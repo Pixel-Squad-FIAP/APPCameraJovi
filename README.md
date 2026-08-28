@@ -1,89 +1,94 @@
-# 📸 JOVI Camera - Smartphone Interface Prototype
+# JOVI Camera
 
-![JOVI Camera Hero](assets/hero_camera_jovi.png)
+## Projeto
 
-> **Protótipo interativo de uma interface de câmera de smartphone premium, desenvolvido para oferecer uma experiência de usuário fluida e repleta de recursos inteligentes.**
+JOVI Camera é um protótipo web de interface de câmera de smartphone, com modos de captura, galeria, scanner de documento e um Modo Estudante com fluxos simulados de resumo, anotação e exportação.
 
----
+## Objetivo
 
-## 🌟 Visão Geral
+Esta entrega da Sprint 3 migra o protótipo original em HTML, CSS e JavaScript Vanilla para React, preservando a identidade visual, os assets, os fluxos e os comportamentos já existentes.
 
-O **JOVI Camera** é uma aplicação web que simula a interface de uma câmera de smartphone de última geração. O projeto foca em **UX/UI Design** e **Manipulação Dinâmica do DOM**, trazendo funcionalidades avançadas que vão desde o controle manual "Pro" até assistentes inteligentes para estudantes.
+## Tecnologias
 
-Desenvolvido inteiramente em **Vanilla JavaScript**, o projeto demonstra como criar interfaces complexas, reativas e performáticas sem a necessidade de frameworks externos.
+- React
+- Vite
+- JavaScript
+- CSS
+- localStorage
 
----
+## Estrutura
 
-## 🚀 Funcionalidades Principais
+- `src/App.jsx`: componente pai da aplicação, concentra o estado compartilhado de modo, timer, ratio, notificações, galeria, overlays e settings.
+- `src/components/TopBar.jsx`: flash, timer, modo ativo, ratio e botão de modos/configurações.
+- `src/components/Viewfinder.jsx`: viewfinder, foco, brilho, zoom, shutter, vídeo, documento, panorâmica e ações do Modo Estudante.
+- `src/components/ModeCarousel.jsx`: carrossel infinito de modos com clique, arraste, snap e cálculos de posição.
+- `src/components/Gallery.jsx`: galeria e slideshow declarativos.
+- `src/components/StudentMode.jsx`: resumo simulado, anotação persistida, exportação simulada e fluxo de documento acoplado ao protótipo.
+- `src/components/SettingsOverlay.jsx`: área do usuário com login simulado e recuperação por prompt.
+- `assets/`: imagens usadas pela galeria e prévia de documento.
+- `css/`: CSS reaproveitado do protótipo Vanilla.
+- `vanilla.html`: versão Vanilla preservada para referência.
 
-### 🎭 Modos de Captura Dinâmicos
-- **Foto & Vídeo**: Transições suaves com indicadores de gravação em tempo real.
-- **Modo Pro**: Controle total sobre parâmetros fotográficos:
-  - `ISO`, `Velocidade do Obturador (S)`, `Exposição (EV)`, `Balanço de Branco (WB)` e `Foco (AF)`.
-- **Modo Noturno & Retrato**: Algoritmos visuais simulados para capturas específicas.
-- **Panorâmica**: Guia visual interativo para capturas amplas.
+## Instalação
 
-### 🎓 Student Mode (AI Powered)
-Uma funcionalidade inovadora voltada para produtividade acadêmica:
-- **Resumir**: Identifica pontos-chave em textos fotografados usando simulação de IA.
-- **Anotar**: Permite adicionar notas rápidas e categorizar por disciplinas.
-- **Exportar**: Conversão direta para formatos como `.PDF`, `.DOCX` ou envio para o Google Docs.
+```bash
+npm install
+```
 
-### 📄 Scanner de Documentos
-- Enquadramento inteligente para digitalização de papéis.
-- Fluxo de exportação otimizado para documentos profissionais.
+## Execução
 
-### 🛠️ UX & Interatividade
-- **Sistema de Notificações**: Substituição de diálogos nativos (`alert`, `confirm`) por toasts elegantes e não-intrusivos.
-- **Galeria Integrada**: Navegação em slideshow com controles de toque e indicadores visuais.
-- **Controle de Gestos**: Ajuste de brilho e foco diretamente no viewfinder.
-- **Zoom Fluido**: Seleção rápida entre lentes (.5x, 1x, 2x, 3x).
+```bash
+npm run dev
+```
 
----
+## Build
 
-## 🛠️ Tecnologias Utilizadas
+```bash
+npm run build
+```
 
-O projeto utiliza o estado da arte do desenvolvimento web nativo:
+## Funcionalidades
 
-- ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white) **Estrutura Semântica**
-- ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white) **Design Responsivo & Glassmorphism** (Flexbox, Grid, Animações complexas)
-- ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) **ES6+ Core** (Manipulação de DOM, Event Listeners, IIFEs, Gerenciamento de Estado)
+- Modos de câmera: Panorâmica, Noite, Documento, Vídeo, Foto, Retrato, Estudante e Pro.
+- Carrossel infinito de modos com clique, arraste e snap.
+- TopBar com flash, timer, ratio e menu de modos.
+- Shutter para foto, timer de captura e gravação de vídeo simulada.
+- Zoom, brilho e foco no viewfinder.
+- Galeria com slideshow, setas e dots.
+- Modo Estudante com resumo simulado, anotação, exportação simulada e envio simulado ao Google Docs.
+- Scanner/documento com enquadramento e exportação simulada.
+- Configurações/login simulado com validação local, `alert` e `prompt`.
+- Toasts/notificações visuais.
 
----
+## localStorage
 
-## 👥 Pixel Squad - 1ESPY
+A anotação do Modo Estudante é persistida em `localStorage` com a chave `jovi.student.annotation`.
 
-Conheça a equipe por trás do desenvolvimento do JOVI Camera:
+O formato salvo é JSON:
 
-| Integrante | RM |
-| :--- | :--- |
-| **Pedro Henrique Marques** | 569307 |
-| **Evandro Marcondes** | 572473 |
-| **Enzo Alves** | 569665 |
-| **Raphael de Oliveira** | 571065 |
-| **Renan Queiroz** | 569077 |
+```json
+{"text":"texto da anotação"}
+```
 
----
+O valor é carregado quando o componente `StudentMode` inicializa. Ele é salvo somente quando o usuário edita a anotação e clica em `Salvar alterações`. Para demonstrar a persistência: abra o Modo Estudante, entre em `Anotar`, escreva uma anotação, clique em `Salvar alterações`, recarregue a página, retorne a `Anotar` e confirme que o texto continua no campo.
 
-## 🔧 Como Executar
+## Math
 
-O projeto é "Plug & Play". Nenhuma instalação de dependências é necessária.
+- `src/components/ModeCarousel.jsx`: `Math.abs` calcula distância do item ao centro do carrossel, limiar de drag e parada do snap.
+- `src/components/Viewfinder.jsx`: `Math.floor` converte segundos em minutos no timer de gravação.
+- `src/components/Viewfinder.jsx`: `Math.max` e `Math.min` limitam o percentual de brilho entre `0` e `1`.
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/Pixel-Squad-Challege/APPCameraJovi
-   ```
-2. Abra o arquivo `index.html` em seu navegador de preferência.
-3. Recomendamos utilizar a **ferramenta de desenvolvedor (F12)** no modo de visualização mobile (preferencialmente iPhone 12/13/14 Pro) para a melhor experiência.
+Esses usos preservam os cálculos reais existentes na versão Vanilla.
 
----
+## Uso de Inteligência Artificial
 
-## 📄 Licença
+Durante a Sprint 3, ferramentas de Inteligência Artificial foram utilizadas como apoio em etapas específicas do desenvolvimento, principalmente na revisão de trechos de código, identificação de inconsistências durante a migração do protótipo para React, análise da organização dos componentes e suporte na revisão da documentação. As sugestões geradas foram utilizadas como referência técnica e passaram por análise e validação antes de serem aplicadas ao projeto.
 
-Este projeto está sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
+## Deploy
 
----
+- GitHub: `https://github.com/Pixel-Squad-Challege/APPCameraJovi`
+- Vercel: a URL deve ser adicionada após o deploy real.
 
-<p align="center">
-  Desenvolvido com dedição e responsabilidade com os termos da LGPD pelo <b>Pixel Squad</b>
-</p>
+## Equipe
+
+Consulte `INTEGRANTES.TXT`.
