@@ -4,6 +4,7 @@ const STORAGE_KEY = 'jovi.student.annotation';
 
 const summaryShortText = 'A análise deste documento identificou padrões térmicos consistentes com o comportamento de fluidos em recipientes isolados, sugerindo uma aplicação direta da lei de conservação...';
 const summaryFullText = 'A análise deste documento identificou padrões térmicos consistentes com o comportamento de fluidos em recipientes isolados, sugerindo uma aplicação direta da lei de conservação de energia. O conteúdo analisado aborda os princípios da Termodinâmica, com foco na Primeira Lei e na conservação de energia em sistemas fechados. Foram identificados exemplos práticos envolvendo máquinas térmicas e ciclos de compressão.';
+const initialCaptureAlbums = ['Trabalhos', 'Aulas', 'Provas', 'Estudos'];
 
 function readStoredAnnotation() {
   try {
@@ -36,10 +37,18 @@ export default function StudentMode({ activeOverlay, onClose, showNotification }
   const [exportFormat, setExportFormat] = useState('.PDF');
   const [exportDestination, setExportDestination] = useState('Google Drive');
   const [docFormat, setDocFormat] = useState('.PDF');
+  const [captureAlbums, setCaptureAlbums] = useState(initialCaptureAlbums);
+  const [selectedCaptureAlbum, setSelectedCaptureAlbum] = useState('');
+  const [newAlbumOpen, setNewAlbumOpen] = useState(false);
+  const [newAlbumName, setNewAlbumName] = useState('');
   const closeTimerRef = useRef(null);
+  const resetCaptureTimerRef = useRef(null);
 
   useEffect(() => {
-    return () => window.clearTimeout(closeTimerRef.current);
+    return () => {
+      window.clearTimeout(closeTimerRef.current);
+      window.clearTimeout(resetCaptureTimerRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -85,6 +94,47 @@ export default function StudentMode({ activeOverlay, onClose, showNotification }
     closeAfterNotification();
   };
 
+  const resetCaptureDestination = () => {
+    setSelectedCaptureAlbum('');
+  };
+
+  const handleSkipCaptureDestination = () => {
+    window.clearTimeout(resetCaptureTimerRef.current);
+    resetCaptureDestination();
+    onClose();
+  };
+
+  const handleConfirmCaptureDestination = () => {
+    showNotification('Captura salva no álbum!');
+    window.clearTimeout(closeTimerRef.current);
+    window.clearTimeout(resetCaptureTimerRef.current);
+    closeTimerRef.current = window.setTimeout(onClose, 500);
+    resetCaptureTimerRef.current = window.setTimeout(resetCaptureDestination, 1000);
+  };
+
+  const handleOpenNewAlbum = () => {
+    setNewAlbumName('');
+    setNewAlbumOpen(true);
+  };
+
+  const handleCancelNewAlbum = () => {
+    setNewAlbumName('');
+    setNewAlbumOpen(false);
+  };
+
+  const handleCreateAlbum = () => {
+    const albumName = newAlbumName.trim();
+    if (!albumName) {
+      showNotification('Digite um nome válido');
+      return;
+    }
+
+    setCaptureAlbums((current) => [...current, albumName]);
+    setSelectedCaptureAlbum(albumName);
+    setNewAlbumName('');
+    setNewAlbumOpen(false);
+  };
+
   return (
     <>
       <SummaryOverlay
@@ -122,6 +172,22 @@ export default function StudentMode({ activeOverlay, onClose, showNotification }
         onFormatChange={setDocFormat}
         onSavePdf={() => notifyAction('Salvar PDF')}
         onShare={() => notifyAction('Compartilhar')}
+      />
+      <CaptureDestinationOverlay
+        albums={captureAlbums}
+        isOpen={activeOverlay === 'captureDestination'}
+        onConfirm={handleConfirmCaptureDestination}
+        onNewAlbum={handleOpenNewAlbum}
+        onSelectAlbum={setSelectedCaptureAlbum}
+        onSkip={handleSkipCaptureDestination}
+        selectedAlbum={selectedCaptureAlbum}
+      />
+      <NewAlbumOverlay
+        isOpen={newAlbumOpen}
+        name={newAlbumName}
+        onCancel={handleCancelNewAlbum}
+        onCreate={handleCreateAlbum}
+        onNameChange={setNewAlbumName}
       />
     </>
   );
@@ -268,6 +334,8 @@ function ExportOverlay({
 }
 
 function DocExportOverlay({ format, isOpen, onClose, onFormatChange, onSavePdf, onShare }) {
+  const saveLabel = `Salvar ${format.replace('.', '')}`;
+
   return (
     <OverlayFrame id="overlay-doc-exportar" isOpen={isOpen} onClose={onClose} title="Exportar Documento">
       <div className="student-ai-badge">✦ Scanner</div>
@@ -291,10 +359,91 @@ function DocExportOverlay({ format, isOpen, onClose, onFormatChange, onSavePdf, 
         onSelect={onFormatChange}
       />
       <div className="student-overlay-footer">
-        <button className="student-action-btn primary" onClick={onSavePdf}>Salvar PDF</button>
+        <button className="student-action-btn primary" id="btn-save-doc" onClick={onSavePdf}>{saveLabel}</button>
         <button className="student-action-btn secondary" onClick={onShare}>Compartilhar</button>
       </div>
     </OverlayFrame>
+  );
+}
+
+function CaptureDestinationOverlay({
+  albums,
+  isOpen,
+  onConfirm,
+  onNewAlbum,
+  onSelectAlbum,
+  onSkip,
+  selectedAlbum
+}) {
+  return (
+    <div id="overlay-capture-destination" className={`student-overlay ${isOpen ? 'show' : ''}`}>
+      <div className="student-overlay-panel" style={{ width: '100%', height: 'auto', paddingBottom: '24px' }}>
+        <div className="student-overlay-header" style={{ justifyContent: 'center' }}>
+          <span className="student-overlay-title">Salvar em...</span>
+        </div>
+        <div className="student-card" style={{ marginTop: '10px' }}>
+          <div className="student-card-label">Escolha o álbum</div>
+          <div className="student-tags" id="capture-albums" style={{ marginTop: '12px' }}>
+            {albums.map((album) => (
+              <span
+                className={`student-tag ${selectedAlbum === album ? 'active-tag' : ''}`}
+                key={album}
+                onClick={() => onSelectAlbum(album)}
+              >
+                {album}
+              </span>
+            ))}
+            <span className="student-tag" onClick={onNewAlbum}>+ Novo</span>
+          </div>
+        </div>
+        <div className="student-overlay-footer" style={{ marginTop: '20px', gap: '10px', flexDirection: 'column' }}>
+          <button
+            className="student-action-btn primary"
+            disabled={!selectedAlbum}
+            id="btn-confirm-capture"
+            onClick={onConfirm}
+            style={{ width: '100%', opacity: selectedAlbum ? 1 : 0.5 }}
+          >
+            Confirmar
+          </button>
+          <button className="student-action-btn secondary" id="btn-skip-capture" onClick={onSkip} style={{ width: '100%' }}>Pular</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NewAlbumOverlay({ isOpen, name, onCancel, onCreate, onNameChange }) {
+  return (
+    <div id="overlay-new-album" className={`student-overlay ${isOpen ? 'show' : ''}`}>
+      <div className="student-overlay-panel" style={{ width: '100%', height: 'auto', paddingBottom: '30px' }}>
+        <div className="student-overlay-header">
+          <button className="student-back-btn" onClick={onCancel} aria-label="Fechar Novo Álbum">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M11 4L6 9L11 14" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <span className="student-overlay-title">Novo Álbum</span>
+          <div style={{ width: '32px' }} />
+        </div>
+        <div className="student-card" style={{ marginTop: '10px' }}>
+          <div className="student-card-label">Nome do álbum</div>
+          <input
+            className="student-textarea"
+            id="input-new-album"
+            onChange={(event) => onNameChange(event.target.value)}
+            placeholder="Ex: Biologia, Provas 2024..."
+            style={{ height: '48px' }}
+            type="text"
+            value={name}
+          />
+        </div>
+        <div className="student-overlay-footer" style={{ marginTop: '20px' }}>
+          <button className="student-action-btn primary" id="btn-create-album" onClick={onCreate}>Criar</button>
+          <button className="student-action-btn secondary" onClick={onCancel}>Cancelar</button>
+        </div>
+      </div>
+    </div>
   );
 }
 

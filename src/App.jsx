@@ -98,6 +98,7 @@ export default function App() {
           flashOff={flashOff}
           notification={notification}
           onStudentOverlayOpen={setStudentOverlay}
+          onCaptureDestinationOpen={() => setStudentOverlay('captureDestination')}
           ratio={ratio}
           shutterRequestId={shutterRequestId}
           showNotification={showNotification}

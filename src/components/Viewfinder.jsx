@@ -12,6 +12,7 @@ export default function Viewfinder({
   flipRequestId,
   flashOff,
   notification,
+  onCaptureDestinationOpen,
   onFlippedChange,
   onRecordingChange,
   onStudentOverlayOpen,
@@ -143,6 +144,7 @@ export default function Viewfinder({
     schedule(() => {
       setThumbnailVisible(false);
       setThumbnailFlying(false);
+      schedule(onCaptureDestinationOpen, 400);
     }, 650);
   };
 
@@ -174,7 +176,10 @@ export default function Viewfinder({
     if (activeMode === 'Vídeo') {
       setIsRecording((current) => {
         const next = !current;
-        if (!next) setRecordingSeconds(0);
+        if (!next) {
+          setRecordingSeconds(0);
+          schedule(onCaptureDestinationOpen, 400);
+        }
         return next;
       });
       return;
