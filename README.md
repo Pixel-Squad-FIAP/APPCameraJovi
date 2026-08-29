@@ -86,8 +86,8 @@ Durante a Sprint 3, ferramentas de Inteligência Artificial foram utilizadas com
 
 ## Deploy
 
-- GitHub: `https://github.com/Pixel-Squad-Challege/APPCameraJovi`
-- Vercel: a URL deve ser adicionada após o deploy real.
+- GitHub: `https://github.com/Pixel-Squad-FIAP/APPCameraJovi`
+- Vercel: `https://app-camera-jovi.vercel.app`
 
 ## Equipe
 
