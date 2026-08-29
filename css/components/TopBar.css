@@ -20,6 +20,9 @@
 
 /* ---- Flash ---- */
 .top-bar .icon-flash {
+  background: none;
+  border: 0;
+  padding: 0;
   width: 26px;
   height: 26px;
   display: flex;
@@ -85,6 +88,8 @@
 
 /* ---- Ratio ---- */
 .top-bar .ratio {
+  background: none;
+  border: 0;
   color: rgba(255,255,255,0.65);
   font-size: 14px;
   font-weight: 600;
@@ -110,6 +115,10 @@
 .top-bar .icon-grid,
 .top-bar .icon-flash,
 .top-bar .icon-timer {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
   transition: all 0.18s ease;
   user-select: none;
 }

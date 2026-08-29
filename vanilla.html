@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=390, initial-scale=1.0" />
+  <title>JOVI Camera</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div class="phone">
+
+    <div id="camera-app" class="camera-app">
+
+      <!-- ===== TOP BAR ===== -->
+      <div class="top-bar">
+
+        <div class="icon-flash" id="btn-flash">
+          <svg width="16" height="22" viewBox="0 0 16 22">
+            <polyline points="10,1 3,12 8,12 6,21 13,10 8,10 10,1" stroke="white" stroke-width="1.6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+            <line id="flash-strike" x1="2" y1="2" x2="14" y2="20" stroke="white" stroke-width="1.6" stroke-linecap="round" style="display:none;"/>
+          </svg>
+        </div>
+
+        <div class="icon-timer" id="btn-timer">
+          <svg width="24" height="24" viewBox="0 0 22 22">
+            <circle cx="11" cy="12" r="8" stroke="white" stroke-width="1.6"/>
+            <line x1="11" y1="8" x2="11" y2="12" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+            <line x1="11" y1="12" x2="14" y2="14" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+            <line x1="6" y1="3" x2="3" y2="6" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+            <line x1="16" y1="3" x2="19" y2="6" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+            <line id="timer-strike" x1="4" y1="4" x2="18" y2="18" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span id="timer-label" class="timer-text"></span>
+        </div>
+
+        <div class="mode-pill" id="top-mode-pill">Foto</div>
+
+        <div class="ratio" id="btn-ratio">3:4</div>
+
+        <div class="icon-grid" id="btn-settings">
+          <svg width="20" height="20" viewBox="0 0 20 20">
+            <rect x="1"  y="1"  width="7" height="7" rx="1.5" stroke="white" stroke-width="1.5" fill="none"/>
+            <rect x="12" y="1"  width="7" height="7" rx="1.5" stroke="white" stroke-width="1.5" fill="none"/>
+            <rect x="1"  y="12" width="7" height="7" rx="1.5" stroke="white" stroke-width="1.5" fill="none"/>
+            <rect x="12" y="12" width="7" height="7" rx="1.5" stroke="white" stroke-width="1.5" fill="none"/>
+          </svg>
+        </div>
+
+      </div><!-- /top-bar -->
+
+
+      <!-- ===== VIEWFINDER ===== -->
+      <div class="viewfinder">
+
+        <div class="focus-box" id="focus-box">
+          <span class="focus-corner-bl"></span>
+          <span class="focus-corner-br"></span>
+        </div>
+
+        <div class="focus-box-student" id="focus-box-student" style="display:none;"></div>
+
+        <div class="pano-guide" id="pano-guide" style="display:none;">
+          <div class="pano-line"></div>
+          <div class="pano-arrow"></div>
+        </div>
+
+        <div class="doc-scanner-frame" id="doc-scanner-frame" style="display:none;"></div>
+
+        <div class="student-actions" id="student-actions" style="display:none;">
+          <button class="student-btn">Resumir</button>
+          <button class="student-btn">Anotar</button>
+          <button class="student-btn">Exportar</button>
+        </div>
+
+        <div class="student-actions" id="doc-actions" style="display:none;">
+          <button class="student-btn">Digitalizar</button>
+          <button class="student-btn" data-open="overlay-doc-exportar">Exportar</button>
+        </div>
+
+
+
+        <div id="recording-indicator" class="recording-indicator">
+          <div class="red-dot"></div>
+          <span id="recording-timer">00:00</span>
+        </div>
+
+        <!-- Pro Mode Extra Controls -->
+        <div id="pro-controls" class="pro-controls">
+          <div class="pro-item"><span>ISO</span><strong>Auto</strong></div>
+          <div class="pro-item"><span>S</span><strong>1/125</strong></div>
+          <div class="pro-item"><span>EV</span><strong>0.0</strong></div>
+          <div class="pro-item"><span>WB</span><strong>Auto</strong></div>
+          <div class="pro-item"><span>AF</span><strong>AF-C</strong></div>
+        </div>
+
+        <!-- Camera Notification -->
+        <div id="camera-notification" class="camera-notification"></div>
+
+        <!-- Timer Countdown Overlay -->
+        <div id="timer-countdown" class="timer-countdown"></div>
+
+      </div><!-- /viewfinder -->
+
+      <div class="zoom-selector">
+        <button class="zoom-btn">.5</button>
+        <button class="zoom-btn active">1</button>
+        <button class="zoom-btn">2</button>
+        <button class="zoom-btn">3</button>
+      </div>
+
+      <div class="brightness-track" id="brightness-track">
+        <div class="brightness-fill" id="brightness-fill"></div>
+        <div class="brightness-thumb" id="brightness-thumb"></div>
+      </div>
+
+
+      <!-- ===== CONTROLES INFERIORES ===== -->
+      <div class="bottom-controls">
+
+        <div class="controls-row">
+
+          <button class="btn-gallery" aria-label="Galeria"></button>
+
+          <div class="shutter-wrapper">
+            <div class="shutter-ring"></div>
+            <button class="shutter-btn" id="shutter-btn" aria-label="Tirar foto"></button>
+          </div>
+
+          <button class="btn-flip" aria-label="Virar câmera">
+            <svg width="22" height="18" viewBox="0 0 22 18">
+              <path d="M2 9 C2 4.6 5.6 1 10 1 L18 1" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="15,1 18,1 18,4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20 9 C20 13.4 16.4 17 12 17 L4 17" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="7,17 4,17 4,14" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+        </div><!-- /controls-row -->
+
+        <!-- Barra de modos — itens gerados pelo Carousel.js -->
+        <div class="mode-bar-container">
+          <div class="mode-bar" id="mode-bar"></div>
+        </div>
+
+      </div><!-- /bottom-controls -->
+
+      <!-- Gallery / Slideshow Overlay -->
+      <div id="gallery-overlay" class="gallery-overlay">
+        <div class="gallery-header">
+          <button class="gallery-close" id="gallery-close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+          <span>Galeria</span>
+        </div>
+        <div class="slideshow-container">
+          <div class="slide fade">
+            <img src="assets/photo1.png" style="width:100%">
+          </div>
+          <div class="slide fade">
+            <img src="assets/photo2.png" style="width:100%">
+          </div>
+          <div class="slide fade">
+            <img src="assets/photo3.png" style="width:100%">
+          </div>
+          <div class="slide fade">
+            <img src="assets/photo4.png" style="width:100%">
+          </div>
+          <div class="slide fade">
+            <img src="assets/photo5.png" style="width:100%">
+          </div>
+          <a class="prev" id="prev-slide">&#10094;</a>
+          <a class="next" id="next-slide">&#10095;</a>
+        </div>
+        <div class="slideshow-dots" id="slideshow-dots">
+          <span class="dot" onclick="currentSlide(1)"></span>
+          <span class="dot" onclick="currentSlide(2)"></span>
+          <span class="dot" onclick="currentSlide(3)"></span>
+          <span class="dot" onclick="currentSlide(4)"></span>
+          <span class="dot" onclick="currentSlide(5)"></span>
+        </div>
+      </div>
+
+
+      <!-- More Modes Overlay -->
+      <div id="more-modes-overlay" class="more-modes-container">
+        <div class="more-modes-title">Adicionar modos</div>
+        <div class="more-modes-grid">
+          <div class="mode-chip">Comida</div>
+          <div class="mode-chip">Alta Resolução</div>
+          <div class="mode-chip">Microfilme</div>
+          <div class="mode-chip">Câmera Lenta</div>
+          <div class="mode-chip">Astro</div>
+          <div class="mode-chip">Intervalo</div>
+          <div class="mode-chip">Instantâneo</div>
+          <div class="mode-chip">Visualização Dupla</div>
+          <div class="mode-chip">Superlua</div>
+          <div class="mode-chip">Foto em movimento</div>
+          <div class="mode-chip" id="btn-open-login" style="opacity: 0.4; font-size: 10px;">Configurações</div>
+        </div>
+      </div>
+
+      <!-- Flash Overlay -->
+      <div id="flash-overlay" class="flash-overlay"></div>
+
+      <!-- Gallery Thumbnail Animation -->
+      <div id="shutter-thumbnail" class="shutter-thumbnail"></div>
+
+      <!-- Overlay: Resumir -->
+<div class="student-overlay" id="overlay-resumir">
+  <div class="student-overlay-panel">
+    <div class="student-overlay-header">
+      <button class="student-back-btn" data-close="overlay-resumir">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L6 9L11 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="student-overlay-title">Resumo Gerado</span>
+      <div style="width:32px;"></div>
+    </div>
+    <div class="student-card">
+      <div class="student-skeleton-lines">
+        <div class="sk-line" style="width:90%"></div>
+        <div class="sk-line" style="width:75%"></div>
+        <div class="sk-line" style="width:85%"></div>
+        <div class="sk-line" style="width:60%"></div>
+        <div class="sk-line" style="width:80%"></div>
+      </div>
+    </div>
+    <div class="student-overlay-footer">
+      <button class="student-action-btn primary" style="width: 100%;">Exportar para Google Docs</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay: Anotar -->
+<div class="student-overlay" id="overlay-anotar">
+  <div class="student-overlay-panel">
+    <div class="student-overlay-header">
+      <button class="student-back-btn" data-close="overlay-anotar">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L6 9L11 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="student-overlay-title">Anotação</span>
+      <div style="width:32px;"></div>
+    </div>
+    <div class="student-ai-badge">✦ AI</div>
+    <div class="student-card">
+      <div class="student-card-title">Texto reconhecido</div>
+      <div class="student-skeleton-lines">
+        <div class="sk-line" style="width:95%"></div>
+        <div class="sk-line" style="width:80%"></div>
+        <div class="sk-line" style="width:88%"></div>
+        <div class="sk-line" style="width:70%"></div>
+      </div>
+    </div>
+    <div class="student-card" style="margin-top:12px;">
+      <div class="student-card-title">Sua anotação</div>
+      <textarea class="student-textarea" placeholder="Adicione uma anotação..."></textarea>
+    </div>
+    <div class="student-overlay-footer">
+      <button class="student-action-btn primary" id="btn-save-changes">Salvar alterações</button>
+      <button class="student-action-btn secondary">Descartar</button>
+      <button class="student-action-btn secondary" id="btn-google-docs-save" disabled style="opacity: 0.5; cursor: not-allowed;">Salvar no google docs</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay: Exportar -->
+<div class="student-overlay" id="overlay-exportar">
+  <div class="student-overlay-panel">
+    <div class="student-overlay-header">
+      <button class="student-back-btn" data-close="overlay-exportar">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L6 9L11 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="student-overlay-title">Exportar Texto</span>
+      <div style="width:32px;"></div>
+    </div>
+    <div class="student-ai-badge">✦ AI</div>
+    <div class="student-card">
+      <div class="student-card-title">Texto extraído</div>
+      <div class="student-skeleton-lines">
+        <div class="sk-line" style="width:92%"></div>
+        <div class="sk-line" style="width:78%"></div>
+        <div class="sk-line" style="width:85%"></div>
+        <div class="sk-line" style="width:65%"></div>
+        <div class="sk-line" style="width:88%"></div>
+        <div class="sk-line" style="width:72%"></div>
+      </div>
+    </div>
+    <div class="student-card" style="margin-top:12px;">
+      <div class="student-card-label">Formato de exportação</div>
+      <div class="student-tags" style="margin-top:8px;">
+        <span class="student-tag active-tag">.PDF</span>
+        <span class="student-tag">.DOCX</span>
+        <span class="student-tag">.TXT</span>
+      </div>
+    </div>
+    <div class="student-card" style="margin-top:12px;">
+      <div class="student-card-label">Destino</div>
+      <div class="student-tags" style="margin-top:8px;">
+        <span class="student-tag active-tag">Google Drive</span>
+        <span class="student-tag">Downloads</span>
+      </div>
+    </div>
+    <div class="student-overlay-footer">
+      <button class="student-action-btn primary">Exportar agora</button>
+      <button class="student-action-btn secondary">Copiar texto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay: Exportar Documento -->
+<div class="student-overlay" id="overlay-doc-exportar">
+  <div class="student-overlay-panel">
+    <div class="student-overlay-header">
+      <button class="student-back-btn" data-close="overlay-doc-exportar">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L6 9L11 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="student-overlay-title">Exportar Documento</span>
+      <div style="width:32px;"></div>
+    </div>
+    <div class="student-ai-badge">✦ Scanner</div>
+    <div class="student-card">
+      <div class="student-card-title">Prévia da Digitalização</div>
+      <div style="height: 160px; background: #fff; border-radius: 4px; display: flex; flex-direction: column; padding: 16px; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); overflow: hidden;">
+        <div style="width: 40%; height: 8px; background: #eee; border-radius: 4px; margin-bottom: 12px;"></div>
+        <div style="width: 100%; height: 4px; background: #f5f5f5; border-radius: 2px; margin-bottom: 6px;"></div>
+        <div style="width: 90%; height: 4px; background: #f5f5f5; border-radius: 2px; margin-bottom: 6px;"></div>
+        <div style="width: 95%; height: 4px; background: #f5f5f5; border-radius: 2px; margin-bottom: 6px;"></div>
+        <div style="width: 85%; height: 4px; background: #f5f5f5; border-radius: 2px; margin-bottom: 16px;"></div>
+        
+        <div style="width: 100%; height: 60px; background: #fafafa; border: 1px dashed #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+             <img src="assets/photo2.png" style="width: 80%; height: 80%; object-fit: cover; opacity: 0.6; filter: grayscale(100%);">
+        </div>
+      </div>
+    </div>
+
+    <div class="student-card" style="margin-top:12px;">
+      <div class="student-card-label">Formato</div>
+      <div class="student-tags" style="margin-top:8px;">
+        <span class="student-tag active-tag">.PDF</span>
+        <span class="student-tag">.DOCX</span>
+        <span class="student-tag">.DOC</span>
+      </div>
+    </div>
+    <div class="student-overlay-footer">
+      <button class="student-action-btn primary" id="btn-save-doc">Salvar PDF</button>
+      <button class="student-action-btn secondary">Compartilhar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay: Login/Configurações (Escondido) -->
+<div class="student-overlay" id="overlay-login">
+  <div class="student-overlay-panel" style="max-width: 300px; height: auto; padding-bottom: 30px;">
+    <div class="student-overlay-header">
+      <button class="student-back-btn" data-close="overlay-login">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L6 9L11 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="student-overlay-title">Área do Usuário</span>
+      <div style="width:32px;"></div>
+    </div>
+    
+    <div class="student-card" style="margin-top: 20px;">
+      <form id="login-form">
+        <div class="student-card-label">Email</div>
+        <input type="email" id="login-email" class="student-textarea" style="height: 40px; margin-bottom: 15px;" placeholder="seu@email.com">
+        
+        <div class="student-card-label">Senha</div>
+        <input type="password" id="login-password" class="student-textarea" style="height: 40px; margin-bottom: 10px;" placeholder="••••••••">
+        
+        <div style="text-align: right; margin-bottom: 15px;">
+            <a href="#" id="forgot-password" style="color: #5c9df5; font-size: 11px; text-decoration: none;">Esqueceu a senha?</a>
+        </div>
+
+        <button type="submit" class="student-action-btn primary" style="width: 100%;">Entrar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay: Destino da Captura -->
+<div class="student-overlay" id="overlay-capture-destination">
+  <div class="student-overlay-panel" style="width: 100%; height: auto; padding-bottom: 24px;">
+    <div class="student-overlay-header" style="justify-content: center;">
+      <span class="student-overlay-title">Salvar em...</span>
+    </div>
+    <div class="student-card" style="margin-top: 10px;">
+      <div class="student-card-label">Escolha o álbum</div>
+      <div class="student-tags" id="capture-albums" style="margin-top:12px;">
+        <span class="student-tag">Trabalhos</span>
+        <span class="student-tag">Aulas</span>
+        <span class="student-tag">Provas</span>
+        <span class="student-tag">Estudos</span>
+        <span class="student-tag">+ Novo</span>
+      </div>
+    </div>
+    <div class="student-overlay-footer" style="margin-top: 20px; gap: 10px; flex-direction: column;">
+      <button class="student-action-btn primary" id="btn-confirm-capture" disabled style="width: 100%; opacity: 0.5;">Confirmar</button>
+      <button class="student-action-btn secondary" id="btn-skip-capture" style="width: 100%;">Pular</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay: Novo Álbum -->
+<div class="student-overlay" id="overlay-new-album">
+  <div class="student-overlay-panel" style="width: 100%; height: auto; padding-bottom: 30px;">
+    <div class="student-overlay-header">
+      <button class="student-back-btn" data-close="overlay-new-album">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L6 9L11 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="student-overlay-title">Novo Álbum</span>
+      <div style="width:32px;"></div>
+    </div>
+    <div class="student-card" style="margin-top: 10px;">
+      <div class="student-card-label">Nome do álbum</div>
+      <input type="text" id="input-new-album" class="student-textarea" style="height: 48px;" placeholder="Ex: Biologia, Provas 2024...">
+    </div>
+    <div class="student-overlay-footer" style="margin-top: 20px;">
+      <button class="student-action-btn primary" id="btn-create-album">Criar</button>
+      <button class="student-action-btn secondary" data-close="overlay-new-album">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+    </div><!-- /camera-app -->
+  </div><!-- /phone -->
+
+  <script src="js/GlobalState.js"></script>
+  <script src="js/components/Navigation.js"></script>
+  <script src="js/components/CameraControls.js"></script>
+  <script src="js/components/ViewfinderInteractions.js"></script>
+  <script src="js/components/Shutter.js"></script>
+  <script src="js/components/Carousel.js"></script>
+  <script src="js/components/ModeFunctions.js"></script>
+  <script src="js/components/Gallery.js"></script>
+  <script src="js/components/StudentMode.js"></script>
+  <script src="js/components/Settings.js"></script>
+</body>
+</html>
