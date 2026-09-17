@@ -10,9 +10,10 @@
 
 body {
   background: radial-gradient(ellipse at 60% 20%, #1a1a2e 0%, #0a0a0f 60%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
   font-family: 'DM Sans', Arial, sans-serif;
+}
+
+#root {
+  min-height: 100vh;
 }
