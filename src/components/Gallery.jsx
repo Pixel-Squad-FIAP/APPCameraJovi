@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCapturesApi } from '../hooks/useCapturesApi.js';
 
 const galleryImages = [
@@ -9,9 +9,29 @@ const galleryImages = [
   { src: 'assets/photo5.png', alt: 'Foto 5 da galeria' }
 ];
 
-export default function Gallery({ isOpen, onClose }) {
+function useCaptureObjectUrls(userCaptures) {
+  const [captureItems, setCaptureItems] = useState([]);
+
+  useEffect(() => {
+    const nextItems = userCaptures.map((capture) => ({
+      ...capture,
+      url: URL.createObjectURL(capture.blob)
+    }));
+
+    setCaptureItems(nextItems);
+
+    return () => {
+      nextItems.forEach((capture) => URL.revokeObjectURL(capture.url));
+    };
+  }, [userCaptures]);
+
+  return captureItems;
+}
+
+export default function Gallery({ isOpen, onClose, userCaptures = [] }) {
   const [slideIndex, setSlideIndex] = useState(0);
   const { captures, error, loading, retry } = useCapturesApi(isOpen);
+  const captureItems = useCaptureObjectUrls(userCaptures);
 
   const showPreviousSlide = () => {
     setSlideIndex((current) => (current === 0 ? galleryImages.length - 1 : current - 1));
@@ -59,6 +79,32 @@ export default function Gallery({ isOpen, onClose }) {
           />
         ))}
       </div>
+
+      <section className="user-captures" aria-labelledby="user-captures-title">
+        <div className="study-captures-header">
+          <span id="user-captures-title">Suas capturas</span>
+        </div>
+
+        {captureItems.length === 0 ? (
+          <p className="study-captures-status">Nenhuma foto capturada ainda.</p>
+        ) : (
+          <div className="user-captures-list">
+            {captureItems.map((capture) => (
+              <article className="user-capture-card" key={capture.id}>
+                <img src={capture.url} alt="Foto real capturada pela câmera" />
+                <time dateTime={capture.createdAt}>
+                  {new Intl.DateTimeFormat('pt-BR', {
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    month: '2-digit'
+                  }).format(new Date(capture.createdAt))}
+                </time>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
 
       <section className="study-captures" aria-labelledby="study-captures-title">
         <div className="study-captures-header">

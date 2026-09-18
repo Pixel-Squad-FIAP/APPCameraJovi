@@ -9,17 +9,22 @@ const zoomLevels = {
 
 export default function Viewfinder({
   activeMode,
+  cameraError,
+  cameraStatus,
   flipRequestId,
   flashOff,
   notification,
   onCaptureDestinationOpen,
   onFlippedChange,
+  onRealPhotoCapture,
   onRecordingChange,
   onStudentOverlayOpen,
   ratio,
+  retryCamera,
   shutterRequestId,
   showNotification,
   timerState,
+  videoRef,
   viewfinderHeight
 }) {
   const [focusPoint, setFocusPoint] = useState({ x: 195, y: 260 });
@@ -129,8 +134,18 @@ export default function Viewfinder({
     resetHideTimer();
   };
 
-  const takePhoto = () => {
+  const takePhoto = async () => {
     clearManagedTimeouts();
+
+    if (activeMode === 'Foto') {
+      try {
+        await onRealPhotoCapture();
+        showNotification('Foto salva na galeria');
+      } catch (error) {
+        showNotification(error.message || 'Não foi possível capturar a foto');
+        return;
+      }
+    }
 
     if (!flashOff) {
       setFlashPulse(false);
@@ -226,6 +241,28 @@ export default function Viewfinder({
           background: viewfinderBackground
         }}
       >
+        <video
+          aria-label="Feed real da câmera"
+          autoPlay
+          className="camera-video"
+          muted
+          playsInline
+          ref={videoRef}
+        />
+
+        {cameraStatus !== 'ready' && (
+          <div className="camera-state-panel" role="status">
+            {cameraStatus === 'requesting' && <p>Solicitando acesso à câmera...</p>}
+            {cameraStatus === 'idle' && <p>Preparando câmera...</p>}
+            {cameraStatus === 'error' && (
+              <>
+                <p>{cameraError}</p>
+                <button type="button" onClick={retryCamera}>Tentar novamente</button>
+              </>
+            )}
+          </div>
+        )}
+
         <div
           className={`focus-box ${focusVisible ? 'show' : ''}`}
           id="focus-box"

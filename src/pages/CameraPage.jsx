@@ -7,6 +7,7 @@ import StudentMode from '../components/StudentMode.jsx';
 import TopBar from '../components/TopBar.jsx';
 import Viewfinder from '../components/Viewfinder.jsx';
 import { RATIO_STATES, TIMER_STATES } from '../data/modes.js';
+import { useCameraCapture } from '../hooks/useCameraCapture.js';
 import { useNotification } from '../hooks/useNotification.js';
 
 const ratioClassByValue = {
@@ -38,6 +39,14 @@ export default function CameraPage() {
   const [studentOverlay, setStudentOverlay] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [flipped, setFlipped] = useState(false);
+  const {
+    cameraError,
+    cameraStatus,
+    capturePhoto,
+    retryCamera,
+    userCaptures,
+    videoRef
+  } = useCameraCapture();
 
   const ratio = RATIO_STATES[ratioIndex];
   const timerState = TIMER_STATES[timerIndex];
@@ -83,17 +92,22 @@ export default function CameraPage() {
 
           <Viewfinder
             activeMode={activeMode}
+            cameraError={cameraError}
+            cameraStatus={cameraStatus}
             flashOff={flashOff}
             notification={notification}
             onStudentOverlayOpen={setStudentOverlay}
             onCaptureDestinationOpen={() => setStudentOverlay('captureDestination')}
+            onRealPhotoCapture={capturePhoto}
             ratio={ratio}
+            retryCamera={retryCamera}
             shutterRequestId={shutterRequestId}
             showNotification={showNotification}
             timerState={timerState}
             flipRequestId={flipRequestId}
             onFlippedChange={setFlipped}
             onRecordingChange={setIsRecording}
+            videoRef={videoRef}
             viewfinderHeight={viewfinderHeightByRatio[ratio]}
           />
 
@@ -107,7 +121,7 @@ export default function CameraPage() {
             onShutter={() => setShutterRequestId((current) => current + 1)}
           />
 
-          <Gallery isOpen={galleryOpen} onClose={() => setGalleryOpen(false)} />
+          <Gallery isOpen={galleryOpen} onClose={() => setGalleryOpen(false)} userCaptures={userCaptures} />
 
           <StudentMode
             activeOverlay={studentOverlay}

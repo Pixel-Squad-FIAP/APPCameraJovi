@@ -19,6 +19,47 @@
   z-index: 1;
 }
 
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #111;
+}
+
+.camera-state-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 28px;
+  background: linear-gradient(160deg, rgba(22,22,28,0.92), rgba(8,8,12,0.9));
+  color: rgba(255,255,255,0.86);
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.camera-state-panel p {
+  margin: 0;
+}
+
+.camera-state-panel button {
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 14px;
+}
+
 /* ---- Focus Box ---- */
 .focus-box {
   position: absolute;
