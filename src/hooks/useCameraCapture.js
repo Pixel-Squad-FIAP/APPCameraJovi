@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { listStoredCaptures, saveStoredCapture } from '../services/captureStorage.js';
 
-const cameraConstraints = {
-  audio: false,
-  video: {
-    facingMode: { ideal: 'environment' },
-    width: { ideal: 1280 },
-    height: { ideal: 720 }
-  }
-};
+function createCameraConstraints(facingMode) {
+  return {
+    audio: false,
+    video: {
+      facingMode: { ideal: facingMode },
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
+    }
+  };
+}
 
 function getCameraErrorMessage(error) {
   if (!navigator.mediaDevices?.getUserMedia) {
@@ -56,9 +58,16 @@ export function useCameraCapture() {
   const streamRef = useRef(null);
   const mountedRef = useRef(false);
   const requestIdRef = useRef(0);
+  const facingModeRef = useRef('environment');
+  const [facingMode, setFacingMode] = useState('environment');
   const [cameraStatus, setCameraStatus] = useState('idle');
   const [cameraError, setCameraError] = useState('');
   const [userCaptures, setUserCaptures] = useState([]);
+
+  const updateFacingMode = useCallback((nextFacingMode) => {
+    facingModeRef.current = nextFacingMode;
+    setFacingMode(nextFacingMode);
+  }, []);
 
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -78,7 +87,7 @@ export function useCameraCapture() {
     }
   }, []);
 
-  const startCamera = useCallback(async () => {
+  const startCamera = useCallback(async (nextFacingMode = facingModeRef.current) => {
     const requestId = requestIdRef.current + 1;
     requestIdRef.current = requestId;
 
@@ -93,7 +102,7 @@ export function useCameraCapture() {
     stopCamera();
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia(cameraConstraints);
+      const stream = await navigator.mediaDevices.getUserMedia(createCameraConstraints(nextFacingMode));
       if (!mountedRef.current || requestId !== requestIdRef.current) {
         stream.getTracks().forEach((track) => track.stop());
         return false;
@@ -115,6 +124,47 @@ export function useCameraCapture() {
       return false;
     }
   }, [stopCamera]);
+
+  const toggleFacingMode = useCallback(async () => {
+    if (cameraStatus === 'requesting') return false;
+
+    const currentFacingMode = facingModeRef.current;
+    const nextFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+    updateFacingMode(nextFacingMode);
+
+    const openedNextCamera = await startCamera(nextFacingMode);
+    if (openedNextCamera) return true;
+
+    updateFacingMode(currentFacingMode);
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      return false;
+    }
+
+    try {
+      const fallbackRequestId = requestIdRef.current;
+      const fallbackStream = await navigator.mediaDevices.getUserMedia(createCameraConstraints(currentFacingMode));
+      if (!mountedRef.current || fallbackRequestId !== requestIdRef.current) {
+        fallbackStream.getTracks().forEach((track) => track.stop());
+        return false;
+      }
+
+      streamRef.current = fallbackStream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = fallbackStream;
+        await videoRef.current.play();
+      }
+
+      setCameraStatus('ready');
+      setCameraError('');
+    } catch {
+      setCameraStatus('error');
+      setCameraError('Não foi possível alternar para a câmera solicitada.');
+    }
+
+    return false;
+  }, [cameraStatus, startCamera, updateFacingMode]);
 
   const capturePhoto = useCallback(async () => {
     const video = videoRef.current;
@@ -172,8 +222,10 @@ export function useCameraCapture() {
     cameraError,
     cameraStatus,
     capturePhoto,
+    facingMode,
     retryCamera: startCamera,
     stopCamera,
+    toggleFacingMode,
     userCaptures,
     videoRef
   };

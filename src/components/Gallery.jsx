@@ -32,13 +32,33 @@ export default function Gallery({ isOpen, onClose, userCaptures = [] }) {
   const [slideIndex, setSlideIndex] = useState(0);
   const { captures, error, loading, retry } = useCapturesApi(isOpen);
   const captureItems = useCaptureObjectUrls(userCaptures);
+  const mainSlides = [
+    ...captureItems.map((capture) => ({
+      alt: 'Foto real capturada pela câmera',
+      id: capture.id,
+      src: capture.url,
+      type: 'user'
+    })),
+    ...galleryImages.map((image) => ({
+      ...image,
+      id: image.src,
+      type: 'demo'
+    }))
+  ];
+  const selectedSlide = mainSlides[slideIndex] || mainSlides[0];
+
+  useEffect(() => {
+    if (slideIndex > mainSlides.length - 1) {
+      setSlideIndex(Math.max(0, mainSlides.length - 1));
+    }
+  }, [mainSlides.length, slideIndex]);
 
   const showPreviousSlide = () => {
-    setSlideIndex((current) => (current === 0 ? galleryImages.length - 1 : current - 1));
+    setSlideIndex((current) => (current === 0 ? mainSlides.length - 1 : current - 1));
   };
 
   const showNextSlide = () => {
-    setSlideIndex((current) => (current === galleryImages.length - 1 ? 0 : current + 1));
+    setSlideIndex((current) => (current === mainSlides.length - 1 ? 0 : current + 1));
   };
 
   return (
@@ -53,11 +73,11 @@ export default function Gallery({ isOpen, onClose, userCaptures = [] }) {
       </div>
 
       <div className="slideshow-container">
-        {galleryImages.map((image, index) => (
-          <div className="slide fade" key={image.src} style={{ display: index === slideIndex ? 'block' : 'none' }}>
-            <img src={image.src} alt={image.alt} style={{ width: '100%' }} />
+        {selectedSlide && (
+          <div className="slide fade" style={{ display: 'block' }}>
+            <img src={selectedSlide.src} alt={selectedSlide.alt} style={{ width: '100%' }} />
           </div>
-        ))}
+        )}
 
         <a className="prev" id="prev-slide" onClick={showPreviousSlide} role="button" tabIndex="0" aria-label="Slide anterior">
           &#10094;
@@ -68,10 +88,10 @@ export default function Gallery({ isOpen, onClose, userCaptures = [] }) {
       </div>
 
       <div className="slideshow-dots" id="slideshow-dots">
-        {galleryImages.map((image, index) => (
+        {mainSlides.map((image, index) => (
           <span
             className={`dot ${index === slideIndex ? 'active' : ''}`}
-            key={image.src}
+            key={image.id}
             onClick={() => setSlideIndex(index)}
             role="button"
             tabIndex="0"
@@ -90,7 +110,16 @@ export default function Gallery({ isOpen, onClose, userCaptures = [] }) {
         ) : (
           <div className="user-captures-list">
             {captureItems.map((capture) => (
-              <article className="user-capture-card" key={capture.id}>
+              <article
+                className="user-capture-card"
+                key={capture.id}
+                onClick={() => {
+                  const selectedIndex = mainSlides.findIndex((slide) => slide.id === capture.id);
+                  if (selectedIndex >= 0) {
+                    setSlideIndex(selectedIndex);
+                  }
+                }}
+              >
                 <img src={capture.url} alt="Foto real capturada pela câmera" />
                 <time dateTime={capture.createdAt}>
                   {new Intl.DateTimeFormat('pt-BR', {

@@ -250,6 +250,7 @@
 .user-capture-card {
   flex: 0 0 92px;
   margin: 0;
+  cursor: pointer;
 }
 
 .user-capture-card img {

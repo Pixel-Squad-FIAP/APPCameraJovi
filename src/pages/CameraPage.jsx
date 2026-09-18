@@ -43,7 +43,9 @@ export default function CameraPage() {
     cameraError,
     cameraStatus,
     capturePhoto,
+    facingMode,
     retryCamera,
+    toggleFacingMode,
     userCaptures,
     videoRef
   } = useCameraCapture();
@@ -94,11 +96,13 @@ export default function CameraPage() {
             activeMode={activeMode}
             cameraError={cameraError}
             cameraStatus={cameraStatus}
+            facingMode={facingMode}
             flashOff={flashOff}
             notification={notification}
             onStudentOverlayOpen={setStudentOverlay}
             onCaptureDestinationOpen={() => setStudentOverlay('captureDestination')}
             onRealPhotoCapture={capturePhoto}
+            onToggleFacingMode={toggleFacingMode}
             ratio={ratio}
             retryCamera={retryCamera}
             shutterRequestId={shutterRequestId}
