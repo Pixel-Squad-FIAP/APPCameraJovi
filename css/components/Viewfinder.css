@@ -31,42 +31,6 @@
   transform: scaleX(-1);
 }
 
-.camera-switch-btn {
-  position: absolute;
-  right: 18px;
-  bottom: 22px;
-  z-index: 15;
-  width: 42px;
-  height: 42px;
-  border: 1px solid rgba(255,255,255,0.16);
-  border-radius: 50%;
-  background: rgba(13,13,18,0.68);
-  backdrop-filter: blur(16px);
-  color: rgba(255,255,255,0.92);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.camera-switch-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-.camera-switch-btn:active:not(:disabled) {
-  transform: scale(0.9);
-}
-
-.camera-switch-btn svg {
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.7;
-}
-
 .camera-state-panel {
   position: absolute;
   inset: 0;

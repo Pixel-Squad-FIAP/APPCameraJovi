@@ -20,7 +20,6 @@ export default function Viewfinder({
   onRealPhotoCapture,
   onRecordingChange,
   onStudentOverlayOpen,
-  onToggleFacingMode,
   ratio,
   retryCamera,
   shutterRequestId,
@@ -251,27 +250,6 @@ export default function Viewfinder({
           playsInline
           ref={videoRef}
         />
-
-        <button
-          aria-label="Trocar câmera"
-          className="camera-switch-btn"
-          disabled={cameraStatus === 'requesting'}
-          onClick={(event) => {
-            event.stopPropagation();
-            onToggleFacingMode();
-          }}
-          type="button"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 9V6.5A2.5 2.5 0 0 1 6.5 4H10" />
-            <path d="M7 1L10 4L7 7" />
-            <path d="M20 15V17.5A2.5 2.5 0 0 1 17.5 20H14" />
-            <path d="M17 23L14 20L17 17" />
-            <path d="M8.5 9.5H15.5A2.5 2.5 0 0 1 18 12V15A2.5 2.5 0 0 1 15.5 17.5H8.5A2.5 2.5 0 0 1 6 15V12A2.5 2.5 0 0 1 8.5 9.5Z" />
-            <path d="M10 9.5L11 7.5H13L14 9.5" />
-            <circle cx="12" cy="13.5" r="1.8" />
-          </svg>
-        </button>
 
         {cameraStatus !== 'ready' && (
           <div className="camera-state-panel" role="status">

@@ -102,7 +102,6 @@ export default function CameraPage() {
             onStudentOverlayOpen={setStudentOverlay}
             onCaptureDestinationOpen={() => setStudentOverlay('captureDestination')}
             onRealPhotoCapture={capturePhoto}
-            onToggleFacingMode={toggleFacingMode}
             ratio={ratio}
             retryCamera={retryCamera}
             shutterRequestId={shutterRequestId}
@@ -121,7 +120,10 @@ export default function CameraPage() {
             isRecording={isRecording}
             onGalleryOpen={() => setGalleryOpen(true)}
             onModeChange={handleModeChange}
-            onFlip={() => setFlipRequestId((current) => current + 1)}
+            onFlip={() => {
+              setFlipRequestId((current) => current + 1);
+              toggleFacingMode();
+            }}
             onShutter={() => setShutterRequestId((current) => current + 1)}
           />
 
