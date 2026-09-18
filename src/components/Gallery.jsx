@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useCapturesApi } from '../hooks/useCapturesApi.js';
 
 const galleryImages = [
   { src: 'assets/photo1.png', alt: 'Foto 1 da galeria' },
@@ -10,6 +11,7 @@ const galleryImages = [
 
 export default function Gallery({ isOpen, onClose }) {
   const [slideIndex, setSlideIndex] = useState(0);
+  const { captures, error, loading, retry } = useCapturesApi(isOpen);
 
   const showPreviousSlide = () => {
     setSlideIndex((current) => (current === 0 ? galleryImages.length - 1 : current - 1));
@@ -57,6 +59,41 @@ export default function Gallery({ isOpen, onClose }) {
           />
         ))}
       </div>
+
+      <section className="study-captures" aria-labelledby="study-captures-title">
+        <div className="study-captures-header">
+          <span id="study-captures-title">Capturas de estudo</span>
+          {error && (
+            <button className="study-captures-retry" type="button" onClick={retry}>
+              Tentar novamente
+            </button>
+          )}
+        </div>
+
+        {loading && <p className="study-captures-status">Carregando capturas...</p>}
+        {error && !loading && <p className="study-captures-status error">{error}</p>}
+        {!loading && !error && captures.length > 0 && (
+          <div className="study-captures-list">
+            {captures.map((capture) => (
+              <article className="study-capture-card" key={capture.id}>
+                <div className="study-capture-meta">
+                  <span>{capture.type}</span>
+                  <time dateTime={capture.capturedAt}>
+                    {new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(new Date(capture.capturedAt))}
+                  </time>
+                </div>
+                <h3>{capture.title}</h3>
+                <p>{capture.summary}</p>
+                <div className="study-capture-tags">
+                  {capture.tags.slice(0, 2).map((tag) => (
+                    <span key={tag}>{tag}</span>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
