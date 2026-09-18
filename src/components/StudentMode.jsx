@@ -1,39 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
-
-const STORAGE_KEY = 'jovi.student.annotation';
+import { useStudentAnnotation } from '../hooks/useStudentAnnotation.js';
 
 const summaryShortText = 'A análise deste documento identificou padrões térmicos consistentes com o comportamento de fluidos em recipientes isolados, sugerindo uma aplicação direta da lei de conservação...';
 const summaryFullText = 'A análise deste documento identificou padrões térmicos consistentes com o comportamento de fluidos em recipientes isolados, sugerindo uma aplicação direta da lei de conservação de energia. O conteúdo analisado aborda os princípios da Termodinâmica, com foco na Primeira Lei e na conservação de energia em sistemas fechados. Foram identificados exemplos práticos envolvendo máquinas térmicas e ciclos de compressão.';
 const initialCaptureAlbums = ['Trabalhos', 'Aulas', 'Provas', 'Estudos'];
 
-function readStoredAnnotation() {
-  try {
-    const rawValue = window.localStorage.getItem(STORAGE_KEY);
-    if (!rawValue) return '';
-    const parsedValue = JSON.parse(rawValue);
-    return typeof parsedValue?.text === 'string' ? parsedValue.text : '';
-  } catch {
-    return '';
-  }
-}
-
-function writeStoredAnnotation(text) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ text }));
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export { STORAGE_KEY };
-
 export default function StudentMode({ activeOverlay, onClose, showNotification }) {
   const [summaryLoaded, setSummaryLoaded] = useState(false);
   const [summaryExpanded, setSummaryExpanded] = useState(false);
-  const [annotationText, setAnnotationText] = useState(readStoredAnnotation);
-  const [savedAnnotationText, setSavedAnnotationText] = useState(readStoredAnnotation);
-  const [googleDocsEnabled, setGoogleDocsEnabled] = useState(false);
+  const {
+    annotationText,
+    discardAnnotation,
+    googleDocsEnabled,
+    saveAnnotation,
+    setAnnotationText
+  } = useStudentAnnotation();
   const [exportFormat, setExportFormat] = useState('.PDF');
   const [exportDestination, setExportDestination] = useState('Google Drive');
   const [docFormat, setDocFormat] = useState('.PDF');
@@ -67,10 +48,8 @@ export default function StudentMode({ activeOverlay, onClose, showNotification }
   };
 
   const handleSaveAnnotation = () => {
-    const saved = writeStoredAnnotation(annotationText);
+    const saved = saveAnnotation();
     if (saved) {
-      setSavedAnnotationText(annotationText);
-      setGoogleDocsEnabled(true);
       showNotification('Alterações salvas!');
     } else {
       showNotification('Não foi possível salvar a anotação.');
@@ -78,7 +57,7 @@ export default function StudentMode({ activeOverlay, onClose, showNotification }
   };
 
   const handleDiscardAnnotation = () => {
-    setAnnotationText(savedAnnotationText);
+    discardAnnotation();
     onClose();
   };
 

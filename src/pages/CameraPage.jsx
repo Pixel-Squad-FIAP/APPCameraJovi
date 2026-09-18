@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import BottomControls from '../components/BottomControls.jsx';
 import Gallery from '../components/Gallery.jsx';
 import MoreModesOverlay from '../components/MoreModesOverlay.jsx';
@@ -7,6 +7,7 @@ import StudentMode from '../components/StudentMode.jsx';
 import TopBar from '../components/TopBar.jsx';
 import Viewfinder from '../components/Viewfinder.jsx';
 import { RATIO_STATES, TIMER_STATES } from '../data/modes.js';
+import { useNotification } from '../hooks/useNotification.js';
 
 const ratioClassByValue = {
   '3:4': '',
@@ -28,7 +29,7 @@ export default function CameraPage() {
   const [timerIndex, setTimerIndex] = useState(0);
   const [ratioIndex, setRatioIndex] = useState(0);
   const [moreModesOpen, setMoreModesOpen] = useState(false);
-  const [notification, setNotification] = useState('');
+  const { notification, showNotification } = useNotification();
   const [visitedModes, setVisitedModes] = useState(() => new Set());
   const [shutterRequestId, setShutterRequestId] = useState(0);
   const [flipRequestId, setFlipRequestId] = useState(0);
@@ -37,23 +38,9 @@ export default function CameraPage() {
   const [studentOverlay, setStudentOverlay] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [flipped, setFlipped] = useState(false);
-  const notificationTimeoutRef = useRef(null);
 
   const ratio = RATIO_STATES[ratioIndex];
   const timerState = TIMER_STATES[timerIndex];
-
-  const showNotification = useCallback((message) => {
-    window.clearTimeout(notificationTimeoutRef.current);
-    setNotification(message);
-    notificationTimeoutRef.current = window.setTimeout(() => {
-      setNotification('');
-      notificationTimeoutRef.current = null;
-    }, 2000);
-  }, []);
-
-  useEffect(() => {
-    return () => window.clearTimeout(notificationTimeoutRef.current);
-  }, []);
 
   const handleModeChange = useCallback((mode) => {
     setActiveMode(mode);
