@@ -13,10 +13,15 @@ function useCaptureObjectUrls(userCaptures) {
   const [captureItems, setCaptureItems] = useState([]);
 
   useEffect(() => {
-    const nextItems = userCaptures.map((capture) => ({
-      ...capture,
-      url: URL.createObjectURL(capture.blob)
-    }));
+    const nextItems = userCaptures.map((capture) => {
+      const mediaKind = capture.mimeType?.startsWith('video/') ? 'video' : 'image';
+
+      return {
+        ...capture,
+        mediaKind,
+        url: URL.createObjectURL(capture.blob)
+      };
+    });
 
     setCaptureItems(nextItems);
 
@@ -34,14 +39,19 @@ export default function Gallery({ isOpen, onClose, userCaptures = [] }) {
   const captureItems = useCaptureObjectUrls(userCaptures);
   const mainSlides = [
     ...captureItems.map((capture) => ({
-      alt: 'Foto real capturada pela câmera',
+      alt: capture.mediaKind === 'video'
+        ? 'Vídeo real gravado pela câmera'
+        : 'Foto real capturada pela câmera',
       id: capture.id,
+      mediaKind: capture.mediaKind,
+      mimeType: capture.mimeType,
       src: capture.url,
       type: 'user'
     })),
     ...galleryImages.map((image) => ({
       ...image,
       id: image.src,
+      mediaKind: 'image',
       type: 'demo'
     }))
   ];
@@ -75,7 +85,18 @@ export default function Gallery({ isOpen, onClose, userCaptures = [] }) {
       <div className="slideshow-container">
         {selectedSlide && (
           <div className="slide fade" style={{ display: 'block' }}>
-            <img src={selectedSlide.src} alt={selectedSlide.alt} style={{ width: '100%' }} />
+            {selectedSlide.mediaKind === 'video' ? (
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                src={selectedSlide.src}
+              >
+                Seu navegador não consegue reproduzir este vídeo.
+              </video>
+            ) : (
+              <img src={selectedSlide.src} alt={selectedSlide.alt} style={{ width: '100%' }} />
+            )}
           </div>
         )}
 
@@ -106,7 +127,7 @@ export default function Gallery({ isOpen, onClose, userCaptures = [] }) {
         </div>
 
         {captureItems.length === 0 ? (
-          <p className="study-captures-status">Nenhuma foto capturada ainda.</p>
+          <p className="study-captures-status">Nenhuma captura feita ainda.</p>
         ) : (
           <div className="user-captures-list">
             {captureItems.map((capture) => (
@@ -120,7 +141,16 @@ export default function Gallery({ isOpen, onClose, userCaptures = [] }) {
                   }
                 }}
               >
-                <img src={capture.url} alt="Foto real capturada pela câmera" />
+                <div className="user-capture-preview">
+                  {capture.mediaKind === 'video' ? (
+                    <>
+                      <video muted playsInline preload="metadata" src={capture.url} />
+                      <span className="user-capture-badge">Vídeo</span>
+                    </>
+                  ) : (
+                    <img src={capture.url} alt="Foto real capturada pela câmera" />
+                  )}
+                </div>
                 <time dateTime={capture.createdAt}>
                   {new Intl.DateTimeFormat('pt-BR', {
                     day: '2-digit',

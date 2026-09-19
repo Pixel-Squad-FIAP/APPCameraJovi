@@ -166,7 +166,8 @@
   height: 100%;
 }
 
-.slide img {
+.slide img,
+.slide video {
   height: 100%;
   width: 100%;
   object-fit: contain;
@@ -253,13 +254,35 @@
   cursor: pointer;
 }
 
-.user-capture-card img {
+.user-capture-preview {
+  position: relative;
+  width: 92px;
+  height: 70px;
+}
+
+.user-capture-card img,
+.user-capture-card video {
   width: 92px;
   height: 70px;
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 10px;
   display: block;
   object-fit: cover;
+  background: #111;
+}
+
+.user-capture-badge {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.68);
+  color: white;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 3px 5px;
+  text-transform: uppercase;
 }
 
 .user-capture-card time {

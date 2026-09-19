@@ -1,6 +1,6 @@
 import ModeCarousel from './ModeCarousel.jsx';
 
-export default function BottomControls({ activeMode, flipped, isRecording, onFlip, onGalleryOpen, onModeChange, onShutter }) {
+export default function BottomControls({ activeMode, flipDisabled = false, flipped, isRecording, onFlip, onGalleryOpen, onModeChange, onShutter }) {
   return (
     <div className="bottom-controls">
       <div className="controls-row">
@@ -21,7 +21,12 @@ export default function BottomControls({ activeMode, flipped, isRecording, onFli
           />
         </div>
 
-        <button className={`btn-flip ${flipped ? 'rotated' : ''}`} aria-label="Virar câmera" onClick={onFlip}>
+        <button
+          className={`btn-flip ${flipped ? 'rotated' : ''}`}
+          aria-label="Virar câmera"
+          disabled={flipDisabled}
+          onClick={onFlip}
+        >
           <svg width="22" height="18" viewBox="0 0 22 18">
             <path d="M2 9 C2 4.6 5.6 1 10 1 L18 1" strokeLinecap="round" strokeLinejoin="round" />
             <polyline points="15,1 18,1 18,4" strokeLinecap="round" strokeLinejoin="round" />

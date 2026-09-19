@@ -14,12 +14,14 @@ export default function Viewfinder({
   facingMode,
   flipRequestId,
   flashOff,
+  isVideoRecording,
   notification,
   onCaptureDestinationOpen,
   onFlippedChange,
   onRealPhotoCapture,
-  onRecordingChange,
   onStudentOverlayOpen,
+  onVideoRecordingStart,
+  onVideoRecordingStop,
   ratio,
   retryCamera,
   shutterRequestId,
@@ -39,7 +41,6 @@ export default function Viewfinder({
   const [flashPulse, setFlashPulse] = useState(false);
   const [thumbnailVisible, setThumbnailVisible] = useState(false);
   const [thumbnailFlying, setThumbnailFlying] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [countdown, setCountdown] = useState('');
   const didMountRef = useRef(false);
@@ -77,29 +78,24 @@ export default function Viewfinder({
   }, []);
 
   useEffect(() => {
-    onRecordingChange(isRecording);
-  }, [isRecording, onRecordingChange]);
-
-  useEffect(() => {
     onFlippedChange(flipped);
   }, [flipped, onFlippedChange]);
 
   useEffect(() => {
-    if (!isRecording) return undefined;
+    if (!isVideoRecording) return undefined;
 
     const intervalId = window.setInterval(() => {
       setRecordingSeconds((current) => current + 1);
     }, 1000);
 
     return () => window.clearInterval(intervalId);
-  }, [isRecording]);
+  }, [isVideoRecording]);
 
   useEffect(() => {
-    if (activeMode !== 'Vídeo' && isRecording) {
-      setIsRecording(false);
+    if (!isVideoRecording) {
       setRecordingSeconds(0);
     }
-  }, [activeMode, isRecording]);
+  }, [isVideoRecording]);
 
   useEffect(() => {
     if (!draggingBrightness) return undefined;
@@ -188,16 +184,26 @@ export default function Viewfinder({
     takePhoto();
   };
 
+  const handleVideoCapture = async () => {
+    try {
+      if (isVideoRecording) {
+        await onVideoRecordingStop();
+        setRecordingSeconds(0);
+        showNotification('Vídeo salvo na galeria');
+        return;
+      }
+
+      await onVideoRecordingStart();
+      setRecordingSeconds(0);
+      showNotification('Gravação iniciada');
+    } catch (error) {
+      showNotification(error.message || 'Não foi possível gravar o vídeo');
+    }
+  };
+
   const handleShutter = () => {
     if (activeMode === 'Vídeo') {
-      setIsRecording((current) => {
-        const next = !current;
-        if (!next) {
-          setRecordingSeconds(0);
-          schedule(onCaptureDestinationOpen, 400);
-        }
-        return next;
-      });
+      handleVideoCapture();
       return;
     }
 
@@ -297,7 +303,7 @@ export default function Viewfinder({
           </div>
         )}
 
-        <div id="recording-indicator" className="recording-indicator" style={{ display: isRecording ? 'flex' : 'none' }}>
+        <div id="recording-indicator" className="recording-indicator" style={{ display: isVideoRecording ? 'flex' : 'none' }}>
           <div className="red-dot" />
           <span id="recording-timer">{minutes}:{seconds}</span>
         </div>

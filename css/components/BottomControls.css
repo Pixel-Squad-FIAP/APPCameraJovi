@@ -167,6 +167,11 @@
   border-color: rgba(255,255,255,0.12);
 }
 
+.btn-flip:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 /* ---- Mode Bar ---- */
 /* ---- Mode Bar: Transform-based infinite loop ---- */
 .mode-bar-container {

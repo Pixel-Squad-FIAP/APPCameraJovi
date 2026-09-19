@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { listStoredCaptures, saveStoredCapture } from '../services/captureStorage.js';
+import { useVideoRecorder } from './useVideoRecorder.js';
 
 function createCameraConstraints(facingMode) {
   return {
@@ -160,6 +161,13 @@ export function useCameraCapture() {
   const [cameraStatus, setCameraStatus] = useState('idle');
   const [cameraError, setCameraError] = useState('');
   const [userCaptures, setUserCaptures] = useState([]);
+  const {
+    cancelRecording,
+    isRecording: isVideoRecording,
+    recordingError: videoRecordingError,
+    startRecording,
+    stopRecording
+  } = useVideoRecorder();
 
   const updateFacingMode = useCallback((nextFacingMode) => {
     facingModeRef.current = nextFacingMode;
@@ -167,6 +175,7 @@ export function useCameraCapture() {
   }, []);
 
   const stopCamera = useCallback(() => {
+    cancelRecording();
     videoReadyAbortRef.current?.abort();
     videoReadyAbortRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -175,7 +184,7 @@ export function useCameraCapture() {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
-  }, []);
+  }, [cancelRecording]);
 
   const loadCaptures = useCallback(async () => {
     try {
@@ -235,6 +244,7 @@ export function useCameraCapture() {
   }, [stopCamera]);
 
   const toggleFacingMode = useCallback(async () => {
+    if (isVideoRecording) return false;
     if (cameraStatus === 'requesting') return false;
 
     const currentFacingMode = facingModeRef.current;
@@ -283,7 +293,7 @@ export function useCameraCapture() {
     }
 
     return false;
-  }, [cameraStatus, startCamera, updateFacingMode]);
+  }, [cameraStatus, isVideoRecording, startCamera, updateFacingMode]);
 
   const capturePhoto = useCallback(async () => {
     const video = videoRef.current;
@@ -325,6 +335,30 @@ export function useCameraCapture() {
     return capture;
   }, [cameraStatus]);
 
+  const startVideoRecording = useCallback(() => {
+    if (cameraStatus !== 'ready') {
+      throw new Error('A câmera ainda não está pronta para gravar vídeo.');
+    }
+
+    return startRecording(streamRef.current);
+  }, [cameraStatus, startRecording]);
+
+  const stopVideoRecording = useCallback(async () => {
+    const recording = await stopRecording();
+    const capture = {
+      id: createCaptureId(),
+      createdAt: new Date().toISOString(),
+      duration: recording.duration,
+      mimeType: recording.mimeType,
+      blob: recording.blob
+    };
+
+    await saveStoredCapture(capture);
+    setUserCaptures((current) => [capture, ...current]);
+
+    return capture;
+  }, [stopRecording]);
+
   useEffect(() => {
     mountedRef.current = true;
     loadCaptures();
@@ -342,10 +376,14 @@ export function useCameraCapture() {
     cameraStatus,
     capturePhoto,
     facingMode,
+    isVideoRecording,
     retryCamera: startCamera,
     stopCamera,
+    startVideoRecording,
+    stopVideoRecording,
     toggleFacingMode,
     userCaptures,
+    videoRecordingError,
     videoRef
   };
 }

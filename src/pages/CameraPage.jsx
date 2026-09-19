@@ -37,14 +37,16 @@ export default function CameraPage() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [studentOverlay, setStudentOverlay] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
   const [flipped, setFlipped] = useState(false);
   const {
     cameraError,
     cameraStatus,
     capturePhoto,
     facingMode,
+    isVideoRecording,
     retryCamera,
+    startVideoRecording,
+    stopVideoRecording,
     toggleFacingMode,
     userCaptures,
     videoRef
@@ -54,6 +56,11 @@ export default function CameraPage() {
   const timerState = TIMER_STATES[timerIndex];
 
   const handleModeChange = useCallback((mode) => {
+    if (isVideoRecording && mode !== 'Vídeo') {
+      showNotification('Pare a gravação antes de trocar de modo');
+      return;
+    }
+
     setActiveMode(mode);
     setMoreModesOpen(false);
 
@@ -66,7 +73,7 @@ export default function CameraPage() {
       setVisitedModes((current) => new Set(current).add('Retrato'));
       showNotification('Posicione o assunto a 1.5m');
     }
-  }, [showNotification, visitedModes]);
+  }, [isVideoRecording, showNotification, visitedModes]);
 
   const handleTimerClick = () => {
     setTimerIndex((current) => (current + 1) % TIMER_STATES.length);
@@ -101,7 +108,10 @@ export default function CameraPage() {
             notification={notification}
             onStudentOverlayOpen={setStudentOverlay}
             onCaptureDestinationOpen={() => setStudentOverlay('captureDestination')}
+            isVideoRecording={isVideoRecording}
             onRealPhotoCapture={capturePhoto}
+            onVideoRecordingStart={startVideoRecording}
+            onVideoRecordingStop={stopVideoRecording}
             ratio={ratio}
             retryCamera={retryCamera}
             shutterRequestId={shutterRequestId}
@@ -109,7 +119,6 @@ export default function CameraPage() {
             timerState={timerState}
             flipRequestId={flipRequestId}
             onFlippedChange={setFlipped}
-            onRecordingChange={setIsRecording}
             videoRef={videoRef}
             viewfinderHeight={viewfinderHeightByRatio[ratio]}
           />
@@ -117,10 +126,16 @@ export default function CameraPage() {
           <BottomControls
             activeMode={activeMode}
             flipped={flipped}
-            isRecording={isRecording}
+            flipDisabled={isVideoRecording}
+            isRecording={isVideoRecording}
             onGalleryOpen={() => setGalleryOpen(true)}
             onModeChange={handleModeChange}
             onFlip={() => {
+              if (isVideoRecording) {
+                showNotification('Pare a gravação antes de virar a câmera');
+                return;
+              }
+
               setFlipRequestId((current) => current + 1);
               toggleFacingMode();
             }}
