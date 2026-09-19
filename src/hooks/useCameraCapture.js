@@ -17,6 +17,10 @@ function getCameraErrorMessage(error) {
     return 'Seu navegador não oferece suporte ao acesso à câmera.';
   }
 
+  if (error?.name === 'VideoPlaybackError') {
+    return getVideoPlaybackErrorMessage();
+  }
+
   if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') {
     return 'Permissão da câmera negada. Libere o acesso à câmera no navegador e tente novamente.';
   }
@@ -30,6 +34,98 @@ function getCameraErrorMessage(error) {
   }
 
   return 'Não foi possível iniciar a câmera do dispositivo.';
+}
+
+function getVideoPlaybackErrorMessage() {
+  return 'A câmera foi acessada, mas o navegador não conseguiu exibir o feed de vídeo.';
+}
+
+function createVideoPlaybackError() {
+  const error = new Error(getVideoPlaybackErrorMessage());
+  error.name = 'VideoPlaybackError';
+  return error;
+}
+
+function createVideoAbortError() {
+  const error = new Error('A inicialização anterior da câmera foi cancelada.');
+  error.name = 'VideoAbortError';
+  return error;
+}
+
+function isVideoReady(video) {
+  return video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && Boolean(video.videoWidth && video.videoHeight);
+}
+
+function observeVideoReady(video, signal) {
+  if (isVideoReady(video)) {
+    return {
+      cleanup: () => {},
+      promise: Promise.resolve()
+    };
+  }
+
+  let cleanup = () => {};
+  const promise = new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(createVideoAbortError());
+      return;
+    }
+
+    cleanup = () => {
+      video.removeEventListener('loadeddata', handleReady);
+      video.removeEventListener('canplay', handleReady);
+      video.removeEventListener('playing', handleReady);
+      video.removeEventListener('error', handleError);
+      signal?.removeEventListener('abort', handleAbort);
+    };
+
+    const handleReady = () => {
+      if (!isVideoReady(video)) return;
+      cleanup();
+      resolve();
+    };
+
+    const handleError = () => {
+      cleanup();
+      reject(createVideoPlaybackError());
+    };
+
+    const handleAbort = () => {
+      cleanup();
+      reject(createVideoAbortError());
+    };
+
+    video.addEventListener('loadeddata', handleReady);
+    video.addEventListener('canplay', handleReady);
+    video.addEventListener('playing', handleReady);
+    video.addEventListener('error', handleError);
+    signal?.addEventListener('abort', handleAbort, { once: true });
+  });
+
+  return { cleanup, promise };
+}
+
+async function connectStreamToVideo(video, stream, signal) {
+  video.srcObject = stream;
+
+  const readiness = observeVideoReady(video, signal);
+  const playPromise = video.play();
+
+  try {
+    await Promise.race([
+      readiness.promise,
+      playPromise.catch(() => {
+        if (isVideoReady(video)) return;
+        throw createVideoPlaybackError();
+      })
+    ]);
+
+    if (!isVideoReady(video)) {
+      await readiness.promise;
+    }
+  } finally {
+    readiness.cleanup();
+  }
 }
 
 function createCaptureId() {
@@ -58,6 +154,7 @@ export function useCameraCapture() {
   const streamRef = useRef(null);
   const mountedRef = useRef(false);
   const requestIdRef = useRef(0);
+  const videoReadyAbortRef = useRef(null);
   const facingModeRef = useRef('environment');
   const [facingMode, setFacingMode] = useState('environment');
   const [cameraStatus, setCameraStatus] = useState('idle');
@@ -70,6 +167,8 @@ export function useCameraCapture() {
   }, []);
 
   const stopCamera = useCallback(() => {
+    videoReadyAbortRef.current?.abort();
+    videoReadyAbortRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
 
@@ -100,6 +199,8 @@ export function useCameraCapture() {
     setCameraStatus('requesting');
     setCameraError('');
     stopCamera();
+    const videoReadyAbort = new AbortController();
+    videoReadyAbortRef.current = videoReadyAbort;
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia(createCameraConstraints(nextFacingMode));
@@ -111,13 +212,21 @@ export function useCameraCapture() {
       streamRef.current = stream;
 
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+        await connectStreamToVideo(videoRef.current, stream, videoReadyAbort.signal);
+      }
+
+      if (!mountedRef.current || requestId !== requestIdRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return false;
       }
 
       setCameraStatus('ready');
       return true;
     } catch (error) {
+      if (error?.name === 'VideoAbortError') {
+        return false;
+      }
+
       stopCamera();
       setCameraStatus('error');
       setCameraError(getCameraErrorMessage(error));
@@ -142,6 +251,8 @@ export function useCameraCapture() {
     }
 
     try {
+      const videoReadyAbort = new AbortController();
+      videoReadyAbortRef.current = videoReadyAbort;
       const fallbackRequestId = requestIdRef.current;
       const fallbackStream = await navigator.mediaDevices.getUserMedia(createCameraConstraints(currentFacingMode));
       if (!mountedRef.current || fallbackRequestId !== requestIdRef.current) {
@@ -152,13 +263,21 @@ export function useCameraCapture() {
       streamRef.current = fallbackStream;
 
       if (videoRef.current) {
-        videoRef.current.srcObject = fallbackStream;
-        await videoRef.current.play();
+        await connectStreamToVideo(videoRef.current, fallbackStream, videoReadyAbort.signal);
+      }
+
+      if (!mountedRef.current || fallbackRequestId !== requestIdRef.current) {
+        fallbackStream.getTracks().forEach((track) => track.stop());
+        return false;
       }
 
       setCameraStatus('ready');
       setCameraError('');
-    } catch {
+    } catch (error) {
+      if (error?.name === 'VideoAbortError') {
+        return false;
+      }
+
       setCameraStatus('error');
       setCameraError('Não foi possível alternar para a câmera solicitada.');
     }
