@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { drawFramedVideoFrame, getFramedCanvasSize } from '../services/cameraFraming.js';
 
 const MIME_TYPE_CANDIDATES = [
   'video/webm;codecs=vp9',
@@ -18,18 +19,115 @@ function getVideoTracks(stream) {
   return stream?.getVideoTracks?.().filter((track) => track.readyState === 'live') || [];
 }
 
+function stopStreamTracks(stream) {
+  stream?.getTracks?.().forEach((track) => track.stop());
+}
+
+function getMicrophoneErrorMessage(error) {
+  if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') {
+    return 'Microfone negado. O vídeo será gravado sem áudio.';
+  }
+
+  if (error?.name === 'NotFoundError' || error?.name === 'OverconstrainedError') {
+    return 'Nenhum microfone disponível. O vídeo será gravado sem áudio.';
+  }
+
+  return 'Não foi possível acessar o microfone. O vídeo será gravado sem áudio.';
+}
+
+async function requestAudioStream() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    return {
+      error: 'Seu navegador não oferece suporte ao microfone.',
+      stream: null
+    };
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    return { error: '', stream };
+  } catch (error) {
+    return {
+      error: getMicrophoneErrorMessage(error),
+      stream: null
+    };
+  }
+}
+
+function createProcessedVideoStream(video, framingRef) {
+  if (typeof HTMLCanvasElement === 'undefined' || typeof HTMLCanvasElement.prototype.captureStream !== 'function') {
+    throw new Error('Este navegador não oferece suporte à gravação com enquadramento aplicado.');
+  }
+
+  if (!video?.videoWidth || !video?.videoHeight) {
+    throw new Error('O feed da câmera não informou dimensões válidas para gravar vídeo.');
+  }
+
+  const framing = framingRef.current;
+  const canvas = document.createElement('canvas');
+  const { height, width } = getFramedCanvasSize(
+    video.videoWidth,
+    video.videoHeight,
+    framing.ratio,
+    framing.zoomFactor
+  );
+  const context = canvas.getContext('2d');
+
+  if (!context) {
+    throw new Error('Não foi possível preparar o enquadramento do vídeo.');
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  let animationFrameId = 0;
+  const drawFrame = () => {
+    const currentFraming = framingRef.current;
+    drawFramedVideoFrame(context, video, {
+      mirror: currentFraming.facingMode === 'user',
+      ratio: framing.ratio,
+      zoomFactor: currentFraming.zoomFactor
+    });
+    animationFrameId = window.requestAnimationFrame(drawFrame);
+  };
+
+  drawFrame();
+
+  const stream = canvas.captureStream(30);
+
+  return {
+    height,
+    stream,
+    stop: () => {
+      window.cancelAnimationFrame(animationFrameId);
+      stopStreamTracks(stream);
+    },
+    width
+  };
+}
+
 export function useVideoRecorder() {
   const recorderRef = useRef(null);
   const chunksRef = useRef([]);
+  const recordingInfoRef = useRef(null);
+  const resourcesRef = useRef(null);
   const startedAtRef = useRef(null);
   const stopPromiseRef = useRef(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingError, setRecordingError] = useState('');
 
+  const cleanupResources = useCallback(() => {
+    resourcesRef.current?.processedVideo?.stop();
+    stopStreamTracks(resourcesRef.current?.audioStream);
+    stopStreamTracks(resourcesRef.current?.recordingStream);
+    resourcesRef.current = null;
+  }, []);
+
   const cancelRecording = useCallback(() => {
     const recorder = recorderRef.current;
     stopPromiseRef.current = null;
     chunksRef.current = [];
+    recordingInfoRef.current = null;
     startedAtRef.current = null;
     recorderRef.current = null;
     setIsRecording(false);
@@ -40,9 +138,10 @@ export function useVideoRecorder() {
       recorder.onstop = null;
       recorder.stop();
     }
-  }, []);
+    cleanupResources();
+  }, [cleanupResources]);
 
-  const startRecording = useCallback((stream) => {
+  const startRecording = useCallback(async ({ framingRef, sourceStream, videoElement }) => {
     if (!window.MediaRecorder) {
       throw new Error('Este navegador não oferece suporte à gravação de vídeo.');
     }
@@ -51,16 +150,41 @@ export function useVideoRecorder() {
       throw new Error('Uma gravação já está em andamento.');
     }
 
-    if (!stream || getVideoTracks(stream).length === 0) {
+    if (!sourceStream || getVideoTracks(sourceStream).length === 0) {
       throw new Error('A câmera precisa estar ativa para iniciar a gravação.');
     }
 
+    const processedVideo = createProcessedVideoStream(videoElement, framingRef);
+    const audioResult = await requestAudioStream();
+    const recordingStream = new MediaStream([
+      ...processedVideo.stream.getVideoTracks(),
+      ...(audioResult.stream?.getAudioTracks() || [])
+    ]);
     const mimeType = getSupportedMimeType();
-    const recorder = mimeType
-      ? new window.MediaRecorder(stream, { mimeType })
-      : new window.MediaRecorder(stream);
+    let recorder;
+
+    try {
+      recorder = mimeType
+        ? new window.MediaRecorder(recordingStream, { mimeType })
+        : new window.MediaRecorder(recordingStream);
+    } catch {
+      processedVideo.stop();
+      stopStreamTracks(audioResult.stream);
+      stopStreamTracks(recordingStream);
+      throw new Error('Não foi possível preparar a gravação de vídeo.');
+    }
 
     chunksRef.current = [];
+    resourcesRef.current = {
+      audioStream: audioResult.stream,
+      processedVideo,
+      recordingStream
+    };
+    recordingInfoRef.current = {
+      hasAudio: Boolean(audioResult.stream?.getAudioTracks().length),
+      height: processedVideo.height,
+      width: processedVideo.width
+    };
     startedAtRef.current = Date.now();
     setRecordingError('');
 
@@ -80,14 +204,22 @@ export function useVideoRecorder() {
     } catch {
       recorderRef.current = null;
       chunksRef.current = [];
+      recordingInfoRef.current = null;
       startedAtRef.current = null;
+      cleanupResources();
       throw new Error('Não foi possível iniciar a gravação de vídeo.');
     }
 
     setIsRecording(true);
 
-    return recorder.mimeType || mimeType || 'video/webm';
-  }, []);
+    return {
+      audioError: audioResult.error,
+      hasAudio: recordingInfoRef.current.hasAudio,
+      height: processedVideo.height,
+      mimeType: recorder.mimeType || mimeType || 'video/webm',
+      width: processedVideo.width
+    };
+  }, [cleanupResources]);
 
   const stopRecording = useCallback(() => {
     const recorder = recorderRef.current;
@@ -105,12 +237,15 @@ export function useVideoRecorder() {
         const chunks = chunksRef.current;
         const duration = startedAtRef.current ? Date.now() - startedAtRef.current : 0;
         const mimeType = recorder.mimeType || chunks[0]?.type || 'video/webm';
+        const recordingInfo = recordingInfoRef.current;
 
         recorderRef.current = null;
         stopPromiseRef.current = null;
         chunksRef.current = [];
+        recordingInfoRef.current = null;
         startedAtRef.current = null;
         setIsRecording(false);
+        cleanupResources();
 
         const blob = new Blob(chunks, { type: mimeType });
         if (blob.size === 0) {
@@ -118,15 +253,24 @@ export function useVideoRecorder() {
           return;
         }
 
-        resolve({ blob, duration, mimeType });
+        resolve({
+          blob,
+          duration,
+          hasAudio: Boolean(recordingInfo?.hasAudio),
+          height: recordingInfo?.height,
+          mimeType,
+          width: recordingInfo?.width
+        });
       };
 
       recorder.onerror = () => {
         recorderRef.current = null;
         stopPromiseRef.current = null;
         chunksRef.current = [];
+        recordingInfoRef.current = null;
         startedAtRef.current = null;
         setIsRecording(false);
+        cleanupResources();
         setRecordingError('Não foi possível finalizar a gravação de vídeo.');
         reject(new Error('Não foi possível finalizar a gravação de vídeo.'));
       };
@@ -135,7 +279,7 @@ export function useVideoRecorder() {
     });
 
     return stopPromiseRef.current;
-  }, []);
+  }, [cleanupResources]);
 
   useEffect(() => cancelRecording, [cancelRecording]);
 

@@ -1,12 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 
-const zoomLevels = {
-  '.5': 'scale(0.85)',
-  1: 'scale(1)',
-  2: 'scale(1.5)',
-  3: 'scale(2.2)'
-};
-
 export default function Viewfinder({
   activeMode,
   cameraError,
@@ -14,6 +7,7 @@ export default function Viewfinder({
   facingMode,
   flipRequestId,
   flashOff,
+  hardwareZoomSupported = false,
   isVideoRecording,
   notification,
   onCaptureDestinationOpen,
@@ -22,20 +16,22 @@ export default function Viewfinder({
   onStudentOverlayOpen,
   onVideoRecordingStart,
   onVideoRecordingStop,
+  onZoomLevelChange = () => {},
+  previewZoomFactor = 1,
   ratio,
   retryCamera,
   shutterRequestId,
   showNotification,
   timerState,
   videoRef,
-  viewfinderHeight
+  viewfinderHeight,
+  zoomLevel = '1'
 }) {
   const [focusPoint, setFocusPoint] = useState({ x: 195, y: 260 });
   const [focusVisible, setFocusVisible] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(false);
   const [brightness, setBrightness] = useState(0.6);
   const [draggingBrightness, setDraggingBrightness] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState('1');
   const [flipped, setFlipped] = useState(false);
   const [viewfinderBlurred, setViewfinderBlurred] = useState(false);
   const [flashPulse, setFlashPulse] = useState(false);
@@ -193,9 +189,9 @@ export default function Viewfinder({
         return;
       }
 
-      await onVideoRecordingStart();
+      const recordingInfo = await onVideoRecordingStart();
       setRecordingSeconds(0);
-      showNotification('Gravação iniciada');
+      showNotification(recordingInfo?.audioError || 'Gravação iniciada');
     } catch (error) {
       showNotification(error.message || 'Não foi possível gravar o vídeo');
     }
@@ -243,7 +239,7 @@ export default function Viewfinder({
         style={{
           height: `${viewfinderHeight}px`,
           filter: viewfinderBlurred ? 'blur(10px)' : `brightness(${0.4 + brightness * 0.8})`,
-          transform: zoomLevels[zoomLevel],
+          transform: `scale(${previewZoomFactor})`,
           transition: 'height 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           background: viewfinderBackground
         }}
@@ -327,9 +323,10 @@ export default function Viewfinder({
             key={level}
             onClick={(event) => {
               event.stopPropagation();
-              setZoomLevel(level);
+              onZoomLevelChange(level);
               resetHideTimer();
             }}
+            title={hardwareZoomSupported ? 'Zoom aplicado pela câmera quando suportado' : 'Zoom digital aplicado na captura'}
           >
             {level}
           </button>

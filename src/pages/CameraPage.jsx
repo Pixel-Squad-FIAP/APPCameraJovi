@@ -29,6 +29,7 @@ export default function CameraPage() {
   const [flashOff, setFlashOff] = useState(false);
   const [timerIndex, setTimerIndex] = useState(0);
   const [ratioIndex, setRatioIndex] = useState(0);
+  const [zoomLevel, setZoomLevel] = useState('1');
   const [moreModesOpen, setMoreModesOpen] = useState(false);
   const { notification, showNotification } = useNotification();
   const [visitedModes, setVisitedModes] = useState(() => new Set());
@@ -38,22 +39,23 @@ export default function CameraPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [studentOverlay, setStudentOverlay] = useState(null);
   const [flipped, setFlipped] = useState(false);
+  const ratio = RATIO_STATES[ratioIndex];
+  const timerState = TIMER_STATES[timerIndex];
   const {
     cameraError,
     cameraStatus,
     capturePhoto,
     facingMode,
+    hardwareZoomSupported,
     isVideoRecording,
+    previewZoomFactor,
     retryCamera,
     startVideoRecording,
     stopVideoRecording,
     toggleFacingMode,
     userCaptures,
     videoRef
-  } = useCameraCapture();
-
-  const ratio = RATIO_STATES[ratioIndex];
-  const timerState = TIMER_STATES[timerIndex];
+  } = useCameraCapture({ ratio, zoomLevel });
 
   const handleModeChange = useCallback((mode) => {
     if (isVideoRecording && mode !== 'Vídeo') {
@@ -80,6 +82,11 @@ export default function CameraPage() {
   };
 
   const handleRatioClick = () => {
+    if (isVideoRecording) {
+      showNotification('Pare a gravação antes de trocar a proporção');
+      return;
+    }
+
     setRatioIndex((current) => (current + 1) % RATIO_STATES.length);
   };
 
@@ -105,6 +112,7 @@ export default function CameraPage() {
             cameraStatus={cameraStatus}
             facingMode={facingMode}
             flashOff={flashOff}
+            hardwareZoomSupported={hardwareZoomSupported}
             notification={notification}
             onStudentOverlayOpen={setStudentOverlay}
             onCaptureDestinationOpen={() => setStudentOverlay('captureDestination')}
@@ -112,6 +120,8 @@ export default function CameraPage() {
             onRealPhotoCapture={capturePhoto}
             onVideoRecordingStart={startVideoRecording}
             onVideoRecordingStop={stopVideoRecording}
+            onZoomLevelChange={setZoomLevel}
+            previewZoomFactor={previewZoomFactor}
             ratio={ratio}
             retryCamera={retryCamera}
             shutterRequestId={shutterRequestId}
@@ -121,6 +131,7 @@ export default function CameraPage() {
             onFlippedChange={setFlipped}
             videoRef={videoRef}
             viewfinderHeight={viewfinderHeightByRatio[ratio]}
+            zoomLevel={zoomLevel}
           />
 
           <BottomControls

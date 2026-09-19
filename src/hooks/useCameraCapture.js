@@ -1,4 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  drawFramedVideoFrame,
+  getDigitalZoomFactor,
+  getFramedCanvasSize,
+  getRequestedHardwareZoom
+} from '../services/cameraFraming.js';
 import { listStoredCaptures, saveStoredCapture } from '../services/captureStorage.js';
 import { useVideoRecorder } from './useVideoRecorder.js';
 
@@ -150,14 +156,24 @@ function canvasToBlob(canvas, mimeType, quality) {
   });
 }
 
-export function useCameraCapture() {
+export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const mountedRef = useRef(false);
   const requestIdRef = useRef(0);
+  const framingSyncIdRef = useRef(0);
+  const framingRef = useRef({
+    facingMode: 'environment',
+    ratio,
+    zoomFactor: getDigitalZoomFactor(zoomLevel),
+    zoomLevel
+  });
+  const recordingFramingRef = useRef(null);
   const videoReadyAbortRef = useRef(null);
   const facingModeRef = useRef('environment');
   const [facingMode, setFacingMode] = useState('environment');
+  const [hardwareZoomSupported, setHardwareZoomSupported] = useState(false);
+  const [previewZoomFactor, setPreviewZoomFactor] = useState(getDigitalZoomFactor(zoomLevel));
   const [cameraStatus, setCameraStatus] = useState('idle');
   const [cameraError, setCameraError] = useState('');
   const [userCaptures, setUserCaptures] = useState([]);
@@ -171,11 +187,17 @@ export function useCameraCapture() {
 
   const updateFacingMode = useCallback((nextFacingMode) => {
     facingModeRef.current = nextFacingMode;
+    framingRef.current = {
+      ...framingRef.current,
+      facingMode: nextFacingMode
+    };
     setFacingMode(nextFacingMode);
   }, []);
 
   const stopCamera = useCallback(() => {
     cancelRecording();
+    recordingFramingRef.current = null;
+    framingSyncIdRef.current += 1;
     videoReadyAbortRef.current?.abort();
     videoReadyAbortRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -194,6 +216,52 @@ export function useCameraCapture() {
       console.error(error);
     }
   }, []);
+
+  const syncFraming = useCallback(async () => {
+    const syncId = framingSyncIdRef.current + 1;
+    framingSyncIdRef.current = syncId;
+    const track = streamRef.current?.getVideoTracks?.()[0];
+    const digitalZoomFactor = getDigitalZoomFactor(zoomLevel);
+    let nextFraming = {
+      facingMode: facingModeRef.current,
+      ratio,
+      zoomFactor: digitalZoomFactor,
+      zoomLevel
+    };
+    let supportsHardwareZoom = false;
+
+    if (track?.readyState === 'live' && typeof track.getCapabilities === 'function' && typeof track.applyConstraints === 'function') {
+      const capabilities = track.getCapabilities();
+      const zoomCapabilities = capabilities?.zoom;
+
+      if (zoomCapabilities && Number.isFinite(zoomCapabilities.min) && Number.isFinite(zoomCapabilities.max)) {
+        supportsHardwareZoom = true;
+        const requestedZoom = getRequestedHardwareZoom(zoomLevel);
+        const baselineZoom = Math.min(Math.max(1, zoomCapabilities.min), zoomCapabilities.max);
+        const canApplyRequestedZoom = requestedZoom >= zoomCapabilities.min && requestedZoom <= zoomCapabilities.max;
+        const hardwareZoom = canApplyRequestedZoom ? requestedZoom : baselineZoom;
+
+        try {
+          await track.applyConstraints({ advanced: [{ zoom: hardwareZoom }] });
+          nextFraming = {
+            ...nextFraming,
+            zoomFactor: canApplyRequestedZoom ? 1 : digitalZoomFactor
+          };
+        } catch {
+          nextFraming = {
+            ...nextFraming,
+            zoomFactor: digitalZoomFactor
+          };
+        }
+      }
+    }
+
+    if (!mountedRef.current || syncId !== framingSyncIdRef.current) return;
+
+    framingRef.current = nextFraming;
+    setHardwareZoomSupported(supportsHardwareZoom);
+    setPreviewZoomFactor(nextFraming.zoomFactor);
+  }, [ratio, zoomLevel]);
 
   const startCamera = useCallback(async (nextFacingMode = facingModeRef.current) => {
     const requestId = requestIdRef.current + 1;
@@ -295,6 +363,21 @@ export function useCameraCapture() {
     return false;
   }, [cameraStatus, isVideoRecording, startCamera, updateFacingMode]);
 
+  useEffect(() => {
+    if (cameraStatus !== 'ready') {
+      framingRef.current = {
+        facingMode: facingModeRef.current,
+        ratio,
+        zoomFactor: getDigitalZoomFactor(zoomLevel),
+        zoomLevel
+      };
+      setPreviewZoomFactor(getDigitalZoomFactor(zoomLevel));
+      return;
+    }
+
+    syncFraming();
+  }, [cameraStatus, ratio, syncFraming, zoomLevel]);
+
   const capturePhoto = useCallback(async () => {
     const video = videoRef.current;
 
@@ -309,23 +392,35 @@ export function useCameraCapture() {
       throw new Error('O feed da câmera não informou dimensões válidas.');
     }
 
+    const framing = framingRef.current;
+    const canvasSize = getFramedCanvasSize(width, height, framing.ratio, framing.zoomFactor);
     const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
 
     const context = canvas.getContext('2d');
     if (!context) {
       throw new Error('Não foi possível preparar a área de captura da foto.');
     }
 
-    context.drawImage(video, 0, 0, width, height);
+    drawFramedVideoFrame(context, video, {
+      mirror: framing.facingMode === 'user',
+      ratio: framing.ratio,
+      zoomFactor: framing.zoomFactor
+    });
 
     const mimeType = 'image/jpeg';
     const blob = await canvasToBlob(canvas, mimeType, 0.92);
     const capture = {
       id: createCaptureId(),
+      aspectRatio: framing.ratio,
       createdAt: new Date().toISOString(),
+      height: canvas.height,
       mimeType,
+      mirrored: framing.facingMode === 'user',
+      zoom: framing.zoomLevel,
+      zoomFactor: framing.zoomFactor,
+      width: canvas.width,
       blob
     };
 
@@ -335,21 +430,52 @@ export function useCameraCapture() {
     return capture;
   }, [cameraStatus]);
 
-  const startVideoRecording = useCallback(() => {
+  const startVideoRecording = useCallback(async () => {
     if (cameraStatus !== 'ready') {
       throw new Error('A câmera ainda não está pronta para gravar vídeo.');
     }
 
-    return startRecording(streamRef.current);
+    if (!videoRef.current) {
+      throw new Error('O feed da câmera não está disponível para gravar vídeo.');
+    }
+
+    recordingFramingRef.current = { ...framingRef.current };
+
+    try {
+      return await startRecording({
+        framingRef,
+        sourceStream: streamRef.current,
+        videoElement: videoRef.current
+      });
+    } catch (error) {
+      recordingFramingRef.current = null;
+      throw error;
+    }
   }, [cameraStatus, startRecording]);
 
   const stopVideoRecording = useCallback(async () => {
-    const recording = await stopRecording();
+    let recording;
+    let recordingFraming;
+
+    try {
+      recording = await stopRecording();
+      recordingFraming = recordingFramingRef.current;
+    } finally {
+      recordingFramingRef.current = null;
+    }
+
     const capture = {
       id: createCaptureId(),
+      aspectRatio: recordingFraming?.ratio,
       createdAt: new Date().toISOString(),
       duration: recording.duration,
+      hasAudio: recording.hasAudio,
+      height: recording.height,
       mimeType: recording.mimeType,
+      mirrored: recordingFraming?.facingMode === 'user',
+      width: recording.width,
+      zoom: framingRef.current.zoomLevel,
+      zoomFactor: framingRef.current.zoomFactor,
       blob: recording.blob
     };
 
@@ -376,7 +502,9 @@ export function useCameraCapture() {
     cameraStatus,
     capturePhoto,
     facingMode,
+    hardwareZoomSupported,
     isVideoRecording,
+    previewZoomFactor,
     retryCamera: startCamera,
     stopCamera,
     startVideoRecording,
