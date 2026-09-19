@@ -15,9 +15,11 @@ function useCaptureObjectUrls(userCaptures) {
   useEffect(() => {
     const nextItems = userCaptures.map((capture) => {
       const mediaKind = capture.mimeType?.startsWith('video/') ? 'video' : 'image';
+      const isDocument = capture.kind === 'document';
 
       return {
         ...capture,
+        isDocument,
         mediaKind,
         url: URL.createObjectURL(capture.blob)
       };
@@ -39,10 +41,13 @@ export default function Gallery({ isOpen, onClose, userCaptures = [] }) {
   const captureItems = useCaptureObjectUrls(userCaptures);
   const mainSlides = [
     ...captureItems.map((capture) => ({
-      alt: capture.mediaKind === 'video'
-        ? 'Vídeo real gravado pela câmera'
-        : 'Foto real capturada pela câmera',
+      alt: capture.isDocument
+        ? 'Documento real digitalizado pela câmera'
+        : capture.mediaKind === 'video'
+          ? 'Vídeo real gravado pela câmera'
+          : 'Foto real capturada pela câmera',
       id: capture.id,
+      isDocument: capture.isDocument,
       mediaKind: capture.mediaKind,
       mimeType: capture.mimeType,
       src: capture.url,
@@ -148,7 +153,13 @@ export default function Gallery({ isOpen, onClose, userCaptures = [] }) {
                       <span className="user-capture-badge">Vídeo</span>
                     </>
                   ) : (
-                    <img src={capture.url} alt="Foto real capturada pela câmera" />
+                    <>
+                      <img
+                        src={capture.url}
+                        alt={capture.isDocument ? 'Documento real digitalizado pela câmera' : 'Foto real capturada pela câmera'}
+                      />
+                      {capture.isDocument && <span className="user-capture-badge">Documento</span>}
+                    </>
                   )}
                 </div>
                 <time dateTime={capture.createdAt}>

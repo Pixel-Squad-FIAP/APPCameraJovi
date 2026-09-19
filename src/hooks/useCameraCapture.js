@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  drawDocumentVideoFrame,
   drawFramedVideoFrame,
   getDigitalZoomFactor,
+  getDocumentCanvasSize,
   getFramedCanvasSize,
   getRequestedHardwareZoom
 } from '../services/cameraFraming.js';
@@ -204,7 +206,7 @@ async function applyTorch(track, enabled) {
   await track.applyConstraints({ advanced: [{ torch: enabled }] });
 }
 
-export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
+export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfinderWidth = 390, zoomLevel = '1' } = {}) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const mountedRef = useRef(false);
@@ -585,6 +587,60 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
     return capture;
   }, [cameraStatus]);
 
+  const captureDocument = useCallback(async () => {
+    const video = videoRef.current;
+
+    if (!video || cameraStatus !== 'ready' || video.readyState < 2) {
+      throw new Error('A câmera ainda não está pronta para digitalizar o documento.');
+    }
+
+    const width = video.videoWidth;
+    const height = video.videoHeight;
+
+    if (!width || !height) {
+      throw new Error('O feed da câmera não informou dimensões válidas.');
+    }
+
+    const framing = framingRef.current;
+    const canvasSize = getDocumentCanvasSize(width, height, viewfinderWidth, viewfinderHeight, framing.zoomFactor);
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+      throw new Error('Não foi possível preparar a área de digitalização.');
+    }
+
+    drawDocumentVideoFrame(context, video, {
+      mirror: framing.facingMode === 'user',
+      viewportHeight: viewfinderHeight,
+      viewportWidth: viewfinderWidth,
+      zoomFactor: framing.zoomFactor
+    });
+
+    const mimeType = 'image/jpeg';
+    const blob = await canvasToBlob(canvas, mimeType, 0.92);
+    const capture = {
+      id: createCaptureId(),
+      aspectRatio: 'document-frame',
+      createdAt: new Date().toISOString(),
+      height: canvas.height,
+      kind: 'document',
+      mimeType,
+      mirrored: framing.facingMode === 'user',
+      zoom: framing.zoomLevel,
+      zoomFactor: framing.zoomFactor,
+      width: canvas.width,
+      blob
+    };
+
+    await saveStoredCapture(capture);
+    setUserCaptures((current) => [capture, ...current]);
+
+    return capture;
+  }, [cameraStatus, viewfinderHeight, viewfinderWidth]);
+
   const startVideoRecording = useCallback(async () => {
     if (cameraStatus !== 'ready') {
       throw new Error('A câmera ainda não está pronta para gravar vídeo.');
@@ -663,6 +719,7 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
     cameraError,
     cameraStatus,
     cameraTransitionFrame,
+    captureDocument,
     capturePhoto,
     facingMode,
     hardwareZoomSupported,

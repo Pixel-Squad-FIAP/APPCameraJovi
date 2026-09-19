@@ -19,7 +19,15 @@ const REQUESTED_HARDWARE_ZOOM = {
   3: 3
 };
 
+export const DOCUMENT_FRAME_ASPECT_RATIO = 280 / 380;
+const DOCUMENT_FRAME = {
+  height: 380,
+  topRatio: 0.42,
+  width: 280
+};
+
 export function getAspectRatio(ratio) {
+  if (Number.isFinite(ratio) && ratio > 0) return ratio;
   return ASPECT_RATIOS[ratio] || ASPECT_RATIOS['3:4'];
 }
 
@@ -93,4 +101,65 @@ export function drawFramedVideoFrame(context, video, options) {
     canvas.height
   );
   context.restore();
+}
+
+export function getDocumentCanvasSize(videoWidth, videoHeight, viewportWidth, viewportHeight, zoomFactor = 1) {
+  const rect = calculateDocumentSourceRect(videoWidth, videoHeight, viewportWidth, viewportHeight, zoomFactor);
+
+  return {
+    height: Math.max(1, Math.round(rect.height)),
+    width: Math.max(1, Math.round(rect.width))
+  };
+}
+
+export function drawDocumentVideoFrame(context, video, options) {
+  const {
+    mirror = false,
+    viewportHeight,
+    viewportWidth,
+    zoomFactor = 1
+  } = options;
+  const rect = calculateDocumentSourceRect(video.videoWidth, video.videoHeight, viewportWidth, viewportHeight, zoomFactor);
+  const canvas = context.canvas;
+
+  context.save();
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (mirror) {
+    context.translate(canvas.width, 0);
+    context.scale(-1, 1);
+  }
+
+  context.drawImage(
+    video,
+    rect.x,
+    rect.y,
+    rect.width,
+    rect.height,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+  context.restore();
+}
+
+function calculateDocumentSourceRect(videoWidth, videoHeight, viewportWidth, viewportHeight, zoomFactor = 1) {
+  const viewportRatio = viewportWidth / viewportHeight;
+  const viewportSourceRect = calculateSourceRect(videoWidth, videoHeight, viewportRatio, zoomFactor);
+  const frameWidth = Math.min(DOCUMENT_FRAME.width, viewportWidth);
+  const frameHeight = Math.min(DOCUMENT_FRAME.height, viewportHeight);
+  const frameX = clamp((viewportWidth - frameWidth) / 2, 0, viewportWidth - frameWidth);
+  const frameY = clamp((viewportHeight * DOCUMENT_FRAME.topRatio) - (frameHeight / 2), 0, viewportHeight - frameHeight);
+
+  return {
+    height: viewportSourceRect.height * (frameHeight / viewportHeight),
+    width: viewportSourceRect.width * (frameWidth / viewportWidth),
+    x: viewportSourceRect.x + viewportSourceRect.width * (frameX / viewportWidth),
+    y: viewportSourceRect.y + viewportSourceRect.height * (frameY / viewportHeight)
+  };
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }

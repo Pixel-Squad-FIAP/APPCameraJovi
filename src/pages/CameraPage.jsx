@@ -47,10 +47,12 @@ export default function CameraPage() {
   const [flipped, setFlipped] = useState(false);
   const ratio = RATIO_STATES[ratioIndex];
   const timerState = TIMER_STATES[timerIndex];
+  const viewfinderHeight = viewfinderHeightByRatio[ratio];
   const {
     cameraError,
     cameraStatus,
     cameraTransitionFrame,
+    captureDocument,
     capturePhoto,
     facingMode,
     hardwareZoomSupported,
@@ -65,7 +67,7 @@ export default function CameraPage() {
     torchSupported,
     userCaptures,
     videoRef
-  } = useCameraCapture({ ratio, zoomLevel });
+  } = useCameraCapture({ ratio, viewfinderHeight, zoomLevel });
   const latestCapture = getLatestUserCapture(userCaptures);
 
   const handleModeChange = useCallback((mode) => {
@@ -136,6 +138,8 @@ export default function CameraPage() {
             onStudentOverlayOpen={setStudentOverlay}
             onCaptureDestinationOpen={() => setStudentOverlay('captureDestination')}
             isVideoRecording={isVideoRecording}
+            onDocumentCapture={captureDocument}
+            onDocumentExportUnavailable={() => showNotification('Exportação estará disponível após o processamento do documento')}
             onRealPhotoCapture={capturePhoto}
             onVideoRecordingStart={startVideoRecording}
             onVideoRecordingStop={stopVideoRecording}
@@ -149,7 +153,7 @@ export default function CameraPage() {
             flipRequestId={flipRequestId}
             onFlippedChange={setFlipped}
             videoRef={videoRef}
-            viewfinderHeight={viewfinderHeightByRatio[ratio]}
+            viewfinderHeight={viewfinderHeight}
             zoomLevel={zoomLevel}
           />
 

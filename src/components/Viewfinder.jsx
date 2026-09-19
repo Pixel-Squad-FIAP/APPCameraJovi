@@ -11,6 +11,8 @@ export default function Viewfinder({
   isVideoRecording,
   notification,
   onCaptureDestinationOpen,
+  onDocumentCapture,
+  onDocumentExportUnavailable = () => {},
   onFlippedChange,
   onRealPhotoCapture,
   onStudentOverlayOpen,
@@ -139,13 +141,25 @@ export default function Viewfinder({
       }
     }
 
+    if (activeMode === 'Documento') {
+      try {
+        await onDocumentCapture();
+        showNotification('Documento digitalizado');
+      } catch (error) {
+        showNotification(error.message || 'Não foi possível digitalizar o documento');
+        return;
+      }
+    }
+
     setThumbnailVisible(true);
     setThumbnailFlying(false);
     schedule(() => setThumbnailFlying(true), 60);
     schedule(() => {
       setThumbnailVisible(false);
       setThumbnailFlying(false);
-      schedule(onCaptureDestinationOpen, 400);
+      if (activeMode !== 'Documento') {
+        schedule(onCaptureDestinationOpen, 400);
+      }
     }, 650);
   };
 
@@ -298,8 +312,8 @@ export default function Viewfinder({
 
         {activeMode === 'Documento' && (
           <div className="student-actions" id="doc-actions">
-            <button className="student-btn" onClick={() => onStudentOverlayOpen('summary')}>Digitalizar</button>
-            <button className="student-btn" onClick={() => onStudentOverlayOpen('docExport')}>Exportar</button>
+            <button className="student-btn" onClick={handlePhotoCapture}>Digitalizar</button>
+            <button className="student-btn" onClick={onDocumentExportUnavailable}>Exportar</button>
           </div>
         )}
 
