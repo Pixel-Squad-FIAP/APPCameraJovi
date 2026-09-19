@@ -1,10 +1,70 @@
+import { useEffect, useState } from 'react';
 import ModeCarousel from './ModeCarousel.jsx';
+import { createVideoThumbnailBlob } from '../services/mediaThumbnail.js';
 
-export default function BottomControls({ activeMode, flipDisabled = false, flipped, isRecording, onFlip, onGalleryOpen, onModeChange, onShutter }) {
+function useLatestCaptureThumbnail(latestCapture) {
+  const [thumbnail, setThumbnail] = useState({ isVideo: false, url: '' });
+
+  useEffect(() => {
+    let active = true;
+    let objectUrl = '';
+
+    const clearThumbnail = () => {
+      if (active) {
+        setThumbnail({ isVideo: false, url: '' });
+      }
+    };
+
+    if (!latestCapture?.blob) {
+      clearThumbnail();
+      return () => {
+        active = false;
+      };
+    }
+
+    const isVideo = latestCapture.mimeType?.startsWith('video/');
+    const sourceBlob = isVideo ? latestCapture.thumbnailBlob : latestCapture.blob;
+
+    if (sourceBlob) {
+      objectUrl = URL.createObjectURL(sourceBlob);
+      setThumbnail({ isVideo, url: objectUrl });
+    } else if (isVideo) {
+      createVideoThumbnailBlob(latestCapture.blob)
+        .then((thumbnailBlob) => {
+          if (!active) return;
+          objectUrl = URL.createObjectURL(thumbnailBlob);
+          setThumbnail({ isVideo: true, url: objectUrl });
+        })
+        .catch(clearThumbnail);
+    } else {
+      clearThumbnail();
+    }
+
+    return () => {
+      active = false;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [latestCapture]);
+
+  return thumbnail;
+}
+
+export default function BottomControls({ activeMode, flipDisabled = false, flipped, isRecording, latestCapture, onFlip, onGalleryOpen, onModeChange, onShutter }) {
+  const latestThumbnail = useLatestCaptureThumbnail(latestCapture);
+
   return (
     <div className="bottom-controls">
       <div className="controls-row">
-        <button className="btn-gallery" aria-label="Galeria" onClick={onGalleryOpen} />
+        <button className={`btn-gallery ${latestThumbnail.url ? 'has-thumbnail' : ''}`} aria-label="Galeria" onClick={onGalleryOpen} type="button">
+          {latestThumbnail.url && (
+            <>
+              <img src={latestThumbnail.url} alt="" aria-hidden="true" />
+              {latestThumbnail.isVideo && <span className="gallery-video-indicator" aria-hidden="true" />}
+            </>
+          )}
+        </button>
 
         <div className="shutter-wrapper">
           <div className="shutter-ring" style={{ borderColor: isRecording ? 'rgba(255,59,48,0.3)' : '' }} />

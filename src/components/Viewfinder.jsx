@@ -7,7 +7,6 @@ export default function Viewfinder({
   cameraTransitionFrame = '',
   facingMode,
   flipRequestId,
-  flashOff,
   hardwareZoomSupported = false,
   isVideoRecording,
   notification,
@@ -35,7 +34,6 @@ export default function Viewfinder({
   const [draggingBrightness, setDraggingBrightness] = useState(false);
   const [flipped, setFlipped] = useState(false);
   const [viewfinderBlurred, setViewfinderBlurred] = useState(false);
-  const [flashPulse, setFlashPulse] = useState(false);
   const [thumbnailVisible, setThumbnailVisible] = useState(false);
   const [thumbnailFlying, setThumbnailFlying] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
@@ -139,12 +137,6 @@ export default function Viewfinder({
         showNotification(error.message || 'Não foi possível capturar a foto');
         return;
       }
-    }
-
-    if (!flashOff) {
-      setFlashPulse(false);
-      window.requestAnimationFrame(() => setFlashPulse(true));
-      schedule(() => setFlashPulse(false), 300);
     }
 
     setThumbnailVisible(true);
@@ -357,8 +349,6 @@ export default function Viewfinder({
           style={{ top: `${(1 - brightness) * 160}px` }}
         />
       </div>
-
-      <div className={`flash-overlay ${flashPulse ? 'do-flash' : ''}`} id="flash-overlay" />
 
       <div
         id="shutter-thumbnail"

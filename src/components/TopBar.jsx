@@ -1,5 +1,6 @@
 export default function TopBar({
   activeMode,
+  flashDisabled = false,
   flashOff,
   moreModesOpen,
   onFlashToggle,
@@ -11,7 +12,14 @@ export default function TopBar({
 }) {
   return (
     <div className="top-bar">
-      <button className={`icon-flash ${flashOff ? 'is-off' : ''}`} id="btn-flash" onClick={onFlashToggle} aria-label="Flash">
+      <button
+        className={`icon-flash ${flashOff ? 'is-off' : ''}`}
+        disabled={flashDisabled}
+        id="btn-flash"
+        onClick={onFlashToggle}
+        aria-label="Flash"
+        title={flashDisabled ? 'Flash indisponível neste dispositivo' : 'Flash'}
+      >
         <svg width="16" height="22" viewBox="0 0 16 22">
           <polyline points="10,1 3,12 8,12 6,21 13,10 8,10 10,1" stroke="white" strokeWidth="1.6" fill="none" strokeLinejoin="round" strokeLinecap="round" />
           <line id="flash-strike" x1="2" y1="2" x2="14" y2="20" stroke="white" strokeWidth="1.6" strokeLinecap="round" style={{ display: flashOff ? 'block' : 'none' }} />

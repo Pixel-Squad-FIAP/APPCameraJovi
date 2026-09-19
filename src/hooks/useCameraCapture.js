@@ -6,6 +6,7 @@ import {
   getRequestedHardwareZoom
 } from '../services/cameraFraming.js';
 import { listStoredCaptures, saveStoredCapture } from '../services/captureStorage.js';
+import { createVideoThumbnailBlob } from '../services/mediaThumbnail.js';
 import { useVideoRecorder } from './useVideoRecorder.js';
 
 function createCameraConstraints(facingMode) {
@@ -179,6 +180,30 @@ function captureTransitionFrame(video, facingMode) {
   return canvas.toDataURL('image/jpeg', 0.82);
 }
 
+function getLiveVideoTrack(stream) {
+  return stream?.getVideoTracks?.().find((track) => track.readyState === 'live') || null;
+}
+
+function supportsTorch(track) {
+  if (!track || typeof track.getCapabilities !== 'function') return false;
+
+  const capabilities = track.getCapabilities();
+  if (typeof capabilities?.torch === 'boolean') return capabilities.torch;
+  if (Array.isArray(capabilities?.fillLightMode)) {
+    return capabilities.fillLightMode.includes('torch');
+  }
+
+  return false;
+}
+
+async function applyTorch(track, enabled) {
+  if (!track || typeof track.applyConstraints !== 'function') {
+    throw new Error('Este dispositivo não oferece controle de flash.');
+  }
+
+  await track.applyConstraints({ advanced: [{ torch: enabled }] });
+}
+
 export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -192,14 +217,19 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
     zoomLevel
   });
   const recordingFramingRef = useRef(null);
+  const torchOperationIdRef = useRef(0);
   const videoReadyAbortRef = useRef(null);
   const facingModeRef = useRef('environment');
+  const torchEnabledRef = useRef(false);
   const [facingMode, setFacingMode] = useState('environment');
   const [hardwareZoomSupported, setHardwareZoomSupported] = useState(false);
   const [previewZoomFactor, setPreviewZoomFactor] = useState(getDigitalZoomFactor(zoomLevel));
   const [cameraStatus, setCameraStatus] = useState('idle');
   const [cameraTransitionFrame, setCameraTransitionFrame] = useState('');
   const [cameraError, setCameraError] = useState('');
+  const [torchEnabled, setTorchEnabledState] = useState(false);
+  const [torchError, setTorchError] = useState('');
+  const [torchSupported, setTorchSupported] = useState(false);
   const [userCaptures, setUserCaptures] = useState([]);
   const {
     cancelRecording,
@@ -218,8 +248,34 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
     setFacingMode(nextFacingMode);
   }, []);
 
+  const setTorchEnabled = useCallback((enabled) => {
+    torchEnabledRef.current = enabled;
+    setTorchEnabledState(enabled);
+  }, []);
+
+  const resetTorchState = useCallback(() => {
+    torchOperationIdRef.current += 1;
+    setTorchEnabled(false);
+    setTorchError('');
+    setTorchSupported(false);
+  }, [setTorchEnabled]);
+
+  const disableActiveTorch = useCallback(async () => {
+    const track = getLiveVideoTrack(streamRef.current);
+    if (!track || !torchEnabledRef.current || !supportsTorch(track)) return;
+
+    try {
+      await applyTorch(track, false);
+    } catch {
+      // Track is about to be stopped; keep camera cleanup resilient.
+    } finally {
+      setTorchEnabled(false);
+    }
+  }, [setTorchEnabled]);
+
   const stopCamera = useCallback(({ clearTransitionFrame = true } = {}) => {
     cancelRecording();
+    disableActiveTorch();
     recordingFramingRef.current = null;
     framingSyncIdRef.current += 1;
     videoReadyAbortRef.current?.abort();
@@ -234,7 +290,8 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
     if (clearTransitionFrame) {
       setCameraTransitionFrame('');
     }
-  }, [cancelRecording]);
+    resetTorchState();
+  }, [cancelRecording, disableActiveTorch, resetTorchState]);
 
   const loadCaptures = useCallback(async () => {
     try {
@@ -291,6 +348,13 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
     setPreviewZoomFactor(nextFraming.zoomFactor);
   }, [ratio, zoomLevel]);
 
+  const syncTorchCapability = useCallback(() => {
+    const supported = supportsTorch(getLiveVideoTrack(streamRef.current));
+    setTorchSupported(supported);
+    setTorchError('');
+    setTorchEnabled(false);
+  }, [setTorchEnabled]);
+
   const startCamera = useCallback(async (nextFacingMode = facingModeRef.current, options = {}) => {
     const {
       preserveCurrentFrame = false,
@@ -329,6 +393,7 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
       }
 
       streamRef.current = stream;
+      syncTorchCapability();
       if (status !== 'switching') {
         setCameraStatus('preparing');
       }
@@ -390,6 +455,7 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
       }
 
       streamRef.current = fallbackStream;
+      syncTorchCapability();
 
       if (videoRef.current) {
         await connectStreamToVideo(videoRef.current, fallbackStream, videoReadyAbort.signal);
@@ -414,7 +480,43 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
     }
 
     return false;
-  }, [cameraStatus, isVideoRecording, startCamera, updateFacingMode]);
+  }, [cameraStatus, isVideoRecording, startCamera, syncTorchCapability, updateFacingMode]);
+
+  const toggleTorch = useCallback(async () => {
+    const track = getLiveVideoTrack(streamRef.current);
+    const nextEnabled = !torchEnabledRef.current;
+    const operationId = torchOperationIdRef.current + 1;
+    torchOperationIdRef.current = operationId;
+
+    if (!supportsTorch(track)) {
+      const error = 'Flash indisponível neste dispositivo.';
+      setTorchSupported(false);
+      setTorchEnabled(false);
+      setTorchError(error);
+      return { error, ok: false };
+    }
+
+    try {
+      await applyTorch(track, nextEnabled);
+      if (!mountedRef.current || operationId !== torchOperationIdRef.current) {
+        return { ok: false };
+      }
+      setTorchSupported(true);
+      setTorchEnabled(nextEnabled);
+      setTorchError('');
+      return { enabled: nextEnabled, ok: true };
+    } catch {
+      if (!mountedRef.current || operationId !== torchOperationIdRef.current) {
+        return { ok: false };
+      }
+      const error = nextEnabled
+        ? 'Não foi possível ativar o flash neste dispositivo.'
+        : 'Não foi possível desligar o flash neste dispositivo.';
+      setTorchEnabled(!nextEnabled);
+      setTorchError(error);
+      return { error, ok: false };
+    }
+  }, [setTorchEnabled]);
 
   useEffect(() => {
     if (cameraStatus !== 'ready') {
@@ -526,11 +628,18 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
       height: recording.height,
       mimeType: recording.mimeType,
       mirrored: recordingFraming?.facingMode === 'user',
+      thumbnailBlob: null,
       width: recording.width,
       zoom: framingRef.current.zoomLevel,
       zoomFactor: framingRef.current.zoomFactor,
       blob: recording.blob
     };
+
+    try {
+      capture.thumbnailBlob = await createVideoThumbnailBlob(recording.blob);
+    } catch {
+      capture.thumbnailBlob = null;
+    }
 
     await saveStoredCapture(capture);
     setUserCaptures((current) => [capture, ...current]);
@@ -563,7 +672,11 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
     stopCamera,
     startVideoRecording,
     stopVideoRecording,
+    toggleTorch,
     toggleFacingMode,
+    torchEnabled,
+    torchError,
+    torchSupported,
     userCaptures,
     videoRecordingError,
     videoRef

@@ -24,9 +24,15 @@ const viewfinderHeightByRatio = {
   Full: 738
 };
 
+function getLatestUserCapture(captures) {
+  return captures.reduce((latest, capture) => {
+    if (!latest) return capture;
+    return new Date(capture.createdAt) > new Date(latest.createdAt) ? capture : latest;
+  }, null);
+}
+
 export default function CameraPage() {
   const [activeMode, setActiveMode] = useState('Foto');
-  const [flashOff, setFlashOff] = useState(false);
   const [timerIndex, setTimerIndex] = useState(0);
   const [ratioIndex, setRatioIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState('1');
@@ -53,10 +59,14 @@ export default function CameraPage() {
     retryCamera,
     startVideoRecording,
     stopVideoRecording,
+    toggleTorch,
     toggleFacingMode,
+    torchEnabled,
+    torchSupported,
     userCaptures,
     videoRef
   } = useCameraCapture({ ratio, zoomLevel });
+  const latestCapture = getLatestUserCapture(userCaptures);
 
   const handleModeChange = useCallback((mode) => {
     if (isVideoRecording && mode !== 'Vídeo') {
@@ -91,17 +101,25 @@ export default function CameraPage() {
     setRatioIndex((current) => (current + 1) % RATIO_STATES.length);
   };
 
+  const handleFlashToggle = async () => {
+    const result = await toggleTorch();
+    if (!result.ok && result.error) {
+      showNotification(result.error);
+    }
+  };
+
   return (
     <main className="camera-page" aria-label="Aplicação da câmera JOVI">
       <div className="phone">
         <div id="camera-app" className={`camera-app ${ratioClassByValue[ratio]}`}>
           <TopBar
             activeMode={activeMode}
-            flashOff={flashOff}
+            flashDisabled={!torchSupported || cameraStatus !== 'ready'}
+            flashOff={!torchEnabled}
             moreModesOpen={moreModesOpen}
             ratio={ratio}
             timerState={timerState}
-            onFlashToggle={() => setFlashOff((current) => !current)}
+            onFlashToggle={handleFlashToggle}
             onRatioClick={handleRatioClick}
             onSettingsClick={() => setMoreModesOpen((current) => !current)}
             onTimerClick={handleTimerClick}
@@ -113,7 +131,6 @@ export default function CameraPage() {
             cameraStatus={cameraStatus}
             cameraTransitionFrame={cameraTransitionFrame}
             facingMode={facingMode}
-            flashOff={flashOff}
             hardwareZoomSupported={hardwareZoomSupported}
             notification={notification}
             onStudentOverlayOpen={setStudentOverlay}
@@ -141,6 +158,7 @@ export default function CameraPage() {
             flipped={flipped}
             flipDisabled={isVideoRecording}
             isRecording={isVideoRecording}
+            latestCapture={latestCapture}
             onGalleryOpen={() => setGalleryOpen(true)}
             onModeChange={handleModeChange}
             onFlip={() => {

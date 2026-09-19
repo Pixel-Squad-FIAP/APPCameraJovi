@@ -38,6 +38,16 @@
   background: rgba(255,255,255,0.08);
 }
 
+.top-bar .icon-flash:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.top-bar .icon-flash:disabled:active {
+  background: none;
+  transform: none;
+}
+
 .icon-flash.is-off svg polyline {
   stroke: rgba(255,255,255,0.35);
 }
