@@ -44,6 +44,7 @@ export default function CameraPage() {
   const {
     cameraError,
     cameraStatus,
+    cameraTransitionFrame,
     capturePhoto,
     facingMode,
     hardwareZoomSupported,
@@ -110,6 +111,7 @@ export default function CameraPage() {
             activeMode={activeMode}
             cameraError={cameraError}
             cameraStatus={cameraStatus}
+            cameraTransitionFrame={cameraTransitionFrame}
             facingMode={facingMode}
             flashOff={flashOff}
             hardwareZoomSupported={hardwareZoomSupported}

@@ -156,6 +156,29 @@ function canvasToBlob(canvas, mimeType, quality) {
   });
 }
 
+function captureTransitionFrame(video, facingMode) {
+  if (!video || video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+    return '';
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const context = canvas.getContext('2d');
+  if (!context) return '';
+
+  context.save();
+  if (facingMode === 'user') {
+    context.translate(canvas.width, 0);
+    context.scale(-1, 1);
+  }
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  context.restore();
+
+  return canvas.toDataURL('image/jpeg', 0.82);
+}
+
 export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -175,6 +198,7 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
   const [hardwareZoomSupported, setHardwareZoomSupported] = useState(false);
   const [previewZoomFactor, setPreviewZoomFactor] = useState(getDigitalZoomFactor(zoomLevel));
   const [cameraStatus, setCameraStatus] = useState('idle');
+  const [cameraTransitionFrame, setCameraTransitionFrame] = useState('');
   const [cameraError, setCameraError] = useState('');
   const [userCaptures, setUserCaptures] = useState([]);
   const {
@@ -194,7 +218,7 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
     setFacingMode(nextFacingMode);
   }, []);
 
-  const stopCamera = useCallback(() => {
+  const stopCamera = useCallback(({ clearTransitionFrame = true } = {}) => {
     cancelRecording();
     recordingFramingRef.current = null;
     framingSyncIdRef.current += 1;
@@ -205,6 +229,10 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
 
     if (videoRef.current) {
       videoRef.current.srcObject = null;
+    }
+
+    if (clearTransitionFrame) {
+      setCameraTransitionFrame('');
     }
   }, [cancelRecording]);
 
@@ -263,7 +291,11 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
     setPreviewZoomFactor(nextFraming.zoomFactor);
   }, [ratio, zoomLevel]);
 
-  const startCamera = useCallback(async (nextFacingMode = facingModeRef.current) => {
+  const startCamera = useCallback(async (nextFacingMode = facingModeRef.current, options = {}) => {
+    const {
+      preserveCurrentFrame = false,
+      status = 'initializing'
+    } = options;
     const requestId = requestIdRef.current + 1;
     requestIdRef.current = requestId;
 
@@ -273,9 +305,19 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
       return false;
     }
 
-    setCameraStatus('requesting');
+    const transitionFrame = preserveCurrentFrame
+      ? captureTransitionFrame(videoRef.current, facingModeRef.current)
+      : '';
+
+    if (transitionFrame) {
+      setCameraTransitionFrame(transitionFrame);
+    } else {
+      setCameraTransitionFrame('');
+    }
+
+    setCameraStatus(status);
     setCameraError('');
-    stopCamera();
+    stopCamera({ clearTransitionFrame: !transitionFrame });
     const videoReadyAbort = new AbortController();
     videoReadyAbortRef.current = videoReadyAbort;
 
@@ -287,6 +329,9 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
       }
 
       streamRef.current = stream;
+      if (status !== 'switching') {
+        setCameraStatus('preparing');
+      }
 
       if (videoRef.current) {
         await connectStreamToVideo(videoRef.current, stream, videoReadyAbort.signal);
@@ -298,6 +343,7 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
       }
 
       setCameraStatus('ready');
+      setCameraTransitionFrame('');
       return true;
     } catch (error) {
       if (error?.name === 'VideoAbortError') {
@@ -306,6 +352,7 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
 
       stopCamera();
       setCameraStatus('error');
+      setCameraTransitionFrame('');
       setCameraError(getCameraErrorMessage(error));
       return false;
     }
@@ -313,13 +360,16 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
 
   const toggleFacingMode = useCallback(async () => {
     if (isVideoRecording) return false;
-    if (cameraStatus === 'requesting') return false;
+    if (['initializing', 'preparing', 'switching'].includes(cameraStatus)) return false;
 
     const currentFacingMode = facingModeRef.current;
     const nextFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
     updateFacingMode(nextFacingMode);
 
-    const openedNextCamera = await startCamera(nextFacingMode);
+    const openedNextCamera = await startCamera(nextFacingMode, {
+      preserveCurrentFrame: true,
+      status: 'switching'
+    });
     if (openedNextCamera) return true;
 
     updateFacingMode(currentFacingMode);
@@ -332,6 +382,7 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
       const videoReadyAbort = new AbortController();
       videoReadyAbortRef.current = videoReadyAbort;
       const fallbackRequestId = requestIdRef.current;
+      setCameraStatus('switching');
       const fallbackStream = await navigator.mediaDevices.getUserMedia(createCameraConstraints(currentFacingMode));
       if (!mountedRef.current || fallbackRequestId !== requestIdRef.current) {
         fallbackStream.getTracks().forEach((track) => track.stop());
@@ -350,6 +401,7 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
       }
 
       setCameraStatus('ready');
+      setCameraTransitionFrame('');
       setCameraError('');
     } catch (error) {
       if (error?.name === 'VideoAbortError') {
@@ -357,6 +409,7 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
       }
 
       setCameraStatus('error');
+      setCameraTransitionFrame('');
       setCameraError('Não foi possível alternar para a câmera solicitada.');
     }
 
@@ -500,6 +553,7 @@ export function useCameraCapture({ ratio = '3:4', zoomLevel = '1' } = {}) {
   return {
     cameraError,
     cameraStatus,
+    cameraTransitionFrame,
     capturePhoto,
     facingMode,
     hardwareZoomSupported,

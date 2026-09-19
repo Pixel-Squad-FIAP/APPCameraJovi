@@ -4,6 +4,7 @@ export default function Viewfinder({
   activeMode,
   cameraError,
   cameraStatus,
+  cameraTransitionFrame = '',
   facingMode,
   flipRequestId,
   flashOff,
@@ -230,6 +231,10 @@ export default function Viewfinder({
   const viewfinderBackground = activeMode === 'Panorâmica'
     ? 'linear-gradient(rgba(0,0,0,0.2), transparent, rgba(0,0,0,0.2))'
     : activeMode === 'Foto' ? 'none' : undefined;
+  const showCameraStatePanel = ['idle', 'initializing', 'preparing', 'error'].includes(cameraStatus);
+  const cameraStatusMessage = cameraStatus === 'preparing'
+    ? 'Preparando imagem...'
+    : 'Iniciando câmera...';
 
   return (
     <>
@@ -253,14 +258,21 @@ export default function Viewfinder({
           ref={videoRef}
         />
 
-        {cameraStatus !== 'ready' && (
+        {cameraTransitionFrame && cameraStatus === 'switching' && (
+          <img className="camera-transition-frame" src={cameraTransitionFrame} alt="" aria-hidden="true" />
+        )}
+
+        {cameraStatus === 'switching' && (
+          <div className="camera-switch-indicator" role="status">Trocando câmera...</div>
+        )}
+
+        {showCameraStatePanel && (
           <div className="camera-state-panel" role="status">
-            {cameraStatus === 'requesting' && <p>Solicitando acesso à câmera...</p>}
-            {cameraStatus === 'idle' && <p>Preparando câmera...</p>}
+            {cameraStatus !== 'error' && <p>{cameraStatusMessage}</p>}
             {cameraStatus === 'error' && (
               <>
                 <p>{cameraError}</p>
-                <button type="button" onClick={retryCamera}>Tentar novamente</button>
+                <button type="button" onClick={() => retryCamera()}>Tentar novamente</button>
               </>
             )}
           </div>
