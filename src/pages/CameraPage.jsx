@@ -8,6 +8,7 @@ import TopBar from '../components/TopBar.jsx';
 import Viewfinder from '../components/Viewfinder.jsx';
 import { RATIO_STATES, TIMER_STATES } from '../data/modes.js';
 import { useCameraCapture } from '../hooks/useCameraCapture.js';
+import { useDocumentScanner } from '../hooks/useDocumentScanner.js';
 import { useNotification } from '../hooks/useNotification.js';
 
 const ratioClassByValue = {
@@ -38,21 +39,24 @@ export default function CameraPage() {
   const [zoomLevel, setZoomLevel] = useState('1');
   const [moreModesOpen, setMoreModesOpen] = useState(false);
   const { notification, showNotification } = useNotification();
-  const [visitedModes, setVisitedModes] = useState(() => new Set());
   const [shutterRequestId, setShutterRequestId] = useState(0);
   const [flipRequestId, setFlipRequestId] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [studentOverlay, setStudentOverlay] = useState(null);
   const [flipped, setFlipped] = useState(false);
+  const [panoramaState, setPanoramaState] = useState({ progress: 0, status: 'idle' });
+  const [viewfinderSize, setViewfinderSize] = useState({ height: 520, width: 390 });
   const ratio = RATIO_STATES[ratioIndex];
   const timerState = TIMER_STATES[timerIndex];
-  const viewfinderHeight = viewfinderHeightByRatio[ratio];
+  const viewfinderHeight = viewfinderSize.height || viewfinderHeightByRatio[ratio];
   const {
+    addUserCapture,
     cameraError,
     cameraStatus,
     cameraTransitionFrame,
     captureDocument,
+    capturePanorama,
     capturePhoto,
     facingMode,
     hardwareZoomSupported,
@@ -65,10 +69,25 @@ export default function CameraPage() {
     toggleFacingMode,
     torchEnabled,
     torchSupported,
+    updateUserCapture,
     userCaptures,
     videoRef
-  } = useCameraCapture({ ratio, viewfinderHeight, zoomLevel });
+  } = useCameraCapture({
+    ratio,
+    viewfinderHeight,
+    viewfinderWidth: viewfinderSize.width || 390,
+    zoomLevel
+  });
   const latestCapture = getLatestUserCapture(userCaptures);
+  const {
+    isDocumentScanning,
+    retryDocumentOcr,
+    scanDocument,
+    state: documentScannerState
+  } = useDocumentScanner({
+    captureDocument,
+    onCaptureUpdated: updateUserCapture
+  });
 
   const handleModeChange = useCallback((mode) => {
     if (isVideoRecording && mode !== 'Vídeo') {
@@ -79,16 +98,11 @@ export default function CameraPage() {
     setActiveMode(mode);
     setMoreModesOpen(false);
 
-    if (mode === 'Pro') showNotification('Modo Profissional ativado');
     if (mode === 'Vídeo') showNotification('Pronto para gravar');
     if (mode === 'Documento') showNotification('Enquadre o documento no centro');
-    if (mode === 'Noite') showNotification('Longa exposição: mantenha parado');
-    if (mode === 'Panorâmica') showNotification('Deslize lentamente para o lado');
-    if (mode === 'Retrato' && !visitedModes.has('Retrato')) {
-      setVisitedModes((current) => new Set(current).add('Retrato'));
-      showNotification('Posicione o assunto a 1.5m');
-    }
-  }, [isVideoRecording, showNotification, visitedModes]);
+    if (mode === 'Panorâmica') showNotification('Mova lentamente na horizontal');
+    if (mode === 'Estudante') showNotification('Use documentos com OCR para estudar');
+  }, [isVideoRecording, showNotification]);
 
   const handleTimerClick = () => {
     setTimerIndex((current) => (current + 1) % TIMER_STATES.length);
@@ -136,14 +150,30 @@ export default function CameraPage() {
             hardwareZoomSupported={hardwareZoomSupported}
             notification={notification}
             onStudentOverlayOpen={setStudentOverlay}
-            onCaptureDestinationOpen={() => setStudentOverlay('captureDestination')}
             isVideoRecording={isVideoRecording}
-            onDocumentCapture={captureDocument}
+            documentScanState={documentScannerState}
+            isDocumentScanning={isDocumentScanning}
+            onDocumentCapture={scanDocument}
             onDocumentExportUnavailable={() => showNotification('Exportação estará disponível após o processamento do documento')}
+            onPanoramaCapture={async () => {
+              setPanoramaState({ progress: 0, status: 'capturing' });
+              try {
+                const capture = await capturePanorama({
+                  onProgress: (progress) => setPanoramaState({ progress, status: 'capturing' })
+                });
+                setPanoramaState({ progress: 100, status: 'done' });
+                window.setTimeout(() => setPanoramaState({ progress: 0, status: 'idle' }), 900);
+                return capture;
+              } catch (error) {
+                setPanoramaState({ progress: 0, status: 'idle' });
+                throw error;
+              }
+            }}
             onRealPhotoCapture={capturePhoto}
             onVideoRecordingStart={startVideoRecording}
             onVideoRecordingStop={stopVideoRecording}
             onZoomLevelChange={setZoomLevel}
+            panoramaState={panoramaState}
             previewZoomFactor={previewZoomFactor}
             ratio={ratio}
             retryCamera={retryCamera}
@@ -152,8 +182,8 @@ export default function CameraPage() {
             timerState={timerState}
             flipRequestId={flipRequestId}
             onFlippedChange={setFlipped}
+            onViewfinderResize={setViewfinderSize}
             videoRef={videoRef}
-            viewfinderHeight={viewfinderHeight}
             zoomLevel={zoomLevel}
           />
 
@@ -177,12 +207,22 @@ export default function CameraPage() {
             onShutter={() => setShutterRequestId((current) => current + 1)}
           />
 
-          <Gallery isOpen={galleryOpen} onClose={() => setGalleryOpen(false)} userCaptures={userCaptures} />
+          <Gallery
+            onCaptureCreated={addUserCapture}
+            onCaptureUpdated={updateUserCapture}
+            documentOcrState={documentScannerState}
+            isOpen={galleryOpen}
+            onClose={() => setGalleryOpen(false)}
+            onRecognizeDocument={retryDocumentOcr}
+            userCaptures={userCaptures}
+          />
 
           <StudentMode
             activeOverlay={studentOverlay}
             onClose={() => setStudentOverlay(null)}
+            onDocumentUpdated={updateUserCapture}
             showNotification={showNotification}
+            userCaptures={userCaptures}
           />
 
           <MoreModesOverlay

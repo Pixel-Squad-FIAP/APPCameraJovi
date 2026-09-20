@@ -44,6 +44,41 @@ export function saveStoredCapture(capture) {
   return runCaptureTransaction('readwrite', (store) => store.put(capture));
 }
 
+export function updateStoredCapture(id, patch) {
+  return openCaptureDatabase().then((database) => new Promise((resolve, reject) => {
+    const transaction = database.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const getRequest = store.get(id);
+    let updatedCapture = null;
+
+    getRequest.onsuccess = () => {
+      const currentCapture = getRequest.result;
+      if (!currentCapture) {
+        reject(new Error('Captura não encontrada para atualização.'));
+        return;
+      }
+
+      updatedCapture = {
+        ...currentCapture,
+        ...patch
+      };
+
+      const putRequest = store.put(updatedCapture);
+      putRequest.onerror = () => reject(putRequest.error || new Error('Não foi possível atualizar a captura.'));
+    };
+
+    getRequest.onerror = () => reject(getRequest.error || new Error('Não foi possível carregar a captura.'));
+    transaction.oncomplete = () => {
+      database.close();
+      resolve(updatedCapture);
+    };
+    transaction.onerror = () => {
+      database.close();
+      reject(transaction.error || new Error('Transação de atualização falhou.'));
+    };
+  }));
+}
+
 export function listStoredCaptures() {
   return runCaptureTransaction('readonly', (store) => store.getAll())
     .then((captures) => captures.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));

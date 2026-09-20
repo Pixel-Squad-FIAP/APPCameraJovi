@@ -5,20 +5,24 @@ export default function Viewfinder({
   cameraError,
   cameraStatus,
   cameraTransitionFrame = '',
+  documentScanState = { message: '', progress: null, status: 'idle' },
   facingMode,
   flipRequestId,
   hardwareZoomSupported = false,
+  isDocumentScanning = false,
   isVideoRecording,
   notification,
-  onCaptureDestinationOpen,
   onDocumentCapture,
   onDocumentExportUnavailable = () => {},
   onFlippedChange,
+  onPanoramaCapture,
   onRealPhotoCapture,
   onStudentOverlayOpen,
   onVideoRecordingStart,
   onVideoRecordingStop,
+  onViewfinderResize = () => {},
   onZoomLevelChange = () => {},
+  panoramaState = { progress: 0, status: 'idle' },
   previewZoomFactor = 1,
   ratio,
   retryCamera,
@@ -26,9 +30,9 @@ export default function Viewfinder({
   showNotification,
   timerState,
   videoRef,
-  viewfinderHeight,
   zoomLevel = '1'
 }) {
+  const viewfinderRef = useRef(null);
   const [focusPoint, setFocusPoint] = useState({ x: 195, y: 260 });
   const [focusVisible, setFocusVisible] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(false);
@@ -73,6 +77,32 @@ export default function Viewfinder({
       clearManagedTimeouts();
     };
   }, []);
+
+  useEffect(() => {
+    const element = viewfinderRef.current;
+    if (!element) return undefined;
+
+    const notifySize = () => {
+      const rect = element.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        onViewfinderResize({
+          height: Math.round(rect.height),
+          width: Math.round(rect.width)
+        });
+      }
+    };
+
+    notifySize();
+
+    if (!window.ResizeObserver) {
+      window.addEventListener('resize', notifySize);
+      return () => window.removeEventListener('resize', notifySize);
+    }
+
+    const observer = new ResizeObserver(notifySize);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [onViewfinderResize]);
 
   useEffect(() => {
     onFlippedChange(flipped);
@@ -130,11 +160,13 @@ export default function Viewfinder({
 
   const takePhoto = async () => {
     clearManagedTimeouts();
+    let capturedMedia = false;
 
     if (activeMode === 'Foto') {
       try {
         await onRealPhotoCapture();
         showNotification('Foto salva na galeria');
+        capturedMedia = true;
       } catch (error) {
         showNotification(error.message || 'Não foi possível capturar a foto');
         return;
@@ -143,12 +175,33 @@ export default function Viewfinder({
 
     if (activeMode === 'Documento') {
       try {
-        await onDocumentCapture();
-        showNotification('Documento digitalizado');
+        const documentCapture = await onDocumentCapture();
+        if (documentCapture?.ocrStatus === 'done') {
+          showNotification(documentCapture.ocrText ? 'Texto reconhecido' : 'Documento salvo sem texto reconhecido');
+        } else {
+          showNotification('Documento salvo');
+        }
+        capturedMedia = true;
       } catch (error) {
         showNotification(error.message || 'Não foi possível digitalizar o documento');
         return;
       }
+    }
+
+    if (activeMode === 'Panorâmica') {
+      try {
+        await onPanoramaCapture();
+        showNotification('Panorâmica salva na galeria');
+        capturedMedia = true;
+      } catch (error) {
+        showNotification(error.message || 'Não foi possível capturar a panorâmica');
+        return;
+      }
+    }
+
+    if (!capturedMedia) {
+      showNotification('Use as ações do modo selecionado.');
+      return;
     }
 
     setThumbnailVisible(true);
@@ -157,9 +210,6 @@ export default function Viewfinder({
     schedule(() => {
       setThumbnailVisible(false);
       setThumbnailFlying(false);
-      if (activeMode !== 'Documento') {
-        schedule(onCaptureDestinationOpen, 400);
-      }
     }, 650);
   };
 
@@ -241,17 +291,19 @@ export default function Viewfinder({
   const cameraStatusMessage = cameraStatus === 'preparing'
     ? 'Preparando imagem...'
     : 'Iniciando câmera...';
+  const showDocumentScanStatus = activeMode === 'Documento' && documentScanState.status === 'processing';
+  const showPanoramaStatus = activeMode === 'Panorâmica' && panoramaState.status === 'capturing';
 
   return (
     <>
       <div
         className="viewfinder"
+        ref={viewfinderRef}
         onClick={handleViewfinderClick}
         style={{
-          height: `${viewfinderHeight}px`,
           filter: viewfinderBlurred ? 'blur(10px)' : `brightness(${0.4 + brightness * 0.8})`,
           transform: `scale(${previewZoomFactor})`,
-          transition: 'height 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'filter 0.3s, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           background: viewfinderBackground
         }}
       >
@@ -300,7 +352,23 @@ export default function Viewfinder({
             <div className="pano-arrow" />
           </div>
         )}
+
+        {showPanoramaStatus && (
+          <div className="document-scan-status" role="status">
+            <span>Capturando panorâmica...</span>
+            <strong>{panoramaState.progress}%</strong>
+          </div>
+        )}
         {activeMode === 'Documento' && <div className="doc-scanner-frame" id="doc-scanner-frame" style={{ display: 'block' }} />}
+
+        {showDocumentScanStatus && (
+          <div className="document-scan-status" role="status">
+            <span>{documentScanState.message || 'Processando documento...'}</span>
+            {Number.isFinite(documentScanState.progress) && (
+              <strong>{documentScanState.progress}%</strong>
+            )}
+          </div>
+        )}
 
         {activeMode === 'Estudante' && (
           <div className="student-actions" id="student-actions">
@@ -312,22 +380,16 @@ export default function Viewfinder({
 
         {activeMode === 'Documento' && (
           <div className="student-actions" id="doc-actions">
-            <button className="student-btn" onClick={handlePhotoCapture}>Digitalizar</button>
-            <button className="student-btn" onClick={onDocumentExportUnavailable}>Exportar</button>
+            <button className="student-btn" disabled={isDocumentScanning} onClick={handlePhotoCapture}>
+              {isDocumentScanning ? 'Processando...' : 'Digitalizar'}
+            </button>
+            <button className="student-btn" disabled={isDocumentScanning} onClick={onDocumentExportUnavailable}>Exportar</button>
           </div>
         )}
 
         <div id="recording-indicator" className="recording-indicator" style={{ display: isVideoRecording ? 'flex' : 'none' }}>
           <div className="red-dot" />
           <span id="recording-timer">{minutes}:{seconds}</span>
-        </div>
-
-        <div id="pro-controls" className={`pro-controls ${activeMode === 'Pro' ? 'show' : ''}`}>
-          <div className="pro-item"><span>ISO</span><strong>Auto</strong></div>
-          <div className="pro-item"><span>S</span><strong>1/125</strong></div>
-          <div className="pro-item"><span>EV</span><strong>0.0</strong></div>
-          <div className="pro-item"><span>WB</span><strong>Auto</strong></div>
-          <div className="pro-item"><span>AF</span><strong>AF-C</strong></div>
         </div>
 
         <div id="camera-notification" className={`camera-notification ${notification ? 'show' : ''}`}>{notification}</div>

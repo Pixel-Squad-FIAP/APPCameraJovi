@@ -1,12 +1,11 @@
 /* ========== VIEWFINDER ========== */
 .viewfinder {
-  width: 390px;
-  height: 520px;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
   background: linear-gradient(160deg, #2a2a30 0%, #1e1e24 100%);
   position: relative;
-  flex-shrink: 0;
   overflow: hidden;
-  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Vinheta sutil nas bordas para profundidade */
@@ -214,8 +213,10 @@
   top: 42%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 280px;
-  height: 380px;
+  width: min(280px, 72%);
+  aspect-ratio: 280 / 380;
+  height: auto;
+  max-height: 76%;
   border: 2px solid rgba(255, 255, 255, 0.4);
   border-radius: 12px;
   box-shadow: 0 0 0 2000px rgba(0,0,0,0.3);
@@ -239,6 +240,39 @@
 @keyframes scanMove {
   0% { top: 0; }
   100% { top: 100%; }
+}
+
+.document-scan-status {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  z-index: 12;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 270px;
+  border: 1px solid rgba(92,157,245,0.22);
+  border-radius: 999px;
+  background: rgba(13,13,18,0.78);
+  backdrop-filter: blur(14px);
+  color: rgba(255,255,255,0.9);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 7px 12px;
+  pointer-events: none;
+}
+
+.document-scan-status span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-scan-status strong {
+  color: #9ecaff;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---- Brightness ---- */
@@ -300,9 +334,10 @@
 /* ---- Zoom Selector ---- */
 .zoom-selector {
   position: absolute;
-  top: 520px; /* Alinhado ao final do viewfinder padrão */
+  top: auto;
+  bottom: 152px;
   left: 50%;
-  transform: translateX(-50%) translateY(-64px);
+  transform: translateX(-50%);
   background: rgba(13,13,18,0.75);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255,255,255,0.08);
@@ -312,7 +347,7 @@
   padding: 3px;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.4s ease, top 0.4s ease;
+  transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.4s ease, bottom 0.4s ease;
   z-index: 20;
 }
 
@@ -325,11 +360,7 @@
 .camera-app.aspect-1-1 .zoom-selector {
   opacity: 1 !important;
   visibility: visible !important;
-  top: 390px !important; /* Final do viewfinder 1:1 (390) */
-  transform: translateX(-50%) translateY(95px); /* Desce mais para entrar na área escura */
-  background: transparent;
-  border: none;
-  backdrop-filter: none;
+  bottom: 152px !important;
 }
 
 
@@ -439,6 +470,12 @@
 .student-btn:active {
   transform: scale(0.92);
   background: rgba(92, 157, 245, 0.25);
+}
+
+.student-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+  transform: none;
 }
 
 /* ---- Camera Notification ---- */

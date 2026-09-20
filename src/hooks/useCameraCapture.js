@@ -159,6 +159,12 @@ function canvasToBlob(canvas, mimeType, quality) {
   });
 }
 
+function wait(milliseconds) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, milliseconds);
+  });
+}
+
 function captureTransitionFrame(video, facingMode) {
   if (!video || video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
     return '';
@@ -302,6 +308,16 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
     } catch (error) {
       console.error(error);
     }
+  }, []);
+
+  const updateUserCapture = useCallback((updatedCapture) => {
+    setUserCaptures((current) => current.map((capture) => (
+      capture.id === updatedCapture.id ? updatedCapture : capture
+    )));
+  }, []);
+
+  const addUserCapture = useCallback((capture) => {
+    setUserCaptures((current) => [capture, ...current]);
   }, []);
 
   const syncFraming = useCallback(async () => {
@@ -629,6 +645,7 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
       kind: 'document',
       mimeType,
       mirrored: framing.facingMode === 'user',
+      ocrStatus: 'pending',
       zoom: framing.zoomLevel,
       zoomFactor: framing.zoomFactor,
       width: canvas.width,
@@ -640,6 +657,92 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
 
     return capture;
   }, [cameraStatus, viewfinderHeight, viewfinderWidth]);
+
+  const capturePanorama = useCallback(async ({ onProgress } = {}) => {
+    const video = videoRef.current;
+
+    if (!video || cameraStatus !== 'ready' || video.readyState < 2) {
+      throw new Error('A câmera ainda não está pronta para capturar a panorâmica.');
+    }
+
+    if (!video.videoWidth || !video.videoHeight) {
+      throw new Error('O feed da câmera não informou dimensões válidas.');
+    }
+
+    const framing = framingRef.current;
+    const frameCount = 4;
+    const overlap = 0.42;
+    const frameSize = getFramedCanvasSize(video.videoWidth, video.videoHeight, '9:16', framing.zoomFactor);
+    const frameCanvas = document.createElement('canvas');
+    frameCanvas.width = frameSize.width;
+    frameCanvas.height = frameSize.height;
+    const frameContext = frameCanvas.getContext('2d');
+
+    if (!frameContext) {
+      throw new Error('Não foi possível preparar os frames da panorâmica.');
+    }
+
+    const frames = [];
+    for (let index = 0; index < frameCount; index += 1) {
+      drawFramedVideoFrame(frameContext, video, {
+        mirror: framing.facingMode === 'user',
+        ratio: '9:16',
+        zoomFactor: framing.zoomFactor
+      });
+      const snapshot = document.createElement('canvas');
+      snapshot.width = frameCanvas.width;
+      snapshot.height = frameCanvas.height;
+      const snapshotContext = snapshot.getContext('2d');
+      if (!snapshotContext) {
+        throw new Error('Não foi possível preparar um frame da panorâmica.');
+      }
+      snapshotContext.drawImage(frameCanvas, 0, 0);
+      frames.push(snapshot);
+      onProgress?.(Math.round(((index + 1) / frameCount) * 100));
+      if (index < frameCount - 1) {
+        await wait(520);
+      }
+    }
+
+    const step = Math.max(1, Math.round(frameSize.width * (1 - overlap)));
+    const canvas = document.createElement('canvas');
+    canvas.width = frameSize.width + step * (frameCount - 1);
+    canvas.height = frameSize.height;
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      throw new Error('Não foi possível montar a panorâmica.');
+    }
+
+    context.fillStyle = '#000';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    frames.forEach((frame, index) => {
+      context.drawImage(frame, index * step, 0, frameSize.width, frameSize.height);
+    });
+
+    const mimeType = 'image/jpeg';
+    const blob = await canvasToBlob(canvas, mimeType, 0.9);
+    const capture = {
+      id: createCaptureId(),
+      aspectRatio: 'panorama',
+      createdAt: new Date().toISOString(),
+      frameCount,
+      height: canvas.height,
+      kind: 'panorama',
+      mimeType,
+      mirrored: framing.facingMode === 'user',
+      overlap,
+      width: canvas.width,
+      zoom: framing.zoomLevel,
+      zoomFactor: framing.zoomFactor,
+      blob
+    };
+
+    await saveStoredCapture(capture);
+    setUserCaptures((current) => [capture, ...current]);
+
+    return capture;
+  }, [cameraStatus]);
 
   const startVideoRecording = useCallback(async () => {
     if (cameraStatus !== 'ready') {
@@ -719,7 +822,9 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
     cameraError,
     cameraStatus,
     cameraTransitionFrame,
+    addUserCapture,
     captureDocument,
+    capturePanorama,
     capturePhoto,
     facingMode,
     hardwareZoomSupported,
@@ -734,6 +839,7 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
     torchEnabled,
     torchError,
     torchSupported,
+    updateUserCapture,
     userCaptures,
     videoRecordingError,
     videoRef

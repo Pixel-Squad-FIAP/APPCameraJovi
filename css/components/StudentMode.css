@@ -150,6 +150,10 @@
     transition: all 0.15s ease;
 }
 
+button.student-tag {
+    font: inherit;
+}
+
 .student-tag:active {
     transform: scale(0.92);
 }
@@ -222,4 +226,14 @@
 .student-action-btn.secondary:active {
     background: rgba(255, 255, 255, 0.12);
     transform: scale(0.96);
+}
+
+.student-real-text {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 12.5px;
+    line-height: 1.55;
+    margin: 0;
+    max-height: 150px;
+    overflow: auto;
+    white-space: pre-wrap;
 }

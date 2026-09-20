@@ -1,17 +1,6 @@
-export const MODES = ['Panorâmica', 'Noite', 'Documento', 'Vídeo', 'Foto', 'Retrato', 'Estudante', 'Pro'];
+export const MODES = ['Panorâmica', 'Documento', 'Vídeo', 'Foto', 'Estudante'];
 
-export const EXTRA_MODES = [
-  'Comida',
-  'Alta Resolução',
-  'Microfilme',
-  'Câmera Lenta',
-  'Astro',
-  'Intervalo',
-  'Instantâneo',
-  'Visualização Dupla',
-  'Superlua',
-  'Foto em movimento'
-];
+export const EXTRA_MODES = [];
 
 export const TIMER_STATES = ['none', '3s', '5s', '10s'];
 

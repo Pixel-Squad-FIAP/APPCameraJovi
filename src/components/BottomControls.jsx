@@ -23,7 +23,12 @@ function useLatestCaptureThumbnail(latestCapture) {
     }
 
     const isVideo = latestCapture.mimeType?.startsWith('video/');
-    const sourceBlob = isVideo ? latestCapture.thumbnailBlob : latestCapture.blob;
+    const isDocument = latestCapture.kind === 'document';
+    const sourceBlob = isVideo
+      ? latestCapture.thumbnailBlob
+      : isDocument && latestCapture.processedBlob
+        ? latestCapture.processedBlob
+        : latestCapture.blob;
 
     if (sourceBlob) {
       objectUrl = URL.createObjectURL(sourceBlob);
