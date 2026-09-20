@@ -1,4 +1,4 @@
-function loadImageFromBlob(blob) {
+export function loadImageFromBlob(blob) {
   return new Promise((resolve, reject) => {
     const image = new Image();
     const objectUrl = URL.createObjectURL(blob);
@@ -26,6 +26,89 @@ function canvasToBlob(canvas, mimeType, quality) {
       reject(new Error('Não foi possível gerar a imagem processada do documento.'));
     }, mimeType, quality);
   });
+}
+
+function distance(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function getDefaultCorners(width, height) {
+  const insetX = width * 0.08;
+  const insetY = height * 0.08;
+  return [
+    { x: insetX, y: insetY },
+    { x: width - insetX, y: insetY },
+    { x: width - insetX, y: height - insetY },
+    { x: insetX, y: height - insetY }
+  ];
+}
+
+export async function getInitialDocumentCorners(blob) {
+  const image = await loadImageFromBlob(blob);
+  const width = image.naturalWidth || image.width;
+  const height = image.naturalHeight || image.height;
+  return getDefaultCorners(width, height);
+}
+
+export async function rectifyDocumentImage(blob, corners) {
+  const image = await loadImageFromBlob(blob);
+  const sourceWidth = image.naturalWidth || image.width;
+  const sourceHeight = image.naturalHeight || image.height;
+  const safeCorners = (corners?.length === 4 ? corners : getDefaultCorners(sourceWidth, sourceHeight))
+    .map((point) => ({
+      x: clamp(point.x, 0, sourceWidth),
+      y: clamp(point.y, 0, sourceHeight)
+    }));
+  const [topLeft, topRight, bottomRight, bottomLeft] = safeCorners;
+  const outputWidth = Math.max(1, Math.round(Math.max(distance(topLeft, topRight), distance(bottomLeft, bottomRight))));
+  const outputHeight = Math.max(1, Math.round(Math.max(distance(topLeft, bottomLeft), distance(topRight, bottomRight))));
+  const sourceCanvas = document.createElement('canvas');
+  sourceCanvas.width = sourceWidth;
+  sourceCanvas.height = sourceHeight;
+  const sourceContext = sourceCanvas.getContext('2d', { willReadFrequently: true });
+  if (!sourceContext) throw new Error('Não foi possível preparar a correção do documento.');
+  sourceContext.drawImage(image, 0, 0, sourceWidth, sourceHeight);
+  const sourceData = sourceContext.getImageData(0, 0, sourceWidth, sourceHeight);
+
+  const outputCanvas = document.createElement('canvas');
+  outputCanvas.width = outputWidth;
+  outputCanvas.height = outputHeight;
+  const outputContext = outputCanvas.getContext('2d', { willReadFrequently: true });
+  if (!outputContext) throw new Error('Não foi possível retificar o documento.');
+  const outputData = outputContext.createImageData(outputWidth, outputHeight);
+
+  for (let y = 0; y < outputHeight; y += 1) {
+    const v = outputHeight <= 1 ? 0 : y / (outputHeight - 1);
+    for (let x = 0; x < outputWidth; x += 1) {
+      const u = outputWidth <= 1 ? 0 : x / (outputWidth - 1);
+      const topX = topLeft.x + (topRight.x - topLeft.x) * u;
+      const topY = topLeft.y + (topRight.y - topLeft.y) * u;
+      const bottomX = bottomLeft.x + (bottomRight.x - bottomLeft.x) * u;
+      const bottomY = bottomLeft.y + (bottomRight.y - bottomLeft.y) * u;
+      const sourceX = Math.round(topX + (bottomX - topX) * v);
+      const sourceY = Math.round(topY + (bottomY - topY) * v);
+      const clampedX = clamp(sourceX, 0, sourceWidth - 1);
+      const clampedY = clamp(sourceY, 0, sourceHeight - 1);
+      const sourceIndex = (clampedY * sourceWidth + clampedX) * 4;
+      const outputIndex = (y * outputWidth + x) * 4;
+      outputData.data[outputIndex] = sourceData.data[sourceIndex];
+      outputData.data[outputIndex + 1] = sourceData.data[sourceIndex + 1];
+      outputData.data[outputIndex + 2] = sourceData.data[sourceIndex + 2];
+      outputData.data[outputIndex + 3] = sourceData.data[sourceIndex + 3];
+    }
+  }
+
+  outputContext.putImageData(outputData, 0, 0);
+  return {
+    blob: await canvasToBlob(outputCanvas, 'image/jpeg', 0.96),
+    corners: safeCorners,
+    height: outputHeight,
+    width: outputWidth
+  };
 }
 
 export async function processDocumentImage(blob) {

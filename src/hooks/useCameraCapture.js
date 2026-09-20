@@ -165,6 +165,99 @@ function getOrientationYaw(event) {
   return null;
 }
 
+function getCanvasGraySample(canvas, columns = 96, rows = 64) {
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  const sample = new Float32Array(columns * rows);
+
+  for (let row = 0; row < rows; row += 1) {
+    const y = Math.min(canvas.height - 1, Math.round((row / Math.max(1, rows - 1)) * (canvas.height - 1)));
+    for (let column = 0; column < columns; column += 1) {
+      const x = Math.min(canvas.width - 1, Math.round((column / Math.max(1, columns - 1)) * (canvas.width - 1)));
+      const index = (y * canvas.width + x) * 4;
+      sample[row * columns + column] = data[index] * 0.299 + data[index + 1] * 0.587 + data[index + 2] * 0.114;
+    }
+  }
+
+  return { columns, rows, sample };
+}
+
+function estimatePanoramaStep(previousFrame, nextFrame) {
+  const previous = getCanvasGraySample(previousFrame);
+  const next = getCanvasGraySample(nextFrame, previous.columns, previous.rows);
+  const minStep = Math.round(previous.columns * 0.25);
+  const maxStep = Math.round(previous.columns * 0.68);
+  let bestStep = Math.round(previous.columns * 0.45);
+  let bestScore = Number.POSITIVE_INFINITY;
+
+  for (let step = minStep; step <= maxStep; step += 1) {
+    const overlap = previous.columns - step;
+    let score = 0;
+    let count = 0;
+    for (let row = 0; row < previous.rows; row += 2) {
+      for (let column = 0; column < overlap; column += 2) {
+        const previousValue = previous.sample[row * previous.columns + step + column];
+        const nextValue = next.sample[row * next.columns + column];
+        score += Math.abs(previousValue - nextValue);
+        count += 1;
+      }
+    }
+    const normalizedScore = score / Math.max(1, count);
+    if (normalizedScore < bestScore) {
+      bestScore = normalizedScore;
+      bestStep = step;
+    }
+  }
+
+  return Math.max(1, Math.round((bestStep / previous.columns) * previousFrame.width));
+}
+
+function drawPanoramaFrame(context, frame, offsetX, previousOffsetX) {
+  if (previousOffsetX === null) {
+    context.drawImage(frame, offsetX, 0);
+    return;
+  }
+
+  const overlap = Math.max(0, (previousOffsetX + frame.width) - offsetX);
+  const nonOverlapX = Math.max(0, overlap);
+
+  if (overlap > 0) {
+    const existing = context.getImageData(offsetX, 0, overlap, frame.height);
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = frame.width;
+    tempCanvas.height = frame.height;
+    const tempContext = tempCanvas.getContext('2d', { willReadFrequently: true });
+    tempContext.drawImage(frame, 0, 0);
+    const next = tempContext.getImageData(0, 0, overlap, frame.height);
+
+    for (let y = 0; y < frame.height; y += 1) {
+      for (let x = 0; x < overlap; x += 1) {
+        const alpha = x / Math.max(1, overlap - 1);
+        const index = (y * overlap + x) * 4;
+        existing.data[index] = existing.data[index] * (1 - alpha) + next.data[index] * alpha;
+        existing.data[index + 1] = existing.data[index + 1] * (1 - alpha) + next.data[index + 1] * alpha;
+        existing.data[index + 2] = existing.data[index + 2] * (1 - alpha) + next.data[index + 2] * alpha;
+        existing.data[index + 3] = 255;
+      }
+    }
+    context.putImageData(existing, offsetX, 0);
+  }
+
+  if (nonOverlapX < frame.width) {
+    context.drawImage(
+      frame,
+      nonOverlapX,
+      0,
+      frame.width - nonOverlapX,
+      frame.height,
+      offsetX + nonOverlapX,
+      0,
+      frame.width - nonOverlapX,
+      frame.height
+    );
+  }
+}
+
 async function requestOrientationAccess() {
   if (!('DeviceOrientationEvent' in window)) {
     throw new Error('Panorâmica por movimento indisponível neste navegador.');
@@ -616,7 +709,7 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
     return capture;
   }, [cameraStatus]);
 
-  const captureDocument = useCallback(async () => {
+  const captureDocument = useCallback(async ({ persist = true } = {}) => {
     const video = videoRef.current;
 
     if (!video || cameraStatus !== 'ready' || video.readyState < 2) {
@@ -659,14 +752,24 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
       mimeType,
       mirrored: framing.facingMode === 'user',
       ocrStatus: 'pending',
+      pages: [{
+        id: createCaptureId(),
+        blob,
+        height: canvas.height,
+        mimeType,
+        ocrStatus: 'pending',
+        width: canvas.width
+      }],
       zoom: framing.zoomLevel,
       zoomFactor: framing.zoomFactor,
       width: canvas.width,
       blob
     };
 
-    await saveStoredCapture(capture);
-    setUserCaptures((current) => [capture, ...current]);
+    if (persist) {
+      await saveStoredCapture(capture);
+      setUserCaptures((current) => [capture, ...current]);
+    }
 
     return capture;
   }, [cameraStatus, viewfinderHeight, viewfinderWidth]);
@@ -767,9 +870,11 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
       window.addEventListener('deviceorientation', handleOrientation);
     });
 
-    const step = Math.max(1, Math.round(frameSize.width * (1 - overlap)));
+    const steps = frames.slice(1).map((frame, index) => estimatePanoramaStep(frames[index], frame));
+    const offsets = [0];
+    steps.forEach((step) => offsets.push(offsets[offsets.length - 1] + step));
     const canvas = document.createElement('canvas');
-    canvas.width = frameSize.width + step * (frameCount - 1);
+    canvas.width = offsets[offsets.length - 1] + frameSize.width;
     canvas.height = frameSize.height;
     const context = canvas.getContext('2d');
 
@@ -780,7 +885,7 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
     context.fillStyle = '#000';
     context.fillRect(0, 0, canvas.width, canvas.height);
     frames.forEach((frame, index) => {
-      context.drawImage(frame, index * step, 0, frameSize.width, frameSize.height);
+      drawPanoramaFrame(context, frame, offsets[index], index === 0 ? null : offsets[index - 1]);
     });
 
     const mimeType = 'image/jpeg';

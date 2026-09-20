@@ -10,6 +10,7 @@ import { useCameraCapture } from '../hooks/useCameraCapture.js';
 import { useDocumentScanner } from '../hooks/useDocumentScanner.js';
 import { useNotification } from '../hooks/useNotification.js';
 import { updateStoredCapture } from '../services/captureStorage.js';
+import { appendDocumentPage, getDocumentPages } from '../services/documentModel.js';
 
 const ratioClassByValue = {
   '3:4': '',
@@ -44,6 +45,7 @@ export default function CameraPage() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [postCapture, setPostCapture] = useState({ captureId: '', mode: '' });
+  const [pendingDocumentPageId, setPendingDocumentPageId] = useState('');
   const [flipped, setFlipped] = useState(false);
   const [panoramaState, setPanoramaState] = useState({ progress: 0, status: 'idle' });
   const [viewfinderSize, setViewfinderSize] = useState({ height: 520, width: 390 });
@@ -128,10 +130,28 @@ export default function CameraPage() {
   };
 
   const handleDocumentCapture = useCallback(async () => {
+    if (pendingDocumentPageId) {
+      const targetDocument = userCaptures.find((capture) => capture.id === pendingDocumentPageId);
+      if (!targetDocument) {
+        setPendingDocumentPageId('');
+        throw new Error('Documento original não encontrado.');
+      }
+      const pageCapture = await captureDocument({ persist: false });
+      const page = getDocumentPages(pageCapture)[0];
+      const updatedDocument = await updateStoredCapture(targetDocument.id, appendDocumentPage(targetDocument, {
+        ...page,
+        id: page.id || pageCapture.id
+      }));
+      updateUserCapture(updatedDocument);
+      setPendingDocumentPageId('');
+      setPostCapture({ captureId: updatedDocument.id, mode: 'document' });
+      return updatedDocument;
+    }
+
     const capture = await scanDocument();
     setPostCapture({ captureId: capture.id, mode: 'document' });
     return capture;
-  }, [scanDocument]);
+  }, [captureDocument, pendingDocumentPageId, scanDocument, updateUserCapture, userCaptures]);
 
   const handleStudentCapture = useCallback(async () => {
     const capture = await scanDocument();
@@ -244,6 +264,12 @@ export default function CameraPage() {
             mode={postCapture.mode}
             onCaptureUpdated={updateUserCapture}
             onClose={() => setPostCapture({ captureId: '', mode: '' })}
+            onAddPageRequest={(capture) => {
+              setPendingDocumentPageId(capture.id);
+              setPostCapture({ captureId: '', mode: '' });
+              setActiveMode('Documento');
+              showNotification('Enquadre a próxima página e toque no shutter');
+            }}
             onRecognizeDocument={retryDocumentOcr}
             showNotification={showNotification}
           />
@@ -272,6 +298,7 @@ function PostCaptureWorkspace({
   capture,
   documentOcrState,
   mode,
+  onAddPageRequest,
   onCaptureUpdated,
   onClose,
   onRecognizeDocument,
@@ -313,6 +340,7 @@ function PostCaptureWorkspace({
         documentOcrState={documentOcrState}
         isCreating={false}
         modeContext={mode}
+        onAddPageRequest={onAddPageRequest}
         onBack={onClose}
         onCaptureUpdated={onCaptureUpdated}
         onRecognizeDocument={onRecognizeDocument}

@@ -435,6 +435,37 @@
   opacity: 0.45;
 }
 
+.document-page-strip {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.document-page-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.document-page-strip button {
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.72);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 7px 10px;
+}
+
+.document-page-strip button.active {
+  border-color: rgba(158,202,255,0.28);
+  background: rgba(158,202,255,0.14);
+  color: #9ecaff;
+}
+
 .document-image-pane,
 .document-text-pane {
   flex: 1;
@@ -453,6 +484,92 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+
+.corner-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+}
+
+.corner-editor-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px;
+}
+
+.corner-editor-actions button {
+  border: 1px solid rgba(158,202,255,0.22);
+  border-radius: 999px;
+  background: rgba(158,202,255,0.12);
+  color: #9ecaff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 7px 10px;
+}
+
+.corner-editor-actions span {
+  color: rgba(255,255,255,0.56);
+  font-size: 10px;
+}
+
+.corner-editor-stage {
+  position: relative;
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  place-items: center;
+  overflow: hidden;
+}
+
+.corner-editor-frame {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  max-height: 100%;
+  touch-action: none;
+}
+
+.corner-editor-frame img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.corner-editor-polygon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.corner-editor-polygon polygon {
+  fill: rgba(92,157,245,0.1);
+  stroke: #5c9df5;
+  stroke-width: 2;
+}
+
+.corner-handle {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #5c9df5;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.42);
+  cursor: grab;
+  transform: translate(-50%, -50%);
+  touch-action: none;
 }
 
 .document-text-pane {

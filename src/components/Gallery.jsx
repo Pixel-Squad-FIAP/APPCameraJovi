@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { saveStoredCapture, updateStoredCapture } from '../services/captureStorage.js';
-import { exportDocumentAsDocx } from '../services/documentExport.js';
-import { createExtractiveSummary } from '../services/studentSummary.js';
+import { exportDocumentAsDocx, exportDocumentAsPdf } from '../services/documentExport.js';
+import {
+  getCombinedDocumentText,
+  getDocumentPages,
+  getPageText,
+  getPrimaryDocumentBlob,
+  replaceDocumentPage
+} from '../services/documentModel.js';
+import { getInitialDocumentCorners, rectifyDocumentImage } from '../services/documentProcessing.js';
+import { createAcademicAnalysis } from '../services/studentSummary.js';
 
 function createCaptureId() {
   if (window.crypto?.randomUUID) return window.crypto.randomUUID();
@@ -15,7 +23,7 @@ export function getDocumentTitle(capture) {
 }
 
 export function getDocumentText(capture) {
-  return capture?.documentText ?? capture?.ocrText ?? '';
+  return getCombinedDocumentText(capture);
 }
 
 function getCaptureKind(capture) {
@@ -31,7 +39,7 @@ function useCaptureObjectUrls(userCaptures) {
   useEffect(() => {
     const nextItems = userCaptures.map((capture) => {
       const kind = getCaptureKind(capture);
-      const displayBlob = kind === 'document' && capture.processedBlob ? capture.processedBlob : capture.blob;
+      const displayBlob = kind === 'document' ? getPrimaryDocumentBlob(capture) : capture.blob;
       const url = displayBlob ? URL.createObjectURL(displayBlob) : '';
 
       return {
@@ -39,6 +47,7 @@ function useCaptureObjectUrls(userCaptures) {
         displayText: kind === 'document' ? getDocumentText(capture) : '',
         displayTitle: kind === 'document' ? getDocumentTitle(capture) : '',
         kind,
+        pages: kind === 'document' ? getDocumentPages(capture) : [],
         url
       };
     });
@@ -257,38 +266,47 @@ export function DocumentWorkspace({
   documentOcrState,
   isCreating,
   modeContext = 'document',
+  onAddPageRequest,
   onBack,
   onCaptureCreated,
   onCaptureUpdated,
   onRecognizeDocument,
   showNotification = () => {}
 }) {
-  const [activeTab, setActiveTab] = useState(capture?.url ? 'image' : 'text');
+  const pages = useMemo(() => getDocumentPages(capture), [capture]);
+  const [activePageId, setActivePageId] = useState('');
+  const activePage = pages.find((page) => page.id === activePageId) || pages[0] || null;
+  const [activeTab, setActiveTab] = useState(pages.length > 0 ? 'image' : 'text');
   const [annotation, setAnnotation] = useState('');
+  const [corners, setCorners] = useState([]);
+  const [pageText, setPageText] = useState('');
   const [title, setTitle] = useState('');
-  const [text, setText] = useState('');
   const [status, setStatus] = useState('');
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     setTitle(capture ? getDocumentTitle(capture) : '');
-    setText(capture ? getDocumentText(capture) : '');
     setAnnotation(capture?.annotation || '');
-    setActiveTab(capture?.url ? 'image' : 'text');
+    setActivePageId(getDocumentPages(capture)[0]?.id || '');
+    setActiveTab(getDocumentPages(capture).length > 0 ? 'image' : 'text');
     setStatus('');
     setDirty(false);
   }, [capture, isCreating]);
 
+  useEffect(() => {
+    setPageText(getPageText(activePage));
+    setCorners(activePage?.corners || []);
+  }, [activePage]);
+
   const handleSave = async () => {
     const trimmedTitle = title.trim() || 'Documento sem titulo';
-    const nextText = text.trim();
 
     if (isCreating) {
       const now = new Date().toISOString();
       const newCapture = {
         id: createCaptureId(),
         createdAt: now,
-        documentText: nextText,
+        documentText: pageText.trim(),
         kind: 'document',
         source: 'created',
         title: trimmedTitle,
@@ -303,11 +321,13 @@ export function DocumentWorkspace({
 
     if (!capture) return;
 
-    const previousText = getDocumentText(capture).trim();
-    const textChanged = previousText !== nextText;
+    const textChanged = activePage && getPageText(activePage).trim() !== pageText.trim();
+    const pagePatch = activePage ? replaceDocumentPage(capture, activePage.id, {
+      documentText: pageText.trim()
+    }) : {};
     const patch = {
       annotation: annotation.trim(),
-      documentText: nextText,
+      ...pagePatch,
       title: trimmedTitle,
       updatedAt: new Date().toISOString()
     };
@@ -326,45 +346,90 @@ export function DocumentWorkspace({
 
   const handleRecognize = () => {
     if (!capture || !onRecognizeDocument) return;
-    onRecognizeDocument(capture).catch(() => {});
+    onRecognizeDocument(capture, activePage?.id).catch(() => {});
   };
 
-  const handleSummary = async () => {
+  const handleAnalyze = async () => {
     if (!capture) return;
-    const sourceText = text.trim() || getDocumentText(capture);
-    const summary = createExtractiveSummary(sourceText);
+    const pagePatch = activePage ? replaceDocumentPage(capture, activePage.id, { documentText: pageText.trim() }) : {};
+    const sourceText = pageText.trim() || getCombinedDocumentText({ ...capture, ...pagePatch });
+    const summary = createAcademicAnalysis(sourceText);
     if (!summary) {
-      showNotification('Não há texto suficiente para resumir.');
+      showNotification('Não há texto suficiente para analisar.');
       return;
     }
     const updatedCapture = await updateStoredCapture(capture.id, {
-      documentText: sourceText,
+      ...pagePatch,
       summary,
       summaryGeneratedAt: new Date().toISOString(),
       summaryNeedsUpdate: false,
       updatedAt: new Date().toISOString()
     });
     onCaptureUpdated?.(updatedCapture);
-    setStatus('Resumo gerado');
-    showNotification('Resumo gerado.');
+    setStatus('Análise gerada');
+    showNotification('Análise acadêmica gerada.');
   };
 
-  const handleExportDocx = async () => {
+  const persistBeforeExport = async () => {
     if (isCreating) {
       showNotification('Salve o documento antes de exportar.');
-      return;
+      return null;
     }
     if (!capture) return;
+    const pagePatch = activePage ? replaceDocumentPage(capture, activePage.id, { documentText: pageText.trim() }) : {};
     const updatedCapture = await updateStoredCapture(capture.id, {
+      ...pagePatch,
       annotation: annotation.trim(),
-      documentText: text.trim() || getDocumentText(capture),
       title: title.trim() || getDocumentTitle(capture),
       updatedAt: new Date().toISOString()
     });
     onCaptureUpdated?.(updatedCapture);
+    return updatedCapture;
+  };
+
+  const handleExportDocx = async () => {
+    const updatedCapture = await persistBeforeExport();
+    if (!updatedCapture) return;
     await exportDocumentAsDocx(updatedCapture);
     setStatus('DOCX gerado');
     showNotification('DOCX gerado.');
+  };
+
+  const handleExportPdf = async () => {
+    const updatedCapture = await persistBeforeExport();
+    if (!updatedCapture) return;
+    await exportDocumentAsPdf(updatedCapture, { study: modeContext === 'student' });
+    setStatus('PDF gerado');
+    showNotification('PDF gerado.');
+  };
+
+  const handleApplyCrop = async () => {
+    if (!capture || !activePage?.blob || corners.length !== 4) return;
+    setStatus('Ajustando recorte...');
+    const rectified = await rectifyDocumentImage(activePage.blob, corners);
+    const updatedCapture = await updateStoredCapture(capture.id, {
+      ...replaceDocumentPage(capture, activePage.id, {
+        corners: rectified.corners,
+        height: rectified.height,
+        ocrStatus: 'pending',
+        processedBlob: null,
+        rectifiedBlob: rectified.blob,
+        width: rectified.width
+      }),
+      summary: '',
+      summaryNeedsUpdate: true,
+      updatedAt: new Date().toISOString()
+    });
+    onCaptureUpdated?.(updatedCapture);
+    setStatus('Recorte aplicado');
+    showNotification('Página retificada.');
+  };
+
+  const handleDetectCorners = async () => {
+    if (!activePage?.blob) return;
+    const detected = await getInitialDocumentCorners(activePage.blob);
+    setCorners(detected);
+    setDirty(true);
   };
 
   const isOcrProcessing = Boolean(
@@ -372,10 +437,9 @@ export function DocumentWorkspace({
     && documentOcrState.captureId === capture.id
     && documentOcrState.status === 'processing'
   );
-  const hasImage = Boolean(capture?.url);
-  const originalOcrText = capture?.ocrText || '';
-  const lowConfidence = Number.isFinite(capture?.ocrConfidence) && capture.ocrConfidence < 65;
-  const showStudentActions = modeContext === 'student' || capture?.source === 'student';
+  const hasImage = pages.length > 0;
+  const lowConfidence = Number.isFinite(activePage?.ocrConfidence) && activePage.ocrConfidence < 65;
+  const isStudent = modeContext === 'student' || capture?.source === 'student';
 
   return (
     <section className="document-workspace">
@@ -406,56 +470,93 @@ export function DocumentWorkspace({
         <button className={activeTab === 'text' ? 'active' : ''} type="button" onClick={() => setActiveTab('text')}>
           Texto
         </button>
-        <button className={activeTab === 'notes' ? 'active' : ''} type="button" onClick={() => setActiveTab('notes')}>
-          Estudo
-        </button>
+        {isStudent && (
+          <button className={activeTab === 'notes' ? 'active' : ''} type="button" onClick={() => setActiveTab('notes')}>
+            Estudo
+          </button>
+        )}
       </div>
+
+      {pages.length > 1 && (
+        <div className="document-page-strip">
+          {pages.map((page, index) => (
+            <button
+              className={page.id === activePage?.id ? 'active' : ''}
+              key={page.id}
+              onClick={() => setActivePageId(page.id)}
+              type="button"
+            >
+              Página {index + 1}
+            </button>
+          ))}
+        </div>
+      )}
 
       {!isCreating && (
         <div className="document-workspace-actions">
-          {capture?.blob && (
+          {activePage?.blob && (
             <button disabled={isOcrProcessing} type="button" onClick={handleRecognize}>
-              {capture.ocrStatus === 'done' ? 'Refazer OCR' : 'Digitalizar texto'}
+              {activePage.ocrStatus === 'done' ? 'Refazer OCR' : 'Digitalizar texto'}
             </button>
           )}
-          <button disabled={!text.trim() && !getDocumentText(capture).trim()} type="button" onClick={handleSummary}>
-            Resumir
-          </button>
-          <button type="button" onClick={() => setActiveTab('notes')}>Anotar</button>
+          {hasImage && <button type="button" onClick={handleApplyCrop}>Aplicar recorte</button>}
+          {isStudent && (
+            <>
+              <button disabled={!pageText.trim() && !getDocumentText(capture).trim()} type="button" onClick={handleAnalyze}>
+                Resumir
+              </button>
+              <button type="button" onClick={() => setActiveTab('notes')}>Anotar</button>
+            </>
+          )}
+          {!isStudent && hasImage && (
+            <button type="button" onClick={() => onAddPageRequest?.(capture)}>
+              Adicionar página
+            </button>
+          )}
           <button type="button" onClick={handleExportDocx}>Exportar DOCX</button>
+          <button type="button" onClick={handleExportPdf}>Exportar PDF</button>
         </div>
       )}
 
       {activeTab === 'image' && hasImage && (
         <div className="document-image-pane">
-          <img src={capture.url} alt="Documento digitalizado" />
+          <CornerEditor
+            capture={capture}
+            corners={corners}
+            onCornersChange={(nextCorners) => {
+              setCorners(nextCorners);
+              setDirty(true);
+            }}
+            onDetectCorners={handleDetectCorners}
+            page={activePage}
+          />
         </div>
       )}
 
       {activeTab === 'text' && (
         <div className="document-text-pane">
-          {originalOcrText && (
+          {activePage?.ocrText && (
             <details>
               <summary>Texto original do OCR</summary>
-              <p>{originalOcrText}</p>
+              <p>{activePage.ocrText}</p>
             </details>
           )}
           {lowConfidence && (
             <p className="document-workspace-status">Alguns trechos podem precisar de correção.</p>
           )}
           {isOcrProcessing && <p className="document-workspace-status">{documentOcrState.message}</p>}
-          {!isCreating && capture?.blob && capture?.ocrStatus !== 'done' && (
+          {!isCreating && activePage?.blob && activePage?.ocrStatus !== 'done' && (
             <button className="document-secondary-action" type="button" onClick={handleRecognize}>
-              {capture.ocrStatus === 'error' ? 'Tentar OCR novamente' : 'Reconhecer texto'}
+              {activePage.ocrStatus === 'error' ? 'Tentar OCR novamente' : 'Reconhecer texto'}
             </button>
           )}
           <textarea
             onChange={(event) => {
-              setText(event.target.value);
+              setPageText(event.target.value);
               setDirty(true);
             }}
             placeholder="Escreva ou corrija o texto do documento..."
-            value={text}
+            value={pageText}
           />
         </div>
       )}
@@ -464,7 +565,7 @@ export function DocumentWorkspace({
         <div className="document-text-pane">
           <div className="document-summary-card">
             <strong>Resumo</strong>
-            <p>{capture?.summary || 'Gere o resumo pelo Modo Estudante após salvar o texto.'}</p>
+            <p>{capture?.summary || 'Gere a análise acadêmica a partir do texto reconhecido.'}</p>
             {capture?.summaryNeedsUpdate && <span>Resumo precisa ser atualizado após a edição.</span>}
           </div>
           <div className="document-summary-card">
@@ -474,12 +575,109 @@ export function DocumentWorkspace({
                 setAnnotation(event.target.value);
                 setDirty(true);
               }}
-              placeholder={showStudentActions ? 'Anote seus pontos de estudo...' : 'Adicione uma anotação para este documento...'}
+              placeholder="Anote seus pontos de estudo..."
               value={annotation}
             />
           </div>
         </div>
       )}
     </section>
+  );
+}
+
+function CornerEditor({ corners, onCornersChange, onDetectCorners, page }) {
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageRect, setImageRect] = useState({ height: 1, width: 1 });
+  const [dragIndex, setDragIndex] = useState(null);
+  const blob = page?.rectifiedBlob || page?.blob;
+  const naturalWidth = page?.width || 1;
+  const naturalHeight = page?.height || 1;
+  const safeCorners = corners.length === 4 ? corners : [
+    { x: naturalWidth * 0.08, y: naturalHeight * 0.08 },
+    { x: naturalWidth * 0.92, y: naturalHeight * 0.08 },
+    { x: naturalWidth * 0.92, y: naturalHeight * 0.92 },
+    { x: naturalWidth * 0.08, y: naturalHeight * 0.92 }
+  ];
+
+  useEffect(() => {
+    if (!blob) {
+      setImageUrl('');
+      return undefined;
+    }
+    const url = URL.createObjectURL(blob);
+    setImageUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [blob]);
+
+  const updateRect = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setImageRect({ height: rect.height, width: rect.width });
+  };
+
+  const movePoint = (event, index = dragIndex) => {
+    if (index === null) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = Math.min(Math.max(event.clientX - rect.left, 0), rect.width);
+    const y = Math.min(Math.max(event.clientY - rect.top, 0), rect.height);
+    const nextCorners = safeCorners.map((point, pointIndex) => (
+      pointIndex === index
+        ? {
+          x: Math.round((x / rect.width) * naturalWidth),
+          y: Math.round((y / rect.height) * naturalHeight)
+        }
+        : point
+    ));
+    onCornersChange(nextCorners);
+  };
+
+  if (!imageUrl) {
+    return <p className="gallery-empty-state">Este documento não possui imagem.</p>;
+  }
+
+  const points = safeCorners.map((point) => ({
+    left: `${(point.x / naturalWidth) * 100}%`,
+    top: `${(point.y / naturalHeight) * 100}%`
+  }));
+
+  return (
+    <div className="corner-editor">
+      <div className="corner-editor-actions">
+        <button type="button" onClick={onDetectCorners}>Sugerir recorte</button>
+        <span>Arraste os cantos e aplique o recorte.</span>
+      </div>
+      <div className="corner-editor-stage">
+        <div
+          className="corner-editor-frame"
+          onPointerMove={(event) => movePoint(event)}
+          onPointerUp={() => setDragIndex(null)}
+          onPointerCancel={() => setDragIndex(null)}
+        >
+          <img
+            alt="Página capturada para ajuste"
+            onLoad={updateRect}
+            src={imageUrl}
+          />
+          <svg className="corner-editor-polygon" viewBox={`0 0 ${imageRect.width} ${imageRect.height}`} preserveAspectRatio="none">
+            <polygon
+              points={safeCorners.map((point) => `${(point.x / naturalWidth) * imageRect.width},${(point.y / naturalHeight) * imageRect.height}`).join(' ')}
+            />
+          </svg>
+          {points.map((style, index) => (
+            <button
+              aria-label={`Ajustar canto ${index + 1}`}
+              className="corner-handle"
+              key={index}
+              onPointerDown={(event) => {
+                event.currentTarget.setPointerCapture?.(event.pointerId);
+                setDragIndex(index);
+                movePoint(event, index);
+              }}
+              style={style}
+              type="button"
+            />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

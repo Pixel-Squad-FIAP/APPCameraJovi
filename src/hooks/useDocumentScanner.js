@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { updateStoredCapture } from '../services/captureStorage.js';
 import { recognizeDocumentText } from '../services/documentOcr.js';
 import { processDocumentImage } from '../services/documentProcessing.js';
+import { getDocumentPages, replaceDocumentPage } from '../services/documentModel.js';
 
 const IDLE_STATE = {
   captureId: '',
@@ -66,25 +67,26 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
     return updatedCapture;
   }, [patchCapture]);
 
-  const prepareDocumentImage = useCallback(async (capture) => {
+  const prepareDocumentImage = useCallback(async (capture, pageId) => {
     if (!isDocumentCapture(capture)) {
       throw new Error('Selecione um documento para processar.');
     }
 
-    if (capture.processedBlob) return capture;
+    const page = getDocumentPages(capture).find((item) => item.id === pageId) || getDocumentPages(capture)[0];
+    if (!page?.blob) throw new Error('Página do documento não encontrada.');
+    if (page.processedBlob) return capture;
 
-    const processed = await processDocumentImage(capture.blob);
-    return patchCapture(capture.id, {
+    const processed = await processDocumentImage(page.rectifiedBlob || page.blob);
+    return patchCapture(capture.id, replaceDocumentPage(capture, page.id, {
       height: processed.height,
       processedBlob: processed.blob,
       processedHeight: processed.height,
       processedWidth: processed.width,
-      updatedAt: new Date().toISOString(),
       width: processed.width
-    });
+    }));
   }, [patchCapture]);
 
-  const recognizeCapture = useCallback(async (capture) => {
+  const recognizeCapture = useCallback(async (capture, pageId) => {
     if (!isDocumentCapture(capture)) {
       throw new Error('Selecione um documento para reconhecer texto.');
     }
@@ -106,10 +108,14 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
     let workingCapture = capture;
 
     try {
-      workingCapture = await prepareDocumentImage(capture);
+      const targetPage = getDocumentPages(capture).find((page) => page.id === pageId) || getDocumentPages(capture)[0];
+      workingCapture = await prepareDocumentImage(capture, targetPage?.id);
+      const workingPage = getDocumentPages(workingCapture).find((page) => page.id === targetPage?.id) || getDocumentPages(workingCapture)[0];
       workingCapture = await patchCapture(capture.id, {
-        ocrError: '',
-        ocrStatus: 'processing',
+        ...replaceDocumentPage(workingCapture, workingPage.id, {
+          ocrError: '',
+          ocrStatus: 'processing'
+        }),
         updatedAt: new Date().toISOString(),
       });
 
@@ -123,7 +129,8 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
         });
       }
 
-      const ocrResult = await recognizeDocumentText(workingCapture.processedBlob || workingCapture.blob, {
+      const ocrPage = getDocumentPages(workingCapture).find((page) => page.id === workingPage.id) || workingPage;
+      const ocrResult = await recognizeDocumentText(ocrPage.processedBlob || ocrPage.rectifiedBlob || ocrPage.blob, {
         signal: abortController.signal,
         onProgress: (progress) => {
           if (!mountedRef.current || abortController.signal.aborted) return;
@@ -137,16 +144,15 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
         }
       });
 
-      const updatedCapture = await patchCapture(capture.id, {
+      const updatedCapture = await patchCapture(capture.id, replaceDocumentPage(workingCapture, workingPage.id, {
+        documentText: ocrPage.documentText ?? ocrResult.text,
         ocrError: '',
         ocrConfidence: ocrResult.confidence,
         ocrLanguage: ocrResult.language,
         ocrProcessedAt: new Date().toISOString(),
         ocrStatus: 'done',
-        ocrText: ocrResult.text,
-        documentText: workingCapture.documentText ?? ocrResult.text,
-        updatedAt: new Date().toISOString()
-      });
+        ocrText: ocrResult.text
+      }));
 
       if (mountedRef.current) {
         setState({
@@ -177,12 +183,12 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
     return prepareDocumentImage(capture);
   }, [captureDocument, prepareDocumentImage, state.status]);
 
-  const retryDocumentOcr = useCallback(async (capture) => {
+  const retryDocumentOcr = useCallback(async (capture, pageId) => {
     if (state.status === 'processing') {
       throw new Error('Aguarde o processamento do documento atual.');
     }
 
-    return recognizeCapture(capture);
+    return recognizeCapture(capture, pageId);
   }, [recognizeCapture, state.status]);
 
   const cancelDocumentOcr = useCallback(() => {
