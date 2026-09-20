@@ -159,10 +159,23 @@ function canvasToBlob(canvas, mimeType, quality) {
   });
 }
 
-function wait(milliseconds) {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, milliseconds);
-  });
+function getOrientationYaw(event) {
+  if (Number.isFinite(event.alpha)) return event.alpha;
+  if (Number.isFinite(event.webkitCompassHeading)) return event.webkitCompassHeading;
+  return null;
+}
+
+async function requestOrientationAccess() {
+  if (!('DeviceOrientationEvent' in window)) {
+    throw new Error('Panorâmica por movimento indisponível neste navegador.');
+  }
+
+  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    const permission = await DeviceOrientationEvent.requestPermission();
+    if (permission !== 'granted') {
+      throw new Error('Permissão de movimento negada. Não é possível guiar a panorâmica.');
+    }
+  }
 }
 
 function captureTransitionFrame(video, facingMode) {
@@ -670,8 +683,11 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
     }
 
     const framing = framingRef.current;
-    const frameCount = 4;
-    const overlap = 0.42;
+    await requestOrientationAccess();
+
+    const frameCount = 6;
+    const targetDegrees = 42;
+    const overlap = 0.55;
     const frameSize = getFramedCanvasSize(video.videoWidth, video.videoHeight, '9:16', framing.zoomFactor);
     const frameCanvas = document.createElement('canvas');
     frameCanvas.width = frameSize.width;
@@ -683,7 +699,7 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
     }
 
     const frames = [];
-    for (let index = 0; index < frameCount; index += 1) {
+    const captureFrame = () => {
       drawFramedVideoFrame(frameContext, video, {
         mirror: framing.facingMode === 'user',
         ratio: '9:16',
@@ -698,11 +714,58 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
       }
       snapshotContext.drawImage(frameCanvas, 0, 0);
       frames.push(snapshot);
-      onProgress?.(Math.round(((index + 1) / frameCount) * 100));
-      if (index < frameCount - 1) {
-        await wait(520);
-      }
-    }
+      onProgress?.(Math.min(100, Math.round((frames.length / frameCount) * 100)));
+    };
+
+    captureFrame();
+
+    await new Promise((resolve, reject) => {
+      let startYaw = null;
+      let lastProgressStep = 0;
+      const timeoutId = window.setTimeout(() => {
+        cleanup();
+        if (frames.length < 3) {
+          reject(new Error('Mova o telefone lentamente na horizontal para capturar a panorâmica.'));
+          return;
+        }
+        resolve();
+      }, 14000);
+
+      const cleanup = () => {
+        window.clearTimeout(timeoutId);
+        window.removeEventListener('deviceorientation', handleOrientation);
+      };
+
+      const handleOrientation = (event) => {
+        const yaw = getOrientationYaw(event);
+        if (!Number.isFinite(yaw)) return;
+
+        if (startYaw === null) {
+          startYaw = yaw;
+          return;
+        }
+
+        let delta = yaw - startYaw;
+        if (delta > 180) delta -= 360;
+        if (delta < -180) delta += 360;
+        const progress = Math.min(1, Math.abs(delta) / targetDegrees);
+        const nextStep = Math.floor(progress * (frameCount - 1));
+
+        if (nextStep > lastProgressStep && frames.length < frameCount) {
+          lastProgressStep = nextStep;
+          captureFrame();
+        } else {
+          onProgress?.(Math.max(Math.round(progress * 100), Math.round((frames.length / frameCount) * 100)));
+        }
+
+        if (frames.length >= frameCount || progress >= 1) {
+          cleanup();
+          resolve();
+        }
+      };
+
+      window.addEventListener('deviceorientation', handleOrientation);
+    });
 
     const step = Math.max(1, Math.round(frameSize.width * (1 - overlap)));
     const canvas = document.createElement('canvas');

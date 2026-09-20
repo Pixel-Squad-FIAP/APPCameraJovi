@@ -21,9 +21,10 @@ const REQUESTED_HARDWARE_ZOOM = {
 
 export const DOCUMENT_FRAME_ASPECT_RATIO = 280 / 380;
 const DOCUMENT_FRAME = {
-  height: 380,
+  aspectRatio: 280 / 380,
+  maxHeightRatio: 0.76,
   topRatio: 0.42,
-  width: 280
+  widthRatio: 0.72
 };
 
 export function getAspectRatio(ratio) {
@@ -147,8 +148,10 @@ export function drawDocumentVideoFrame(context, video, options) {
 function calculateDocumentSourceRect(videoWidth, videoHeight, viewportWidth, viewportHeight, zoomFactor = 1) {
   const viewportRatio = viewportWidth / viewportHeight;
   const viewportSourceRect = calculateSourceRect(videoWidth, videoHeight, viewportRatio, zoomFactor);
-  const frameWidth = Math.min(DOCUMENT_FRAME.width, viewportWidth);
-  const frameHeight = Math.min(DOCUMENT_FRAME.height, viewportHeight);
+  const frameWidthByViewport = viewportWidth * DOCUMENT_FRAME.widthRatio;
+  const frameHeightByWidth = frameWidthByViewport / DOCUMENT_FRAME.aspectRatio;
+  const frameHeight = Math.min(frameHeightByWidth, viewportHeight * DOCUMENT_FRAME.maxHeightRatio);
+  const frameWidth = frameHeight * DOCUMENT_FRAME.aspectRatio;
   const frameX = clamp((viewportWidth - frameWidth) / 2, 0, viewportWidth - frameWidth);
   const frameY = clamp((viewportHeight * DOCUMENT_FRAME.topRatio) - (frameHeight / 2), 0, viewportHeight - frameHeight);
 

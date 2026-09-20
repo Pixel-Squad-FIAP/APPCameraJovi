@@ -60,10 +60,13 @@ export async function processDocumentImage(blob) {
   }
 
   const range = Math.max(1, max - min);
-  const contrastBoost = range < 90 ? 1.25 : 1.08;
+  const low = Math.max(0, min - 8);
+  const high = Math.min(255, max + 8);
+  const adjustedRange = Math.max(1, high - low);
+  const contrastBoost = range < 80 ? 1.12 : 1.04;
 
   for (let index = 0; index < pixels.length; index += 4) {
-    const normalized = ((pixels[index] - min) / range) * 255;
+    const normalized = ((pixels[index] - low) / adjustedRange) * 255;
     const contrasted = Math.max(0, Math.min(255, ((normalized - 128) * contrastBoost) + 128));
     pixels[index] = contrasted;
     pixels[index + 1] = contrasted;
@@ -72,7 +75,7 @@ export async function processDocumentImage(blob) {
 
   context.putImageData(imageData, 0, 0);
 
-  const processedBlob = await canvasToBlob(canvas, 'image/jpeg', 0.92);
+  const processedBlob = await canvasToBlob(canvas, 'image/jpeg', 0.96);
 
   return {
     blob: processedBlob,

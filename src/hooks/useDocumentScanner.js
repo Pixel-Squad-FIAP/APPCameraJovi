@@ -66,6 +66,24 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
     return updatedCapture;
   }, [patchCapture]);
 
+  const prepareDocumentImage = useCallback(async (capture) => {
+    if (!isDocumentCapture(capture)) {
+      throw new Error('Selecione um documento para processar.');
+    }
+
+    if (capture.processedBlob) return capture;
+
+    const processed = await processDocumentImage(capture.blob);
+    return patchCapture(capture.id, {
+      height: processed.height,
+      processedBlob: processed.blob,
+      processedHeight: processed.height,
+      processedWidth: processed.width,
+      updatedAt: new Date().toISOString(),
+      width: processed.width
+    });
+  }, [patchCapture]);
+
   const recognizeCapture = useCallback(async (capture) => {
     if (!isDocumentCapture(capture)) {
       throw new Error('Selecione um documento para reconhecer texto.');
@@ -88,24 +106,11 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
     let workingCapture = capture;
 
     try {
-      let processedBlob = capture.processedBlob;
-      let processedWidth = capture.width;
-      let processedHeight = capture.height;
-
-      if (!processedBlob) {
-        const processed = await processDocumentImage(capture.blob);
-        processedBlob = processed.blob;
-        processedWidth = processed.width;
-        processedHeight = processed.height;
-      }
-
+      workingCapture = await prepareDocumentImage(capture);
       workingCapture = await patchCapture(capture.id, {
-        height: processedHeight,
         ocrError: '',
         ocrStatus: 'processing',
-        processedBlob,
         updatedAt: new Date().toISOString(),
-        width: processedWidth
       });
 
       if (mountedRef.current) {
@@ -118,7 +123,7 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
         });
       }
 
-      const ocrResult = await recognizeDocumentText(processedBlob, {
+      const ocrResult = await recognizeDocumentText(workingCapture.processedBlob || workingCapture.blob, {
         signal: abortController.signal,
         onProgress: (progress) => {
           if (!mountedRef.current || abortController.signal.aborted) return;
@@ -134,10 +139,12 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
 
       const updatedCapture = await patchCapture(capture.id, {
         ocrError: '',
+        ocrConfidence: ocrResult.confidence,
         ocrLanguage: ocrResult.language,
         ocrProcessedAt: new Date().toISOString(),
         ocrStatus: 'done',
         ocrText: ocrResult.text,
+        documentText: workingCapture.documentText ?? ocrResult.text,
         updatedAt: new Date().toISOString()
       });
 
@@ -159,7 +166,7 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
         abortRef.current = null;
       }
     }
-  }, [finishWithError, patchCapture]);
+  }, [finishWithError, patchCapture, prepareDocumentImage]);
 
   const scanDocument = useCallback(async () => {
     if (state.status === 'processing') {
@@ -167,8 +174,8 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
     }
 
     const capture = await captureDocument();
-    return recognizeCapture(capture);
-  }, [captureDocument, recognizeCapture, state.status]);
+    return prepareDocumentImage(capture);
+  }, [captureDocument, prepareDocumentImage, state.status]);
 
   const retryDocumentOcr = useCallback(async (capture) => {
     if (state.status === 'processing') {

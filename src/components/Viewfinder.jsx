@@ -17,7 +17,7 @@ export default function Viewfinder({
   onFlippedChange,
   onPanoramaCapture,
   onRealPhotoCapture,
-  onStudentOverlayOpen,
+  onStudentCapture,
   onVideoRecordingStart,
   onVideoRecordingStop,
   onViewfinderResize = () => {},
@@ -176,14 +176,21 @@ export default function Viewfinder({
     if (activeMode === 'Documento') {
       try {
         const documentCapture = await onDocumentCapture();
-        if (documentCapture?.ocrStatus === 'done') {
-          showNotification(documentCapture.ocrText ? 'Texto reconhecido' : 'Documento salvo sem texto reconhecido');
-        } else {
-          showNotification('Documento salvo');
-        }
+        showNotification(documentCapture?.processedBlob ? 'Documento capturado' : 'Documento salvo');
         capturedMedia = true;
       } catch (error) {
-        showNotification(error.message || 'Não foi possível digitalizar o documento');
+        showNotification(error.message || 'Não foi possível capturar o documento');
+        return;
+      }
+    }
+
+    if (activeMode === 'Estudante') {
+      try {
+        const studentCapture = await onStudentCapture();
+        showNotification(studentCapture?.processedBlob ? 'Conteúdo capturado' : 'Documento salvo');
+        capturedMedia = true;
+      } catch (error) {
+        showNotification(error.message || 'Não foi possível capturar para estudo');
         return;
       }
     }
@@ -291,7 +298,6 @@ export default function Viewfinder({
   const cameraStatusMessage = cameraStatus === 'preparing'
     ? 'Preparando imagem...'
     : 'Iniciando câmera...';
-  const showDocumentScanStatus = activeMode === 'Documento' && documentScanState.status === 'processing';
   const showPanoramaStatus = activeMode === 'Panorâmica' && panoramaState.status === 'capturing';
 
   return (
@@ -360,32 +366,6 @@ export default function Viewfinder({
           </div>
         )}
         {activeMode === 'Documento' && <div className="doc-scanner-frame" id="doc-scanner-frame" style={{ display: 'block' }} />}
-
-        {showDocumentScanStatus && (
-          <div className="document-scan-status" role="status">
-            <span>{documentScanState.message || 'Processando documento...'}</span>
-            {Number.isFinite(documentScanState.progress) && (
-              <strong>{documentScanState.progress}%</strong>
-            )}
-          </div>
-        )}
-
-        {activeMode === 'Estudante' && (
-          <div className="student-actions" id="student-actions">
-            <button className="student-btn" onClick={() => onStudentOverlayOpen('summary')}>Resumir</button>
-            <button className="student-btn" onClick={() => onStudentOverlayOpen('notes')}>Anotar</button>
-            <button className="student-btn" onClick={() => onStudentOverlayOpen('export')}>Exportar</button>
-          </div>
-        )}
-
-        {activeMode === 'Documento' && (
-          <div className="student-actions" id="doc-actions">
-            <button className="student-btn" disabled={isDocumentScanning} onClick={handlePhotoCapture}>
-              {isDocumentScanning ? 'Processando...' : 'Digitalizar'}
-            </button>
-            <button className="student-btn" disabled={isDocumentScanning} onClick={onDocumentExportUnavailable}>Exportar</button>
-          </div>
-        )}
 
         <div id="recording-indicator" className="recording-indicator" style={{ display: isVideoRecording ? 'flex' : 'none' }}>
           <div className="red-dot" />

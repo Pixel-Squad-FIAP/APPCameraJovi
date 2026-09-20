@@ -431,53 +431,6 @@
   font-family: inherit;
 }
 
-/* ---- Student Actions ---- */
-.student-actions {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 12px;
-  z-index: 10;
-}
-
-.camera-app.aspect-full .student-actions {
-  bottom: 190px;
-}
-
-.student-btn {
-  background: rgba(13, 13, 18, 0.75);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(92, 157, 245, 0.4);
-  border-radius: 20px;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 12px;
-  font-weight: 600;
-  font-family: inherit;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  letter-spacing: 0.3px;
-}
-
-.student-btn:hover {
-  background: rgba(92, 157, 245, 0.15);
-  border-color: rgba(92, 157, 245, 0.7);
-  color: #9ecaff;
-}
-
-.student-btn:active {
-  transform: scale(0.92);
-  background: rgba(92, 157, 245, 0.25);
-}
-
-.student-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.52;
-  transform: none;
-}
-
 /* ---- Camera Notification ---- */
 .camera-notification {
   position: absolute;

@@ -1,19 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { saveStoredCapture, updateStoredCapture } from '../services/captureStorage.js';
+import { exportDocumentAsDocx } from '../services/documentExport.js';
+import { createExtractiveSummary } from '../services/studentSummary.js';
 
 function createCaptureId() {
   if (window.crypto?.randomUUID) return window.crypto.randomUUID();
   return `capture-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function getDocumentTitle(capture) {
+export function getDocumentTitle(capture) {
   if (capture.title?.trim()) return capture.title.trim();
   if (capture.source === 'created') return 'Documento criado';
   return `Documento ${new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(new Date(capture.createdAt))}`;
 }
 
-function getDocumentText(capture) {
-  return capture.documentText ?? capture.ocrText ?? '';
+export function getDocumentText(capture) {
+  return capture?.documentText ?? capture?.ocrText ?? '';
 }
 
 function getCaptureKind(capture) {
@@ -249,16 +251,20 @@ function CaptureCard({ capture, onOpen }) {
   );
 }
 
-function DocumentWorkspace({
+export function DocumentWorkspace({
+  backLabel = 'Voltar',
   capture,
   documentOcrState,
   isCreating,
+  modeContext = 'document',
   onBack,
   onCaptureCreated,
   onCaptureUpdated,
-  onRecognizeDocument
+  onRecognizeDocument,
+  showNotification = () => {}
 }) {
   const [activeTab, setActiveTab] = useState(capture?.url ? 'image' : 'text');
+  const [annotation, setAnnotation] = useState('');
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
   const [status, setStatus] = useState('');
@@ -267,6 +273,7 @@ function DocumentWorkspace({
   useEffect(() => {
     setTitle(capture ? getDocumentTitle(capture) : '');
     setText(capture ? getDocumentText(capture) : '');
+    setAnnotation(capture?.annotation || '');
     setActiveTab(capture?.url ? 'image' : 'text');
     setStatus('');
     setDirty(false);
@@ -299,6 +306,7 @@ function DocumentWorkspace({
     const previousText = getDocumentText(capture).trim();
     const textChanged = previousText !== nextText;
     const patch = {
+      annotation: annotation.trim(),
       documentText: nextText,
       title: trimmedTitle,
       updatedAt: new Date().toISOString()
@@ -321,6 +329,44 @@ function DocumentWorkspace({
     onRecognizeDocument(capture).catch(() => {});
   };
 
+  const handleSummary = async () => {
+    if (!capture) return;
+    const sourceText = text.trim() || getDocumentText(capture);
+    const summary = createExtractiveSummary(sourceText);
+    if (!summary) {
+      showNotification('Não há texto suficiente para resumir.');
+      return;
+    }
+    const updatedCapture = await updateStoredCapture(capture.id, {
+      documentText: sourceText,
+      summary,
+      summaryGeneratedAt: new Date().toISOString(),
+      summaryNeedsUpdate: false,
+      updatedAt: new Date().toISOString()
+    });
+    onCaptureUpdated?.(updatedCapture);
+    setStatus('Resumo gerado');
+    showNotification('Resumo gerado.');
+  };
+
+  const handleExportDocx = async () => {
+    if (isCreating) {
+      showNotification('Salve o documento antes de exportar.');
+      return;
+    }
+    if (!capture) return;
+    const updatedCapture = await updateStoredCapture(capture.id, {
+      annotation: annotation.trim(),
+      documentText: text.trim() || getDocumentText(capture),
+      title: title.trim() || getDocumentTitle(capture),
+      updatedAt: new Date().toISOString()
+    });
+    onCaptureUpdated?.(updatedCapture);
+    await exportDocumentAsDocx(updatedCapture);
+    setStatus('DOCX gerado');
+    showNotification('DOCX gerado.');
+  };
+
   const isOcrProcessing = Boolean(
     capture
     && documentOcrState.captureId === capture.id
@@ -328,11 +374,13 @@ function DocumentWorkspace({
   );
   const hasImage = Boolean(capture?.url);
   const originalOcrText = capture?.ocrText || '';
+  const lowConfidence = Number.isFinite(capture?.ocrConfidence) && capture.ocrConfidence < 65;
+  const showStudentActions = modeContext === 'student' || capture?.source === 'student';
 
   return (
     <section className="document-workspace">
       <div className="document-workspace-toolbar">
-        <button type="button" onClick={onBack}>Voltar</button>
+        <button type="button" onClick={onBack}>{backLabel}</button>
         <span>{dirty ? 'Alterações não salvas' : status}</span>
         <button type="button" onClick={handleSave}>Salvar</button>
       </div>
@@ -359,9 +407,24 @@ function DocumentWorkspace({
           Texto
         </button>
         <button className={activeTab === 'notes' ? 'active' : ''} type="button" onClick={() => setActiveTab('notes')}>
-          Resumo
+          Estudo
         </button>
       </div>
+
+      {!isCreating && (
+        <div className="document-workspace-actions">
+          {capture?.blob && (
+            <button disabled={isOcrProcessing} type="button" onClick={handleRecognize}>
+              {capture.ocrStatus === 'done' ? 'Refazer OCR' : 'Digitalizar texto'}
+            </button>
+          )}
+          <button disabled={!text.trim() && !getDocumentText(capture).trim()} type="button" onClick={handleSummary}>
+            Resumir
+          </button>
+          <button type="button" onClick={() => setActiveTab('notes')}>Anotar</button>
+          <button type="button" onClick={handleExportDocx}>Exportar DOCX</button>
+        </div>
+      )}
 
       {activeTab === 'image' && hasImage && (
         <div className="document-image-pane">
@@ -376,6 +439,9 @@ function DocumentWorkspace({
               <summary>Texto original do OCR</summary>
               <p>{originalOcrText}</p>
             </details>
+          )}
+          {lowConfidence && (
+            <p className="document-workspace-status">Alguns trechos podem precisar de correção.</p>
           )}
           {isOcrProcessing && <p className="document-workspace-status">{documentOcrState.message}</p>}
           {!isCreating && capture?.blob && capture?.ocrStatus !== 'done' && (
@@ -403,7 +469,14 @@ function DocumentWorkspace({
           </div>
           <div className="document-summary-card">
             <strong>Anotação</strong>
-            <p>{capture?.annotation || 'Sem anotação salva para este documento.'}</p>
+            <textarea
+              onChange={(event) => {
+                setAnnotation(event.target.value);
+                setDirty(true);
+              }}
+              placeholder={showStudentActions ? 'Anote seus pontos de estudo...' : 'Adicione uma anotação para este documento...'}
+              value={annotation}
+            />
           </div>
         </div>
       )}

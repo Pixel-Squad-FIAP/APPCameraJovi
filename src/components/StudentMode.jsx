@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { updateStoredCapture } from '../services/captureStorage.js';
+import { exportDocumentAsDocx } from '../services/documentExport.js';
 import { buildStudentExportText, createExtractiveSummary } from '../services/studentSummary.js';
 
 function getDocumentLabel(documentCapture) {
@@ -19,18 +20,6 @@ function getReadyDocuments(captures) {
 
 function getDocumentText(capture) {
   return capture?.documentText || capture?.ocrText || '';
-}
-
-function downloadTextFile(documentCapture) {
-  const blob = new Blob([buildStudentExportText(documentCapture)], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `jovi-documento-${documentCapture.id}.txt`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
 }
 
 export default function StudentMode({
@@ -113,14 +102,14 @@ export default function StudentMode({
     }
   };
 
-  const handleDownloadText = () => {
+  const handleDownloadDocx = async () => {
     if (!selectedDocument) {
       showNotification('Nenhum documento disponível.');
       return;
     }
 
-    downloadTextFile(selectedDocument);
-    showNotification('TXT baixado.');
+    await exportDocumentAsDocx(selectedDocument);
+    showNotification('DOCX gerado.');
   };
 
   return (
@@ -153,7 +142,7 @@ export default function StudentMode({
         mode="export"
         onClose={onClose}
         onCopyText={handleCopyText}
-        onDownloadText={handleDownloadText}
+        onDownloadText={handleDownloadDocx}
         onSelectDocument={setSelectedDocumentId}
         selectedDocument={selectedDocument}
         selectedDocumentId={selectedDocument?.id || ''}
@@ -242,7 +231,7 @@ function StudentDocumentOverlay({
     ? 'Resumo do Documento'
     : mode === 'notes'
       ? 'Anotação do Documento'
-      : 'Exportar Texto';
+    : 'Exportar DOCX';
 
   return (
     <OverlayFrame id={`overlay-${mode}`} isOpen={isOpen} onClose={onClose} title={title}>
@@ -285,11 +274,11 @@ function StudentDocumentOverlay({
             <>
               <RecognizedTextCard documentCapture={selectedDocument} />
               <div className="student-card" style={{ marginTop: '12px' }}>
-                <div className="student-card-title">Conteúdo do TXT</div>
+                <div className="student-card-title">Conteúdo do DOCX</div>
                 <p className="student-real-text">Texto reconhecido, resumo e anotação vinculada ao documento.</p>
               </div>
               <div className="student-overlay-footer">
-                <button className="student-action-btn primary" onClick={onDownloadText}>Baixar TXT</button>
+                <button className="student-action-btn primary" onClick={onDownloadText}>Baixar DOCX</button>
                 <button className="student-action-btn secondary" onClick={onCopyText}>Copiar texto</button>
               </div>
             </>

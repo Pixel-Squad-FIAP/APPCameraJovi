@@ -117,6 +117,22 @@
   visibility: visible;
 }
 
+.post-capture-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #000;
+  color: white;
+}
+
+.post-capture-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
 .gallery-header {
   flex-shrink: 0;
   padding: 16px 18px;
@@ -388,6 +404,37 @@
   color: #9ecaff;
 }
 
+.document-workspace-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.document-workspace-actions::-webkit-scrollbar {
+  display: none;
+}
+
+.document-workspace-actions button {
+  border: 1px solid rgba(158,202,255,0.24);
+  border-radius: 999px;
+  background: rgba(158,202,255,0.12);
+  color: #9ecaff;
+  cursor: pointer;
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 8px 10px;
+}
+
+.document-workspace-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .document-image-pane,
 .document-text-pane {
   flex: 1;
@@ -418,6 +465,21 @@
   resize: vertical;
   padding: 12px;
   line-height: 1.45;
+}
+
+.document-summary-card textarea {
+  width: 100%;
+  min-height: 140px;
+  margin-top: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.9);
+  font: inherit;
+  line-height: 1.45;
+  outline: none;
+  padding: 10px;
+  resize: vertical;
 }
 
 .document-text-pane details,

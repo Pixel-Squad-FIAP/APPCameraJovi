@@ -1,15 +1,15 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import BottomControls from '../components/BottomControls.jsx';
-import Gallery from '../components/Gallery.jsx';
+import Gallery, { DocumentWorkspace } from '../components/Gallery.jsx';
 import MoreModesOverlay from '../components/MoreModesOverlay.jsx';
 import SettingsOverlay from '../components/SettingsOverlay.jsx';
-import StudentMode from '../components/StudentMode.jsx';
 import TopBar from '../components/TopBar.jsx';
 import Viewfinder from '../components/Viewfinder.jsx';
 import { RATIO_STATES, TIMER_STATES } from '../data/modes.js';
 import { useCameraCapture } from '../hooks/useCameraCapture.js';
 import { useDocumentScanner } from '../hooks/useDocumentScanner.js';
 import { useNotification } from '../hooks/useNotification.js';
+import { updateStoredCapture } from '../services/captureStorage.js';
 
 const ratioClassByValue = {
   '3:4': '',
@@ -43,7 +43,7 @@ export default function CameraPage() {
   const [flipRequestId, setFlipRequestId] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [studentOverlay, setStudentOverlay] = useState(null);
+  const [postCapture, setPostCapture] = useState({ captureId: '', mode: '' });
   const [flipped, setFlipped] = useState(false);
   const [panoramaState, setPanoramaState] = useState({ progress: 0, status: 'idle' });
   const [viewfinderSize, setViewfinderSize] = useState({ height: 520, width: 390 });
@@ -88,6 +88,9 @@ export default function CameraPage() {
     captureDocument,
     onCaptureUpdated: updateUserCapture
   });
+  const postCaptureDocument = postCapture.captureId
+    ? userCaptures.find((capture) => capture.id === postCapture.captureId) || null
+    : null;
 
   const handleModeChange = useCallback((mode) => {
     if (isVideoRecording && mode !== 'Vídeo') {
@@ -124,6 +127,24 @@ export default function CameraPage() {
     }
   };
 
+  const handleDocumentCapture = useCallback(async () => {
+    const capture = await scanDocument();
+    setPostCapture({ captureId: capture.id, mode: 'document' });
+    return capture;
+  }, [scanDocument]);
+
+  const handleStudentCapture = useCallback(async () => {
+    const capture = await scanDocument();
+    const updatedCapture = await updateStoredCapture(capture.id, {
+      source: 'student',
+      title: capture.title || 'Conteúdo de estudo',
+      updatedAt: new Date().toISOString()
+    });
+    updateUserCapture(updatedCapture);
+    setPostCapture({ captureId: updatedCapture.id, mode: 'student' });
+    return updatedCapture;
+  }, [scanDocument, updateUserCapture]);
+
   return (
     <main className="camera-page" aria-label="Aplicação da câmera JOVI">
       <div className="phone">
@@ -149,11 +170,10 @@ export default function CameraPage() {
             facingMode={facingMode}
             hardwareZoomSupported={hardwareZoomSupported}
             notification={notification}
-            onStudentOverlayOpen={setStudentOverlay}
             isVideoRecording={isVideoRecording}
             documentScanState={documentScannerState}
             isDocumentScanning={isDocumentScanning}
-            onDocumentCapture={scanDocument}
+            onDocumentCapture={handleDocumentCapture}
             onDocumentExportUnavailable={() => showNotification('Exportação estará disponível após o processamento do documento')}
             onPanoramaCapture={async () => {
               setPanoramaState({ progress: 0, status: 'capturing' });
@@ -170,6 +190,7 @@ export default function CameraPage() {
               }
             }}
             onRealPhotoCapture={capturePhoto}
+            onStudentCapture={handleStudentCapture}
             onVideoRecordingStart={startVideoRecording}
             onVideoRecordingStop={stopVideoRecording}
             onZoomLevelChange={setZoomLevel}
@@ -217,12 +238,14 @@ export default function CameraPage() {
             userCaptures={userCaptures}
           />
 
-          <StudentMode
-            activeOverlay={studentOverlay}
-            onClose={() => setStudentOverlay(null)}
-            onDocumentUpdated={updateUserCapture}
+          <PostCaptureWorkspace
+            capture={postCaptureDocument}
+            documentOcrState={documentScannerState}
+            mode={postCapture.mode}
+            onCaptureUpdated={updateUserCapture}
+            onClose={() => setPostCapture({ captureId: '', mode: '' })}
+            onRecognizeDocument={retryDocumentOcr}
             showNotification={showNotification}
-            userCaptures={userCaptures}
           />
 
           <MoreModesOverlay
@@ -242,5 +265,59 @@ export default function CameraPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function PostCaptureWorkspace({
+  capture,
+  documentOcrState,
+  mode,
+  onCaptureUpdated,
+  onClose,
+  onRecognizeDocument,
+  showNotification
+}) {
+  const [url, setUrl] = useState('');
+  const displayBlob = capture?.processedBlob || capture?.blob || null;
+
+  useEffect(() => {
+    if (!displayBlob) {
+      setUrl('');
+      return undefined;
+    }
+
+    const objectUrl = URL.createObjectURL(displayBlob);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [displayBlob]);
+
+  const captureWithUrl = useMemo(() => (
+    capture ? { ...capture, url } : null
+  ), [capture, url]);
+
+  if (!capture) return null;
+
+  return (
+    <div className="post-capture-overlay show">
+      <div className="gallery-header">
+        <button className="gallery-close" onClick={onClose} type="button" aria-label="Fechar revisão">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+        <span>{mode === 'student' ? 'Estudo capturado' : 'Documento capturado'}</span>
+      </div>
+      <DocumentWorkspace
+        backLabel="Refazer"
+        capture={captureWithUrl}
+        documentOcrState={documentOcrState}
+        isCreating={false}
+        modeContext={mode}
+        onBack={onClose}
+        onCaptureUpdated={onCaptureUpdated}
+        onRecognizeDocument={onRecognizeDocument}
+        showNotification={showNotification}
+      />
+    </div>
   );
 }

@@ -52,10 +52,17 @@ export async function recognizeDocumentText(imageBlob, { onProgress, signal } = 
     });
 
     throwIfAborted();
+    if (typeof worker.setParameters === 'function') {
+      await worker.setParameters({
+        tessedit_pageseg_mode: '6'
+      });
+    }
+
     const result = await worker.recognize(imageBlob);
     throwIfAborted();
 
     return {
+      confidence: Number.isFinite(result?.data?.confidence) ? Math.round(result.data.confidence) : null,
       language: DOCUMENT_OCR_LANGUAGE,
       text: normalizeRecognizedText(result?.data?.text)
     };
