@@ -26,6 +26,7 @@ export default function Viewfinder({
   panoramaState = { progress: 0, status: 'idle' },
   previewZoomFactor = 1,
   ratio,
+  ratioLabel = '',
   retryCamera,
   shutterRequestId,
   showNotification,
@@ -45,7 +46,6 @@ export default function Viewfinder({
   const [thumbnailFlying, setThumbnailFlying] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [countdown, setCountdown] = useState('');
-  const [viewfinderBounds, setViewfinderBounds] = useState({ height: 0, width: 0 });
   const [documentGuide, setDocumentGuide] = useState([
     { x: 0.14, y: 0.12 },
     { x: 0.86, y: 0.12 },
@@ -98,7 +98,6 @@ export default function Viewfinder({
           height: Math.round(rect.height),
           width: Math.round(rect.width)
         };
-        setViewfinderBounds(size);
         onViewfinderResize({
           height: size.height,
           width: size.width
@@ -415,63 +414,37 @@ export default function Viewfinder({
   const isSquareRatio = Number.isFinite(ratio)
     ? Math.abs(ratio - 1) < 0.001
     : ratio === '1:1';
-  const ratioControlsPreview = ['Foto', 'Vídeo'].includes(activeMode) && Number.isFinite(ratio);
-  const captureViewportStyle = (() => {
-    const width = viewfinderBounds.width;
-    const height = viewfinderBounds.height;
-    if (!ratioControlsPreview || width <= 0 || height <= 0) {
-      return { height: '100%', width: '100%' };
-    }
-
-    const viewfinderRatio = width / Math.max(1, height);
-    if (!Number.isFinite(viewfinderRatio) || Math.abs(viewfinderRatio - ratio) < 0.01) {
-      return { height: '100%', width: '100%' };
-    }
-
-    if (viewfinderRatio > ratio) {
-      return {
-        height: `${height}px`,
-        width: `${Math.round(height * ratio)}px`
-      };
-    }
-
-    return {
-      height: `${Math.round(width / ratio)}px`,
-      width: `${width}px`
-    };
-  })();
-  const captureViewportFramed = captureViewportStyle.height !== '100%' || captureViewportStyle.width !== '100%';
+  const ratioControlsPreview = ['Foto', 'Vídeo'].includes(activeMode)
+    && Number.isFinite(ratio)
+    && ratioLabel !== 'Full';
+  const viewfinderClassName = `viewfinder ${ratioControlsPreview ? 'ratio-bound' : 'ratio-fluid'}`;
 
   return (
     <>
       <div
-        className="viewfinder"
+        className={viewfinderClassName}
         ref={viewfinderRef}
         onClick={handleViewfinderClick}
         style={{
+          '--preview-aspect-ratio': ratioControlsPreview ? ratio : undefined,
           filter: viewfinderBlurred ? 'blur(10px)' : `brightness(${0.4 + brightness * 0.8})`,
           transform: `scale(${previewZoomFactor})`,
           transition: 'filter 0.3s, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           background: viewfinderBackground
         }}
       >
-        <div
-          className={`capture-viewport ${captureViewportFramed ? 'is-framed' : ''}`}
-          style={captureViewportStyle}
-        >
-          <video
-            aria-label="Feed real da câmera"
-            autoPlay
-            className={`camera-video ${facingMode === 'user' ? 'is-front-camera' : ''}`}
-            muted
-            playsInline
-            ref={videoRef}
-          />
+        <video
+          aria-label="Feed real da câmera"
+          autoPlay
+          className={`camera-video ${facingMode === 'user' ? 'is-front-camera' : ''}`}
+          muted
+          playsInline
+          ref={videoRef}
+        />
 
-          {cameraTransitionFrame && cameraStatus === 'switching' && (
-            <img className="camera-transition-frame" src={cameraTransitionFrame} alt="" aria-hidden="true" />
-          )}
-        </div>
+        {cameraTransitionFrame && cameraStatus === 'switching' && (
+          <img className="camera-transition-frame" src={cameraTransitionFrame} alt="" aria-hidden="true" />
+        )}
 
         {cameraStatus === 'switching' && (
           <div className="camera-switch-indicator" role="status">Trocando câmera...</div>

@@ -18,24 +18,17 @@
   z-index: 1;
 }
 
-.capture-viewport {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 0;
-  overflow: hidden;
-  background: #111;
-  transform: translate(-50%, -50%);
+.viewfinder.ratio-bound {
+  flex: 0 1 auto;
+  aspect-ratio: var(--preview-aspect-ratio);
   transition:
-    width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-    height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.32s ease;
+    filter 0.3s,
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    aspect-ratio 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.capture-viewport.is-framed {
-  box-shadow:
-    0 0 0 2000px rgba(0,0,0,0.42),
-    0 0 0 1px rgba(255,255,255,0.16);
+.viewfinder.ratio-fluid {
+  flex: 1 1 auto;
 }
 
 .camera-video {

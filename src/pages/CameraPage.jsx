@@ -246,6 +246,7 @@ export default function CameraPage() {
             panoramaState={panoramaState}
             previewZoomFactor={previewZoomFactor}
             ratio={effectiveRatio}
+            ratioLabel={ratio}
             retryCamera={retryCamera}
             shutterRequestId={shutterRequestId}
             showNotification={showNotification}
