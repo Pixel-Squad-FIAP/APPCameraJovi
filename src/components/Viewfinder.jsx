@@ -45,6 +45,7 @@ export default function Viewfinder({
   const [thumbnailFlying, setThumbnailFlying] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [countdown, setCountdown] = useState('');
+  const [viewfinderBounds, setViewfinderBounds] = useState({ height: 0, width: 0 });
   const [documentGuide, setDocumentGuide] = useState([
     { x: 0.14, y: 0.12 },
     { x: 0.86, y: 0.12 },
@@ -93,9 +94,14 @@ export default function Viewfinder({
     const notifySize = () => {
       const rect = element.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0) {
-        onViewfinderResize({
+        const size = {
           height: Math.round(rect.height),
           width: Math.round(rect.width)
+        };
+        setViewfinderBounds(size);
+        onViewfinderResize({
+          height: size.height,
+          width: size.width
         });
       }
     };
@@ -409,6 +415,32 @@ export default function Viewfinder({
   const isSquareRatio = Number.isFinite(ratio)
     ? Math.abs(ratio - 1) < 0.001
     : ratio === '1:1';
+  const ratioControlsPreview = ['Foto', 'Vídeo'].includes(activeMode) && Number.isFinite(ratio);
+  const captureViewportStyle = (() => {
+    const width = viewfinderBounds.width;
+    const height = viewfinderBounds.height;
+    if (!ratioControlsPreview || width <= 0 || height <= 0) {
+      return { height: '100%', width: '100%' };
+    }
+
+    const viewfinderRatio = width / Math.max(1, height);
+    if (!Number.isFinite(viewfinderRatio) || Math.abs(viewfinderRatio - ratio) < 0.01) {
+      return { height: '100%', width: '100%' };
+    }
+
+    if (viewfinderRatio > ratio) {
+      return {
+        height: `${height}px`,
+        width: `${Math.round(height * ratio)}px`
+      };
+    }
+
+    return {
+      height: `${Math.round(width / ratio)}px`,
+      width: `${width}px`
+    };
+  })();
+  const captureViewportFramed = captureViewportStyle.height !== '100%' || captureViewportStyle.width !== '100%';
 
   return (
     <>
@@ -423,18 +455,23 @@ export default function Viewfinder({
           background: viewfinderBackground
         }}
       >
-        <video
-          aria-label="Feed real da câmera"
-          autoPlay
-          className={`camera-video ${facingMode === 'user' ? 'is-front-camera' : ''}`}
-          muted
-          playsInline
-          ref={videoRef}
-        />
+        <div
+          className={`capture-viewport ${captureViewportFramed ? 'is-framed' : ''}`}
+          style={captureViewportStyle}
+        >
+          <video
+            aria-label="Feed real da câmera"
+            autoPlay
+            className={`camera-video ${facingMode === 'user' ? 'is-front-camera' : ''}`}
+            muted
+            playsInline
+            ref={videoRef}
+          />
 
-        {cameraTransitionFrame && cameraStatus === 'switching' && (
-          <img className="camera-transition-frame" src={cameraTransitionFrame} alt="" aria-hidden="true" />
-        )}
+          {cameraTransitionFrame && cameraStatus === 'switching' && (
+            <img className="camera-transition-frame" src={cameraTransitionFrame} alt="" aria-hidden="true" />
+          )}
+        </div>
 
         {cameraStatus === 'switching' && (
           <div className="camera-switch-indicator" role="status">Trocando câmera...</div>

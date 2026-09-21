@@ -18,6 +18,26 @@
   z-index: 1;
 }
 
+.capture-viewport {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  overflow: hidden;
+  background: #111;
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.32s ease;
+}
+
+.capture-viewport.is-framed {
+  box-shadow:
+    0 0 0 2000px rgba(0,0,0,0.42),
+    0 0 0 1px rgba(255,255,255,0.16);
+}
+
 .camera-video {
   width: 100%;
   height: 100%;
