@@ -466,6 +466,12 @@
   color: #9ecaff;
 }
 
+.document-page-strip button.add-page {
+  border-color: rgba(255,255,255,0.18);
+  color: white;
+  min-width: 34px;
+}
+
 .document-image-pane,
 .document-text-pane {
   flex: 1;
@@ -623,6 +629,58 @@
   line-height: 1.45;
   margin: 6px 0 0;
   white-space: pre-wrap;
+}
+
+.document-summary-card pre {
+  margin: 8px 0 0;
+  color: rgba(255,255,255,0.82);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.48;
+  white-space: pre-wrap;
+}
+
+.student-study-card {
+  min-height: 100%;
+}
+
+.export-sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0,0,0,0.48);
+  padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
+}
+
+.export-sheet-panel {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  background: rgba(18,18,24,0.96);
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.42);
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.export-sheet-panel strong {
+  color: white;
+  font-size: 13px;
+  padding: 4px 2px 8px;
+}
+
+.export-sheet-panel button {
+  min-height: 42px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .user-captures {

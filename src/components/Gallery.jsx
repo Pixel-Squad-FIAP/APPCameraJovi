@@ -279,19 +279,23 @@ export function DocumentWorkspace({
   const [activeTab, setActiveTab] = useState(pages.length > 0 ? 'image' : 'text');
   const [annotation, setAnnotation] = useState('');
   const [corners, setCorners] = useState([]);
+  const [exportSheetOpen, setExportSheetOpen] = useState(false);
   const [pageText, setPageText] = useState('');
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState('');
   const [dirty, setDirty] = useState(false);
 
+  const isStudent = modeContext === 'student' || capture?.source === 'student';
+
   useEffect(() => {
     setTitle(capture ? getDocumentTitle(capture) : '');
     setAnnotation(capture?.annotation || '');
     setActivePageId(getDocumentPages(capture)[0]?.id || '');
-    setActiveTab(getDocumentPages(capture).length > 0 ? 'image' : 'text');
+    setActiveTab(isStudent ? 'notes' : getDocumentPages(capture).length > 0 ? 'image' : 'text');
+    setExportSheetOpen(false);
     setStatus('');
     setDirty(false);
-  }, [capture, isCreating]);
+  }, [capture, isCreating, isStudent]);
 
   useEffect(() => {
     setPageText(getPageText(activePage));
@@ -370,6 +374,21 @@ export function DocumentWorkspace({
     showNotification('Análise acadêmica gerada.');
   };
 
+  const handleDeletePage = async () => {
+    if (!capture || !activePage || pages.length <= 1) return;
+    const nextPages = pages.filter((page) => page.id !== activePage.id);
+    const updatedCapture = await updateStoredCapture(capture.id, {
+      blob: nextPages[0]?.blob || null,
+      documentText: nextPages.map(getPageText).filter(Boolean).join('\n\n'),
+      pages: nextPages,
+      processedBlob: nextPages[0]?.processedBlob || null,
+      updatedAt: new Date().toISOString()
+    });
+    onCaptureUpdated?.(updatedCapture);
+    setActivePageId(nextPages[0]?.id || '');
+    setStatus('Página excluída');
+  };
+
   const persistBeforeExport = async () => {
     if (isCreating) {
       showNotification('Salve o documento antes de exportar.');
@@ -439,7 +458,6 @@ export function DocumentWorkspace({
   );
   const hasImage = pages.length > 0;
   const lowConfidence = Number.isFinite(activePage?.ocrConfidence) && activePage.ocrConfidence < 65;
-  const isStudent = modeContext === 'student' || capture?.source === 'student';
 
   return (
     <section className="document-workspace">
@@ -462,22 +480,33 @@ export function DocumentWorkspace({
       </label>
 
       <div className="document-workspace-tabs">
-        {hasImage && (
-          <button className={activeTab === 'image' ? 'active' : ''} type="button" onClick={() => setActiveTab('image')}>
-            Imagem
-          </button>
-        )}
-        <button className={activeTab === 'text' ? 'active' : ''} type="button" onClick={() => setActiveTab('text')}>
-          Texto
-        </button>
-        {isStudent && (
-          <button className={activeTab === 'notes' ? 'active' : ''} type="button" onClick={() => setActiveTab('notes')}>
-            Estudo
-          </button>
+        {isStudent ? (
+          <>
+            <button className={activeTab === 'notes' ? 'active' : ''} type="button" onClick={() => setActiveTab('notes')}>
+              Resumo
+            </button>
+            <button className={activeTab === 'text' ? 'active' : ''} type="button" onClick={() => setActiveTab('text')}>
+              Texto
+            </button>
+            <button className={activeTab === 'annotation' ? 'active' : ''} type="button" onClick={() => setActiveTab('annotation')}>
+              Anotações
+            </button>
+          </>
+        ) : (
+          <>
+            {hasImage && (
+              <button className={activeTab === 'image' ? 'active' : ''} type="button" onClick={() => setActiveTab('image')}>
+                Página
+              </button>
+            )}
+            <button className={activeTab === 'text' ? 'active' : ''} type="button" onClick={() => setActiveTab('text')}>
+              Texto
+            </button>
+          </>
         )}
       </div>
 
-      {pages.length > 1 && (
+      {hasImage && !isStudent && (
         <div className="document-page-strip">
           {pages.map((page, index) => (
             <button
@@ -489,32 +518,25 @@ export function DocumentWorkspace({
               Página {index + 1}
             </button>
           ))}
+          <button className="add-page" type="button" onClick={() => onAddPageRequest?.(capture)}>+</button>
         </div>
       )}
 
       {!isCreating && (
         <div className="document-workspace-actions">
-          {activePage?.blob && (
-            <button disabled={isOcrProcessing} type="button" onClick={handleRecognize}>
-              {activePage.ocrStatus === 'done' ? 'Refazer OCR' : 'Digitalizar texto'}
-            </button>
+          {!isStudent && activePage?.blob && (
+            <button disabled={isOcrProcessing} type="button" onClick={handleRecognize}>Texto</button>
           )}
-          {hasImage && <button type="button" onClick={handleApplyCrop}>Aplicar recorte</button>}
+          {!isStudent && hasImage && <button type="button" onClick={handleApplyCrop}>Confirmar recorte</button>}
           {isStudent && (
             <>
               <button disabled={!pageText.trim() && !getDocumentText(capture).trim()} type="button" onClick={handleAnalyze}>
-                Resumir
+                Atualizar resumo
               </button>
-              <button type="button" onClick={() => setActiveTab('notes')}>Anotar</button>
             </>
           )}
-          {!isStudent && hasImage && (
-            <button type="button" onClick={() => onAddPageRequest?.(capture)}>
-              Adicionar página
-            </button>
-          )}
-          <button type="button" onClick={handleExportDocx}>Exportar DOCX</button>
-          <button type="button" onClick={handleExportPdf}>Exportar PDF</button>
+          {!isStudent && pages.length > 1 && <button type="button" onClick={handleDeletePage}>Excluir página</button>}
+          <button type="button" onClick={() => setExportSheetOpen(true)}>Exportar</button>
         </div>
       )}
 
@@ -561,23 +583,38 @@ export function DocumentWorkspace({
         </div>
       )}
 
-      {activeTab === 'notes' && (
+      {(activeTab === 'notes' || activeTab === 'annotation') && (
         <div className="document-text-pane">
-          <div className="document-summary-card">
-            <strong>Resumo</strong>
-            <p>{capture?.summary || 'Gere a análise acadêmica a partir do texto reconhecido.'}</p>
-            {capture?.summaryNeedsUpdate && <span>Resumo precisa ser atualizado após a edição.</span>}
-          </div>
-          <div className="document-summary-card">
-            <strong>Anotação</strong>
-            <textarea
-              onChange={(event) => {
-                setAnnotation(event.target.value);
-                setDirty(true);
-              }}
-              placeholder="Anote seus pontos de estudo..."
-              value={annotation}
-            />
+          {activeTab === 'notes' && (
+            <div className="document-summary-card student-study-card">
+              <strong>Resumo acadêmico</strong>
+              <pre>{capture?.summary || 'Gere a análise acadêmica a partir do texto reconhecido.'}</pre>
+              {capture?.summaryNeedsUpdate && <span>Resumo precisa ser atualizado após a edição.</span>}
+            </div>
+          )}
+          {activeTab === 'annotation' && (
+            <div className="document-summary-card">
+              <strong>Anotação</strong>
+              <textarea
+                onChange={(event) => {
+                  setAnnotation(event.target.value);
+                  setDirty(true);
+                }}
+                placeholder="Anote seus pontos de estudo..."
+                value={annotation}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {exportSheetOpen && (
+        <div className="export-sheet" role="dialog" aria-label="Exportar">
+          <div className="export-sheet-panel">
+            <strong>Exportar {isStudent ? 'material de estudo' : 'documento'}</strong>
+            <button type="button" onClick={handleExportPdf}>PDF</button>
+            <button type="button" onClick={handleExportDocx}>DOCX</button>
+            <button type="button" onClick={() => setExportSheetOpen(false)}>Cancelar</button>
           </div>
         </div>
       )}

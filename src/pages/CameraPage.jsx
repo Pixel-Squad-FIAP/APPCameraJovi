@@ -10,7 +10,8 @@ import { useCameraCapture } from '../hooks/useCameraCapture.js';
 import { useDocumentScanner } from '../hooks/useDocumentScanner.js';
 import { useNotification } from '../hooks/useNotification.js';
 import { updateStoredCapture } from '../services/captureStorage.js';
-import { appendDocumentPage, getDocumentPages } from '../services/documentModel.js';
+import { appendDocumentPage, getCombinedDocumentText, getDocumentPages } from '../services/documentModel.js';
+import { createAcademicAnalysis } from '../services/studentSummary.js';
 
 const ratioClassByValue = {
   '3:4': '',
@@ -46,6 +47,7 @@ export default function CameraPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [postCapture, setPostCapture] = useState({ captureId: '', mode: '' });
   const [pendingDocumentPageId, setPendingDocumentPageId] = useState('');
+  const [documentCorners, setDocumentCorners] = useState(null);
   const [flipped, setFlipped] = useState(false);
   const [panoramaState, setPanoramaState] = useState({ progress: 0, status: 'idle' });
   const [viewfinderSize, setViewfinderSize] = useState({ height: 520, width: 390 });
@@ -129,14 +131,14 @@ export default function CameraPage() {
     }
   };
 
-  const handleDocumentCapture = useCallback(async () => {
+  const handleDocumentCapture = useCallback(async (detectedCorners = documentCorners) => {
     if (pendingDocumentPageId) {
       const targetDocument = userCaptures.find((capture) => capture.id === pendingDocumentPageId);
       if (!targetDocument) {
         setPendingDocumentPageId('');
         throw new Error('Documento original não encontrado.');
       }
-      const pageCapture = await captureDocument({ persist: false });
+      const pageCapture = await captureDocument({ initialCorners: detectedCorners, persist: false });
       const page = getDocumentPages(pageCapture)[0];
       const updatedDocument = await updateStoredCapture(targetDocument.id, appendDocumentPage(targetDocument, {
         ...page,
@@ -148,22 +150,33 @@ export default function CameraPage() {
       return updatedDocument;
     }
 
-    const capture = await scanDocument();
+    const capture = await scanDocument(detectedCorners);
     setPostCapture({ captureId: capture.id, mode: 'document' });
     return capture;
-  }, [captureDocument, pendingDocumentPageId, scanDocument, updateUserCapture, userCaptures]);
+  }, [captureDocument, documentCorners, pendingDocumentPageId, scanDocument, updateUserCapture, userCaptures]);
 
   const handleStudentCapture = useCallback(async () => {
-    const capture = await scanDocument();
+    const capture = await scanDocument(documentCorners);
     const updatedCapture = await updateStoredCapture(capture.id, {
       source: 'student',
       title: capture.title || 'Conteúdo de estudo',
       updatedAt: new Date().toISOString()
     });
     updateUserCapture(updatedCapture);
-    setPostCapture({ captureId: updatedCapture.id, mode: 'student' });
-    return updatedCapture;
-  }, [scanDocument, updateUserCapture]);
+    const recognizedCapture = await retryDocumentOcr(updatedCapture);
+    const summary = createAcademicAnalysis(getCombinedDocumentText(recognizedCapture));
+    const finalCapture = summary
+      ? await updateStoredCapture(recognizedCapture.id, {
+        summary,
+        summaryGeneratedAt: new Date().toISOString(),
+        summaryNeedsUpdate: false,
+        updatedAt: new Date().toISOString()
+      })
+      : recognizedCapture;
+    updateUserCapture(finalCapture);
+    setPostCapture({ captureId: finalCapture.id, mode: 'student' });
+    return finalCapture;
+  }, [documentCorners, retryDocumentOcr, scanDocument, updateUserCapture]);
 
   return (
     <main className="camera-page" aria-label="Aplicação da câmera JOVI">
@@ -194,6 +207,7 @@ export default function CameraPage() {
             documentScanState={documentScannerState}
             isDocumentScanning={isDocumentScanning}
             onDocumentCapture={handleDocumentCapture}
+            onDocumentCornersChange={setDocumentCorners}
             onDocumentExportUnavailable={() => showNotification('Exportação estará disponível após o processamento do documento')}
             onPanoramaCapture={async () => {
               setPanoramaState({ progress: 0, status: 'capturing' });

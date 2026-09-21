@@ -13,6 +13,7 @@ export default function Viewfinder({
   isVideoRecording,
   notification,
   onDocumentCapture,
+  onDocumentCornersChange = () => {},
   onDocumentExportUnavailable = () => {},
   onFlippedChange,
   onPanoramaCapture,
@@ -44,6 +45,12 @@ export default function Viewfinder({
   const [thumbnailFlying, setThumbnailFlying] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [countdown, setCountdown] = useState('');
+  const [documentGuide, setDocumentGuide] = useState([
+    { x: 0.14, y: 0.12 },
+    { x: 0.86, y: 0.12 },
+    { x: 0.86, y: 0.88 },
+    { x: 0.14, y: 0.88 }
+  ]);
   const didMountRef = useRef(false);
   const hideTimerRef = useRef(null);
   const trackRef = useRef(null);
@@ -125,6 +132,86 @@ export default function Viewfinder({
   }, [isVideoRecording]);
 
   useEffect(() => {
+    if (activeMode !== 'Documento' || cameraStatus !== 'ready') return undefined;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 96;
+    canvas.height = 128;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) return undefined;
+
+    let stopped = false;
+    let lastGuide = documentGuide;
+
+    const analyze = () => {
+      if (stopped) return;
+      const video = videoRef.current;
+      if (!video || video.readyState < 2 || !video.videoWidth || !video.videoHeight) return;
+
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      let minX = canvas.width;
+      let minY = canvas.height;
+      let maxX = 0;
+      let maxY = 0;
+      let hits = 0;
+
+      for (let y = 2; y < canvas.height - 2; y += 2) {
+        for (let x = 2; x < canvas.width - 2; x += 2) {
+          const index = (y * canvas.width + x) * 4;
+          const left = ((y * canvas.width + x - 2) * 4);
+          const right = ((y * canvas.width + x + 2) * 4);
+          const top = (((y - 2) * canvas.width + x) * 4);
+          const bottom = (((y + 2) * canvas.width + x) * 4);
+          const lum = data[index] * 0.299 + data[index + 1] * 0.587 + data[index + 2] * 0.114;
+          const contrast = Math.abs(lum - (data[left] * 0.299 + data[left + 1] * 0.587 + data[left + 2] * 0.114))
+            + Math.abs(lum - (data[right] * 0.299 + data[right + 1] * 0.587 + data[right + 2] * 0.114))
+            + Math.abs(lum - (data[top] * 0.299 + data[top + 1] * 0.587 + data[top + 2] * 0.114))
+            + Math.abs(lum - (data[bottom] * 0.299 + data[bottom + 1] * 0.587 + data[bottom + 2] * 0.114));
+
+          if (contrast > 118 && lum > 72) {
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+            hits += 1;
+          }
+        }
+      }
+
+      const width = maxX - minX;
+      const height = maxY - minY;
+      const plausible = hits > 60 && width > canvas.width * 0.34 && height > canvas.height * 0.34;
+      if (!plausible) return;
+
+      const paddingX = width * 0.04;
+      const paddingY = height * 0.04;
+      const detected = [
+        { x: Math.max(0.06, (minX - paddingX) / canvas.width), y: Math.max(0.06, (minY - paddingY) / canvas.height) },
+        { x: Math.min(0.94, (maxX + paddingX) / canvas.width), y: Math.max(0.06, (minY - paddingY) / canvas.height) },
+        { x: Math.min(0.94, (maxX + paddingX) / canvas.width), y: Math.min(0.94, (maxY + paddingY) / canvas.height) },
+        { x: Math.max(0.06, (minX - paddingX) / canvas.width), y: Math.min(0.94, (maxY + paddingY) / canvas.height) }
+      ];
+
+      const smoothed = detected.map((point, index) => ({
+        x: lastGuide[index].x * 0.72 + point.x * 0.28,
+        y: lastGuide[index].y * 0.72 + point.y * 0.28
+      }));
+      lastGuide = smoothed;
+      setDocumentGuide(smoothed);
+      onDocumentCornersChange(smoothed);
+    };
+
+    const intervalId = window.setInterval(analyze, 520);
+    analyze();
+    return () => {
+      stopped = true;
+      window.clearInterval(intervalId);
+    };
+  }, [activeMode, cameraStatus, onDocumentCornersChange, videoRef]);
+
+  useEffect(() => {
     if (!draggingBrightness) return undefined;
 
     const updateBrightness = (clientY) => {
@@ -175,7 +262,7 @@ export default function Viewfinder({
 
     if (activeMode === 'Documento') {
       try {
-        const documentCapture = await onDocumentCapture();
+        const documentCapture = await onDocumentCapture(documentGuide);
         showNotification(documentCapture?.processedBlob ? 'Documento capturado' : 'Documento salvo');
         capturedMedia = true;
       } catch (error) {
@@ -365,7 +452,11 @@ export default function Viewfinder({
             <strong>{panoramaState.progress}%</strong>
           </div>
         )}
-        {activeMode === 'Documento' && <div className="doc-scanner-frame" id="doc-scanner-frame" style={{ display: 'block' }} />}
+        {activeMode === 'Documento' && (
+          <svg className="doc-scanner-frame dynamic" id="doc-scanner-frame" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <polygon points={documentGuide.map((point) => `${point.x * 100},${point.y * 100}`).join(' ')} />
+          </svg>
+        )}
 
         <div id="recording-indicator" className="recording-indicator" style={{ display: isVideoRecording ? 'flex' : 'none' }}>
           <div className="red-dot" />

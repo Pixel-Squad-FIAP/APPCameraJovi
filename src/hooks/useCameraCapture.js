@@ -709,7 +709,7 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
     return capture;
   }, [cameraStatus]);
 
-  const captureDocument = useCallback(async ({ persist = true } = {}) => {
+  const captureDocument = useCallback(async ({ initialCorners = null, persist = true } = {}) => {
     const video = videoRef.current;
 
     if (!video || cameraStatus !== 'ready' || video.readyState < 2) {
@@ -724,7 +724,8 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
     }
 
     const framing = framingRef.current;
-    const canvasSize = getDocumentCanvasSize(width, height, viewfinderWidth, viewfinderHeight, framing.zoomFactor);
+    const previewRatio = viewfinderWidth / Math.max(1, viewfinderHeight);
+    const canvasSize = getFramedCanvasSize(width, height, previewRatio, framing.zoomFactor);
     const canvas = document.createElement('canvas');
     canvas.width = canvasSize.width;
     canvas.height = canvasSize.height;
@@ -734,15 +735,20 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
       throw new Error('Não foi possível preparar a área de digitalização.');
     }
 
-    drawDocumentVideoFrame(context, video, {
+    drawFramedVideoFrame(context, video, {
       mirror: framing.facingMode === 'user',
-      viewportHeight: viewfinderHeight,
-      viewportWidth: viewfinderWidth,
+      ratio: previewRatio,
       zoomFactor: framing.zoomFactor
     });
 
     const mimeType = 'image/jpeg';
     const blob = await canvasToBlob(canvas, mimeType, 0.92);
+    const corners = Array.isArray(initialCorners) && initialCorners.length === 4
+      ? initialCorners.map((point) => ({
+        x: Math.round(point.x * canvas.width),
+        y: Math.round(point.y * canvas.height)
+      }))
+      : null;
     const capture = {
       id: createCaptureId(),
       aspectRatio: 'document-frame',
@@ -755,6 +761,7 @@ export function useCameraCapture({ ratio = '3:4', viewfinderHeight = 520, viewfi
       pages: [{
         id: createCaptureId(),
         blob,
+        corners,
         height: canvas.height,
         mimeType,
         ocrStatus: 'pending',
