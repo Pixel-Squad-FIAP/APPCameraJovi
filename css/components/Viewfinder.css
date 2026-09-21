@@ -202,10 +202,21 @@
 }
 
 .doc-scanner-frame polygon {
-  fill: rgba(92,157,245,0.08);
-  stroke: rgba(92,157,245,0.95);
-  stroke-width: 0.7;
-  filter: drop-shadow(0 0 6px rgba(92,157,245,0.75));
+  fill: transparent;
+  stroke: rgba(158,202,255,0.86);
+  stroke-width: 0.42;
+  filter: drop-shadow(0 0 3px rgba(92,157,245,0.45));
+}
+
+.ratio-crop-guide {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ratio-crop-guide path {
+  fill: rgba(0,0,0,0.34);
 }
 
 @keyframes scanMove {

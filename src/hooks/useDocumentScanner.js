@@ -216,13 +216,13 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
     }
   }, [finishWithError, patchCapture, prepareDocumentImage]);
 
-  const scanDocument = useCallback(async (initialCorners = null) => {
+  const scanDocument = useCallback(async (initialCorners = null, { prepare = true } = {}) => {
     if (state.status === 'processing') {
       throw new Error('Aguarde o processamento do documento atual.');
     }
 
     const capture = await captureDocument({ initialCorners });
-    return prepareDocumentImage(capture);
+    return prepare ? prepareDocumentImage(capture) : capture;
   }, [captureDocument, prepareDocumentImage, state.status]);
 
   const retryDocumentOcr = useCallback(async (capture, pageId) => {

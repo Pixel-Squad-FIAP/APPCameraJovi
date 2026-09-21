@@ -8,6 +8,7 @@ export default function TopBar({
   onSettingsClick,
   onTimerClick,
   ratio,
+  ratioHidden = false,
   timerState
 }) {
   return (
@@ -40,7 +41,15 @@ export default function TopBar({
 
       <div className="mode-pill" id="top-mode-pill">{activeMode}</div>
 
-      <button className="ratio" id="btn-ratio" onClick={onRatioClick} aria-label="Proporção">{ratio}</button>
+      <button
+        className="ratio"
+        hidden={ratioHidden}
+        id="btn-ratio"
+        onClick={onRatioClick}
+        aria-label="Proporção"
+      >
+        {ratio}
+      </button>
 
       <button
         className="icon-grid"

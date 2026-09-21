@@ -27,6 +27,12 @@ const viewfinderHeightByRatio = {
   Full: 738
 };
 
+const ratioValueByLabel = {
+  '1:1': 1,
+  '3:4': 3 / 4,
+  '9:16': 9 / 16
+};
+
 function getLatestUserCapture(captures) {
   return captures.reduce((latest, capture) => {
     if (!latest) return capture;
@@ -54,6 +60,9 @@ export default function CameraPage() {
   const ratio = RATIO_STATES[ratioIndex];
   const timerState = TIMER_STATES[timerIndex];
   const viewfinderHeight = viewfinderSize.height || viewfinderHeightByRatio[ratio];
+  const effectiveRatio = ratio === 'Full'
+    ? (viewfinderSize.width || 390) / Math.max(1, viewfinderHeight)
+    : ratioValueByLabel[ratio] || 3 / 4;
   const {
     addUserCapture,
     cameraError,
@@ -77,7 +86,7 @@ export default function CameraPage() {
     userCaptures,
     videoRef
   } = useCameraCapture({
-    ratio,
+    ratio: effectiveRatio,
     viewfinderHeight,
     viewfinderWidth: viewfinderSize.width || 390,
     zoomLevel
@@ -116,6 +125,11 @@ export default function CameraPage() {
   };
 
   const handleRatioClick = () => {
+    if (activeMode === 'Documento') {
+      showNotification('Documento usa recorte livre pelos cantos');
+      return;
+    }
+
     if (isVideoRecording) {
       showNotification('Pare a gravação antes de trocar a proporção');
       return;
@@ -150,7 +164,7 @@ export default function CameraPage() {
       return updatedDocument;
     }
 
-    const capture = await scanDocument(detectedCorners);
+    const capture = await scanDocument(detectedCorners, { prepare: false });
     setPostCapture({ captureId: capture.id, mode: 'document', pageId: getDocumentPages(capture)[0]?.id || '' });
     return capture;
   }, [captureDocument, documentCorners, pendingDocumentPageId, scanDocument, updateUserCapture, userCaptures]);
@@ -188,6 +202,7 @@ export default function CameraPage() {
             flashOff={!torchEnabled}
             moreModesOpen={moreModesOpen}
             ratio={ratio}
+            ratioHidden={activeMode === 'Documento'}
             timerState={timerState}
             onFlashToggle={handleFlashToggle}
             onRatioClick={handleRatioClick}
@@ -230,7 +245,7 @@ export default function CameraPage() {
             onZoomLevelChange={setZoomLevel}
             panoramaState={panoramaState}
             previewZoomFactor={previewZoomFactor}
-            ratio={ratio}
+            ratio={effectiveRatio}
             retryCamera={retryCamera}
             shutterRequestId={shutterRequestId}
             showNotification={showNotification}
@@ -278,6 +293,7 @@ export default function CameraPage() {
             mode={postCapture.mode}
             onCaptureUpdated={updateUserCapture}
             initialPageId={postCapture.pageId}
+            initialCropOnly={postCapture.mode === 'document'}
             onClose={() => setPostCapture({ captureId: '', mode: '', pageId: '' })}
             onAddPageRequest={(capture) => {
               setPendingDocumentPageId(capture.id);
@@ -312,6 +328,7 @@ export default function CameraPage() {
 function PostCaptureWorkspace({
   capture,
   documentOcrState,
+  initialCropOnly,
   initialPageId,
   mode,
   onAddPageRequest,
@@ -355,6 +372,7 @@ function PostCaptureWorkspace({
         capture={captureWithUrl}
         documentOcrState={documentOcrState}
         isCreating={false}
+        initialCropOnly={initialCropOnly}
         initialPageId={initialPageId}
         modeContext={mode}
         onAddPageRequest={onAddPageRequest}

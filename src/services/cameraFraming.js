@@ -1,4 +1,4 @@
-const ASPECT_RATIOS = {
+export const ASPECT_RATIOS = {
   '3:4': 3 / 4,
   '9:16': 9 / 16,
   '1:1': 1,
@@ -64,12 +64,35 @@ export function calculateSourceRect(videoWidth, videoHeight, ratio, zoomFactor =
   };
 }
 
-export function getFramedCanvasSize(videoWidth, videoHeight, ratio, zoomFactor = 1) {
-  const rect = calculateSourceRect(videoWidth, videoHeight, ratio, zoomFactor);
+export function createFramingPlan(videoWidth, videoHeight, ratio, zoomFactor = 1) {
+  const sourceRect = calculateSourceRect(videoWidth, videoHeight, ratio, zoomFactor);
+  const aspectRatio = getAspectRatio(ratio);
+  let outputWidth = Math.max(1, Math.round(sourceRect.width));
+  let outputHeight = Math.max(1, Math.round(outputWidth / aspectRatio));
+
+  if (outputHeight > Math.round(sourceRect.height)) {
+    outputHeight = Math.max(1, Math.round(sourceRect.height));
+    outputWidth = Math.max(1, Math.round(outputHeight * aspectRatio));
+  }
 
   return {
-    height: Math.max(1, Math.round(rect.height)),
-    width: Math.max(1, Math.round(rect.width))
+    outputHeight,
+    outputWidth,
+    sourceRect: {
+      height: sourceRect.height,
+      width: sourceRect.width,
+      x: sourceRect.x,
+      y: sourceRect.y
+    }
+  };
+}
+
+export function getFramedCanvasSize(videoWidth, videoHeight, ratio, zoomFactor = 1) {
+  const plan = createFramingPlan(videoWidth, videoHeight, ratio, zoomFactor);
+
+  return {
+    height: plan.outputHeight,
+    width: plan.outputWidth
   };
 }
 
@@ -79,7 +102,8 @@ export function drawFramedVideoFrame(context, video, options) {
     ratio,
     zoomFactor = 1
   } = options;
-  const rect = calculateSourceRect(video.videoWidth, video.videoHeight, ratio, zoomFactor);
+  const plan = createFramingPlan(video.videoWidth, video.videoHeight, ratio, zoomFactor);
+  const rect = plan.sourceRect;
   const canvas = context.canvas;
 
   context.save();

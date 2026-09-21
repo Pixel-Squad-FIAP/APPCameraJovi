@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  drawDocumentVideoFrame,
   drawFramedVideoFrame,
   getDigitalZoomFactor,
-  getDocumentCanvasSize,
   getFramedCanvasSize,
   getRequestedHardwareZoom
 } from '../services/cameraFraming.js';

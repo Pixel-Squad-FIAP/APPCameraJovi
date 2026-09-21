@@ -51,6 +51,7 @@ export default function Viewfinder({
     { x: 0.86, y: 0.88 },
     { x: 0.14, y: 0.88 }
   ]);
+  const [documentGuideVisible, setDocumentGuideVisible] = useState(false);
   const didMountRef = useRef(false);
   const hideTimerRef = useRef(null);
   const trackRef = useRef(null);
@@ -132,7 +133,10 @@ export default function Viewfinder({
   }, [isVideoRecording]);
 
   useEffect(() => {
-    if (activeMode !== 'Documento' || cameraStatus !== 'ready') return undefined;
+    if (activeMode !== 'Documento' || cameraStatus !== 'ready') {
+      setDocumentGuideVisible(false);
+      return undefined;
+    }
 
     const canvas = document.createElement('canvas');
     canvas.width = 96;
@@ -142,6 +146,7 @@ export default function Viewfinder({
 
     let stopped = false;
     let lastGuide = documentGuide;
+    let stableHits = 0;
 
     const analyze = () => {
       if (stopped) return;
@@ -182,8 +187,20 @@ export default function Viewfinder({
 
       const width = maxX - minX;
       const height = maxY - minY;
-      const plausible = hits > 60 && width > canvas.width * 0.34 && height > canvas.height * 0.34;
-      if (!plausible) return;
+      const area = width * height;
+      const density = hits / Math.max(1, area / 4);
+      const plausible = hits > 70
+        && density > 0.035
+        && width > canvas.width * 0.38
+        && height > canvas.height * 0.38
+        && width < canvas.width * 0.96
+        && height < canvas.height * 0.96;
+
+      if (!plausible) {
+        stableHits = Math.max(0, stableHits - 1);
+        if (stableHits === 0) setDocumentGuideVisible(false);
+        return;
+      }
 
       const paddingX = width * 0.04;
       const paddingY = height * 0.04;
@@ -195,11 +212,14 @@ export default function Viewfinder({
       ];
 
       const smoothed = detected.map((point, index) => ({
-        x: lastGuide[index].x * 0.72 + point.x * 0.28,
-        y: lastGuide[index].y * 0.72 + point.y * 0.28
+        x: lastGuide[index].x * 0.82 + point.x * 0.18,
+        y: lastGuide[index].y * 0.82 + point.y * 0.18
       }));
       lastGuide = smoothed;
+      stableHits = Math.min(3, stableHits + 1);
+      if (stableHits < 2) return;
       setDocumentGuide(smoothed);
+      setDocumentGuideVisible(true);
       onDocumentCornersChange(smoothed);
     };
 
@@ -262,7 +282,7 @@ export default function Viewfinder({
 
     if (activeMode === 'Documento') {
       try {
-        const documentCapture = await onDocumentCapture(documentGuide);
+        const documentCapture = await onDocumentCapture(documentGuideVisible ? documentGuide : null);
         showNotification(documentCapture?.processedBlob ? 'Documento capturado' : 'Documento salvo');
         capturedMedia = true;
       } catch (error) {
@@ -386,6 +406,24 @@ export default function Viewfinder({
     ? 'Preparando imagem...'
     : 'Iniciando câmera...';
   const showPanoramaStatus = activeMode === 'Panorâmica' && panoramaState.status === 'capturing';
+  const showRatioGuide = ['Foto', 'Vídeo'].includes(activeMode) && Number.isFinite(ratio);
+  const getRatioGuideRect = () => {
+    const width = 100;
+    const height = 100;
+    const viewRatio = viewfinderRef.current
+      ? viewfinderRef.current.getBoundingClientRect().width / Math.max(1, viewfinderRef.current.getBoundingClientRect().height)
+      : ratio;
+    if (!Number.isFinite(viewRatio) || Math.abs(viewRatio - ratio) < 0.025) {
+      return { height, width, x: 0, y: 0 };
+    }
+    if (viewRatio > ratio) {
+      const nextWidth = height * ratio / viewRatio;
+      return { height, width: nextWidth, x: (width - nextWidth) / 2, y: 0 };
+    }
+    const nextHeight = width / ratio * viewRatio;
+    return { height: nextHeight, width, x: 0, y: (height - nextHeight) / 2 };
+  };
+  const ratioGuideRect = showRatioGuide ? getRatioGuideRect() : null;
 
   return (
     <>
@@ -451,9 +489,18 @@ export default function Viewfinder({
             <strong>{panoramaState.progress}%</strong>
           </div>
         )}
-        {activeMode === 'Documento' && (
+        {activeMode === 'Documento' && documentGuideVisible && (
           <svg className="doc-scanner-frame dynamic" id="doc-scanner-frame" viewBox="0 0 100 100" preserveAspectRatio="none">
             <polygon points={documentGuide.map((point) => `${point.x * 100},${point.y * 100}`).join(' ')} />
+          </svg>
+        )}
+
+        {ratioGuideRect && (
+          <svg className="ratio-crop-guide" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path
+              d={`M0 0H100V100H0Z M${ratioGuideRect.x} ${ratioGuideRect.y}H${ratioGuideRect.x + ratioGuideRect.width}V${ratioGuideRect.y + ratioGuideRect.height}H${ratioGuideRect.x}Z`}
+              fillRule="evenodd"
+            />
           </svg>
         )}
 

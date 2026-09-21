@@ -260,10 +260,49 @@ function CaptureCard({ capture, onOpen }) {
   );
 }
 
+function displayPointToNaturalPoint({ clientX, clientY, rect, naturalHeight, naturalWidth }) {
+  const x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+  const y = Math.min(Math.max(clientY - rect.top, 0), rect.height);
+  return {
+    x: Math.round((x / Math.max(1, rect.width)) * naturalWidth),
+    y: Math.round((y / Math.max(1, rect.height)) * naturalHeight)
+  };
+}
+
+function naturalPointToDisplayPoint(point, { displayHeight, displayWidth, naturalHeight, naturalWidth }) {
+  return {
+    x: (point.x / Math.max(1, naturalWidth)) * displayWidth,
+    y: (point.y / Math.max(1, naturalHeight)) * displayHeight
+  };
+}
+
+function DocumentPagePreview({ page }) {
+  const [url, setUrl] = useState('');
+  const blob = page?.processedBlob || page?.rectifiedBlob || page?.blob;
+
+  useEffect(() => {
+    if (!blob) {
+      setUrl('');
+      return undefined;
+    }
+
+    const objectUrl = URL.createObjectURL(blob);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [blob]);
+
+  if (!url) {
+    return <p className="gallery-empty-state">Esta página não possui imagem.</p>;
+  }
+
+  return <img src={url} alt="Página digitalizada" />;
+}
+
 export function DocumentWorkspace({
   backLabel = 'Voltar',
   capture,
   documentOcrState,
+  initialCropOnly = false,
   initialPageId = '',
   isCreating,
   modeContext = 'document',
@@ -281,6 +320,7 @@ export function DocumentWorkspace({
   const [annotation, setAnnotation] = useState('');
   const [corners, setCorners] = useState([]);
   const [exportSheetOpen, setExportSheetOpen] = useState(false);
+  const [cropOnly, setCropOnly] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [pageText, setPageText] = useState('');
   const [title, setTitle] = useState('');
@@ -295,11 +335,12 @@ export function DocumentWorkspace({
     setAnnotation(capture?.annotation || '');
     setActivePageId(initialPageId || getDocumentPages(capture)[0]?.id || '');
     setActiveTab(isStudent ? 'notes' : getDocumentPages(capture).length > 0 ? 'image' : 'text');
+    setCropOnly(Boolean(initialCropOnly && !isStudent && getDocumentPages(capture).length > 0));
     setExportSheetOpen(false);
     setMoreOpen(false);
     setStatus('');
     setDirty(false);
-  }, [capture?.id, initialPageId, isCreating, isStudent]);
+  }, [capture?.id, initialCropOnly, initialPageId, isCreating, isStudent]);
 
   useEffect(() => {
     setActivePageId((currentPageId) => {
@@ -443,6 +484,16 @@ export function DocumentWorkspace({
 
   const handleApplyCrop = async () => {
     if (!capture || !activePage?.blob || corners.length !== 4) return;
+    const sourceWidth = activePage.sourceWidth || activePage.width || 1;
+    const sourceHeight = activePage.sourceHeight || activePage.height || 1;
+    const area = corners.reduce((total, point, index) => {
+      const nextPoint = corners[(index + 1) % corners.length];
+      return total + ((point.x * nextPoint.y) - (nextPoint.x * point.y));
+    }, 0) / 2;
+    if (Math.abs(area) < sourceWidth * sourceHeight * 0.08) {
+      showNotification('Ajuste os quatro cantos antes de confirmar.');
+      return;
+    }
     setStatus('Ajustando recorte...');
     const rectified = await rectifyDocumentImage(activePage.blob, corners);
     const updatedCapture = await updateStoredCapture(capture.id, {
@@ -462,6 +513,8 @@ export function DocumentWorkspace({
     });
     onCaptureUpdated?.(updatedCapture);
     setActivePageId(activePage.id);
+    setCropOnly(false);
+    setActiveTab('image');
     setMoreOpen(false);
     setStatus('Recorte aplicado');
     showNotification('Página retificada.');
@@ -476,7 +529,29 @@ export function DocumentWorkspace({
   const lowConfidence = Number.isFinite(activePage?.ocrConfidence) && activePage.ocrConfidence < 65;
 
   return (
-    <section className="document-workspace">
+    <section className={`document-workspace ${cropOnly ? 'is-crop-step' : ''}`}>
+      {cropOnly && activePage ? (
+        <>
+          <div className="document-crop-toolbar">
+            <button type="button" onClick={onBack}>Cancelar</button>
+            <strong>Ajustar documento</strong>
+            <button type="button" onClick={handleApplyCrop}>Confirmar</button>
+          </div>
+          <div className="document-image-pane">
+            <CornerEditor
+              corners={corners}
+              onApplyCrop={handleApplyCrop}
+              onCornersChange={(nextCorners) => {
+                setCorners(nextCorners);
+                setDirty(true);
+              }}
+              page={activePage}
+              showHeader={false}
+            />
+          </div>
+        </>
+      ) : (
+        <>
       <div className="document-workspace-toolbar">
         <button type="button" onClick={onBack}>{backLabel}</button>
         <strong>{isStudent ? 'Material de estudo' : 'Documento'}</strong>
@@ -545,7 +620,7 @@ export function DocumentWorkspace({
         <div className="document-more-menu">
           {activePage?.blob && <button disabled={isOcrProcessing} type="button" onClick={handleRecognize}>Refazer OCR</button>}
           {activePage?.blob && <button type="button" onClick={() => {
-            setActiveTab('image');
+            setCropOnly(true);
             setMoreOpen(false);
           }}>Reajustar recorte</button>}
           {pages.length > 1 && <button type="button" onClick={handleDeletePage}>Excluir página</button>}
@@ -554,16 +629,7 @@ export function DocumentWorkspace({
 
       {activeTab === 'image' && hasImage && (
         <div className="document-image-pane">
-          <CornerEditor
-            capture={capture}
-            corners={corners}
-            onCornersChange={(nextCorners) => {
-              setCorners(nextCorners);
-              setDirty(true);
-            }}
-            onApplyCrop={handleApplyCrop}
-            page={activePage}
-          />
+          <DocumentPagePreview page={activePage} />
         </div>
       )}
 
@@ -644,11 +710,13 @@ export function DocumentWorkspace({
           </div>
         </div>
       )}
+        </>
+      )}
     </section>
   );
 }
 
-function CornerEditor({ corners, onApplyCrop, onCornersChange, page }) {
+function CornerEditor({ corners, onApplyCrop, onCornersChange, page, showHeader = true }) {
   const [imageUrl, setImageUrl] = useState('');
   const [imageRect, setImageRect] = useState({ height: 1, width: 1 });
   const [dragIndex, setDragIndex] = useState(null);
@@ -696,34 +764,49 @@ function CornerEditor({ corners, onApplyCrop, onCornersChange, page }) {
   const movePoint = (event, index = dragIndex) => {
     if (index === null) return;
     const rect = event.currentTarget.getBoundingClientRect();
-    const x = Math.min(Math.max(event.clientX - rect.left, 0), rect.width);
-    const y = Math.min(Math.max(event.clientY - rect.top, 0), rect.height);
     const nextCorners = safeCorners.map((point, pointIndex) => (
       pointIndex === index
-        ? {
-          x: Math.round((x / rect.width) * naturalWidth),
-          y: Math.round((y / rect.height) * naturalHeight)
-        }
+        ? displayPointToNaturalPoint({
+          clientX: event.clientX,
+          clientY: event.clientY,
+          naturalHeight,
+          naturalWidth,
+          rect
+        })
         : point
     ));
     onCornersChange(nextCorners);
   };
 
+  const polygonArea = safeCorners.reduce((area, point, index) => {
+    const nextPoint = safeCorners[(index + 1) % safeCorners.length];
+    return area + ((point.x * nextPoint.y) - (nextPoint.x * point.y));
+  }, 0) / 2;
+  const canConfirm = Math.abs(polygonArea) > naturalWidth * naturalHeight * 0.08;
+
   if (!imageUrl) {
     return <p className="gallery-empty-state">Este documento não possui imagem.</p>;
   }
 
-  const points = safeCorners.map((point) => ({
-    left: `${(point.x / naturalWidth) * 100}%`,
-    top: `${(point.y / naturalHeight) * 100}%`
+  const displayPoints = safeCorners.map((point) => naturalPointToDisplayPoint(point, {
+    displayHeight: imageRect.height,
+    displayWidth: imageRect.width,
+    naturalHeight,
+    naturalWidth
+  }));
+  const points = displayPoints.map((point) => ({
+    left: `${(point.x / Math.max(1, imageRect.width)) * 100}%`,
+    top: `${(point.y / Math.max(1, imageRect.height)) * 100}%`
   }));
 
   return (
     <div className="corner-editor">
-      <div className="corner-editor-header">
-        <span>Ajustar documento</span>
-        <button type="button" onClick={onApplyCrop}>Confirmar</button>
-      </div>
+      {showHeader && (
+        <div className="corner-editor-header">
+          <span>Ajustar documento</span>
+          <button disabled={!canConfirm} type="button" onClick={onApplyCrop}>Confirmar</button>
+        </div>
+      )}
       <div className="corner-editor-stage">
         <div
           className="corner-editor-frame"
@@ -737,8 +820,13 @@ function CornerEditor({ corners, onApplyCrop, onCornersChange, page }) {
             src={imageUrl}
           />
           <svg className="corner-editor-polygon" viewBox={`0 0 ${imageRect.width} ${imageRect.height}`} preserveAspectRatio="none">
+            <path
+              className="corner-editor-dim"
+              d={`M0 0H${imageRect.width}V${imageRect.height}H0Z M${displayPoints.map((point) => `${point.x} ${point.y}`).join(' L')} Z`}
+              fillRule="evenodd"
+            />
             <polygon
-              points={safeCorners.map((point) => `${(point.x / naturalWidth) * imageRect.width},${(point.y / naturalHeight) * imageRect.height}`).join(' ')}
+              points={displayPoints.map((point) => `${point.x},${point.y}`).join(' ')}
             />
           </svg>
           {points.map((style, index) => (
