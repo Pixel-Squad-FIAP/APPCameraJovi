@@ -46,6 +46,7 @@ export default function Viewfinder({
   const [thumbnailFlying, setThumbnailFlying] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [countdown, setCountdown] = useState('');
+  const [layoutBounds, setLayoutBounds] = useState({ availableHeight: 0, width: 0 });
   const [documentGuide, setDocumentGuide] = useState([
     { x: 0.14, y: 0.12 },
     { x: 0.86, y: 0.12 },
@@ -92,12 +93,34 @@ export default function Viewfinder({
     if (!element) return undefined;
 
     const notifySize = () => {
-      const rect = element.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) {
+      const app = element.closest('.camera-app');
+      const topBar = app?.querySelector('.top-bar');
+      const bottomControls = app?.querySelector('.bottom-controls');
+      const appRect = app?.getBoundingClientRect();
+      const topBarRect = topBar?.getBoundingClientRect();
+      const bottomControlsRect = bottomControls?.getBoundingClientRect();
+      const availableHeight = appRect
+        ? Math.max(1, appRect.height - (topBarRect?.height || 0) - (bottomControlsRect?.height || 0))
+        : 0;
+      const width = appRect?.width || element.getBoundingClientRect().width;
+
+      if (width > 0 && (availableHeight > 0 || element.getBoundingClientRect().height > 0)) {
+        const fallbackHeight = element.getBoundingClientRect().height;
+        const fixedRatioPreview = ['Foto', 'Vídeo'].includes(activeMode)
+          && Number.isFinite(ratio)
+          && ratioLabel !== 'Full';
+        const idealHeight = fixedRatioPreview ? width / ratio : 0;
+        const displayHeight = fixedRatioPreview
+          ? Math.min(idealHeight, availableHeight || idealHeight)
+          : availableHeight || fallbackHeight;
+        const displayWidth = fixedRatioPreview
+          ? Math.min(width, displayHeight * ratio)
+          : width;
         const size = {
-          height: Math.round(rect.height),
-          width: Math.round(rect.width)
+          height: Math.round(displayHeight),
+          width: Math.round(displayWidth)
         };
+        setLayoutBounds({ availableHeight: size.height, width: size.width });
         onViewfinderResize({
           height: size.height,
           width: size.width
@@ -115,7 +138,7 @@ export default function Viewfinder({
     const observer = new ResizeObserver(notifySize);
     observer.observe(element);
     return () => observer.disconnect();
-  }, [onViewfinderResize]);
+  }, [activeMode, onViewfinderResize, ratio, ratioLabel]);
 
   useEffect(() => {
     onFlippedChange(flipped);
@@ -418,6 +441,31 @@ export default function Viewfinder({
     && Number.isFinite(ratio)
     && ratioLabel !== 'Full';
   const viewfinderClassName = `viewfinder ${ratioControlsPreview ? 'ratio-bound' : 'ratio-fluid'}`;
+  const viewfinderStyle = (() => {
+    const width = layoutBounds.width;
+    const availableHeight = layoutBounds.availableHeight;
+    const baseStyle = {
+      filter: viewfinderBlurred ? 'blur(10px)' : `brightness(${0.4 + brightness * 0.8})`,
+      transform: `scale(${previewZoomFactor})`,
+      transition: 'filter 0.3s, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.28s cubic-bezier(0.4, 0, 0.2, 1), height 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
+      background: viewfinderBackground
+    };
+
+    if (!ratioControlsPreview || width <= 0 || availableHeight <= 0) {
+      return baseStyle;
+    }
+
+    const idealHeight = width / ratio;
+    const constrainedHeight = Math.min(idealHeight, availableHeight);
+    const constrainedWidth = Math.min(width, constrainedHeight * ratio);
+
+    return {
+      ...baseStyle,
+      flex: '0 0 auto',
+      height: `${Math.round(constrainedHeight)}px`,
+      width: `${Math.round(constrainedWidth)}px`
+    };
+  })();
 
   return (
     <>
@@ -425,13 +473,7 @@ export default function Viewfinder({
         className={viewfinderClassName}
         ref={viewfinderRef}
         onClick={handleViewfinderClick}
-        style={{
-          '--preview-aspect-ratio': ratioControlsPreview ? ratio : undefined,
-          filter: viewfinderBlurred ? 'blur(10px)' : `brightness(${0.4 + brightness * 0.8})`,
-          transform: `scale(${previewZoomFactor})`,
-          transition: 'filter 0.3s, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          background: viewfinderBackground
-        }}
+        style={viewfinderStyle}
       >
         <video
           aria-label="Feed real da câmera"
