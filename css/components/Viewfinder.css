@@ -208,17 +208,6 @@
   filter: drop-shadow(0 0 3px rgba(92,157,245,0.45));
 }
 
-.ratio-crop-guide {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.ratio-crop-guide path {
-  fill: rgba(0,0,0,0.34);
-}
-
 @keyframes scanMove {
   0% { top: 0; }
   100% { top: 100%; }

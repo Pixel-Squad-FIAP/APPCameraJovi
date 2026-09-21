@@ -406,24 +406,9 @@ export default function Viewfinder({
     ? 'Preparando imagem...'
     : 'Iniciando câmera...';
   const showPanoramaStatus = activeMode === 'Panorâmica' && panoramaState.status === 'capturing';
-  const showRatioGuide = ['Foto', 'Vídeo'].includes(activeMode) && Number.isFinite(ratio);
-  const getRatioGuideRect = () => {
-    const width = 100;
-    const height = 100;
-    const viewRatio = viewfinderRef.current
-      ? viewfinderRef.current.getBoundingClientRect().width / Math.max(1, viewfinderRef.current.getBoundingClientRect().height)
-      : ratio;
-    if (!Number.isFinite(viewRatio) || Math.abs(viewRatio - ratio) < 0.025) {
-      return { height, width, x: 0, y: 0 };
-    }
-    if (viewRatio > ratio) {
-      const nextWidth = height * ratio / viewRatio;
-      return { height, width: nextWidth, x: (width - nextWidth) / 2, y: 0 };
-    }
-    const nextHeight = width / ratio * viewRatio;
-    return { height: nextHeight, width, x: 0, y: (height - nextHeight) / 2 };
-  };
-  const ratioGuideRect = showRatioGuide ? getRatioGuideRect() : null;
+  const isSquareRatio = Number.isFinite(ratio)
+    ? Math.abs(ratio - 1) < 0.001
+    : ratio === '1:1';
 
   return (
     <>
@@ -495,15 +480,6 @@ export default function Viewfinder({
           </svg>
         )}
 
-        {ratioGuideRect && (
-          <svg className="ratio-crop-guide" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <path
-              d={`M0 0H100V100H0Z M${ratioGuideRect.x} ${ratioGuideRect.y}H${ratioGuideRect.x + ratioGuideRect.width}V${ratioGuideRect.y + ratioGuideRect.height}H${ratioGuideRect.x}Z`}
-              fillRule="evenodd"
-            />
-          </svg>
-        )}
-
         <div id="recording-indicator" className="recording-indicator" style={{ display: isVideoRecording ? 'flex' : 'none' }}>
           <div className="red-dot" />
           <span id="recording-timer">{minutes}:{seconds}</span>
@@ -513,7 +489,7 @@ export default function Viewfinder({
         <div id="timer-countdown" className={`timer-countdown ${countdown ? 'show' : ''}`}>{countdown}</div>
       </div>
 
-      <div className={`zoom-selector ${controlsVisible || ratio === '1:1' ? 'show' : ''}`}>
+      <div className={`zoom-selector ${controlsVisible || isSquareRatio ? 'show' : ''}`}>
         {['.5', '1', '2', '3'].map((level) => (
           <button
             className={`zoom-btn ${zoomLevel === level ? 'active' : ''}`}
