@@ -146,17 +146,17 @@ export default function CameraPage() {
       }));
       updateUserCapture(updatedDocument);
       setPendingDocumentPageId('');
-      setPostCapture({ captureId: updatedDocument.id, mode: 'document' });
+      setPostCapture({ captureId: updatedDocument.id, mode: 'document', pageId: page.id || pageCapture.id });
       return updatedDocument;
     }
 
     const capture = await scanDocument(detectedCorners);
-    setPostCapture({ captureId: capture.id, mode: 'document' });
+    setPostCapture({ captureId: capture.id, mode: 'document', pageId: getDocumentPages(capture)[0]?.id || '' });
     return capture;
   }, [captureDocument, documentCorners, pendingDocumentPageId, scanDocument, updateUserCapture, userCaptures]);
 
   const handleStudentCapture = useCallback(async () => {
-    const capture = await scanDocument(documentCorners);
+    const capture = await scanDocument(null);
     const updatedCapture = await updateStoredCapture(capture.id, {
       source: 'student',
       title: capture.title || 'Conteúdo de estudo',
@@ -174,9 +174,9 @@ export default function CameraPage() {
       })
       : recognizedCapture;
     updateUserCapture(finalCapture);
-    setPostCapture({ captureId: finalCapture.id, mode: 'student' });
+    setPostCapture({ captureId: finalCapture.id, mode: 'student', pageId: getDocumentPages(finalCapture)[0]?.id || '' });
     return finalCapture;
-  }, [documentCorners, retryDocumentOcr, scanDocument, updateUserCapture]);
+  }, [retryDocumentOcr, scanDocument, updateUserCapture]);
 
   return (
     <main className="camera-page" aria-label="Aplicação da câmera JOVI">
@@ -277,10 +277,11 @@ export default function CameraPage() {
             documentOcrState={documentScannerState}
             mode={postCapture.mode}
             onCaptureUpdated={updateUserCapture}
-            onClose={() => setPostCapture({ captureId: '', mode: '' })}
+            initialPageId={postCapture.pageId}
+            onClose={() => setPostCapture({ captureId: '', mode: '', pageId: '' })}
             onAddPageRequest={(capture) => {
               setPendingDocumentPageId(capture.id);
-              setPostCapture({ captureId: '', mode: '' });
+              setPostCapture({ captureId: '', mode: '', pageId: '' });
               setActiveMode('Documento');
               showNotification('Enquadre a próxima página e toque no shutter');
             }}
@@ -311,6 +312,7 @@ export default function CameraPage() {
 function PostCaptureWorkspace({
   capture,
   documentOcrState,
+  initialPageId,
   mode,
   onAddPageRequest,
   onCaptureUpdated,
@@ -353,6 +355,7 @@ function PostCaptureWorkspace({
         capture={captureWithUrl}
         documentOcrState={documentOcrState}
         isCreating={false}
+        initialPageId={initialPageId}
         modeContext={mode}
         onAddPageRequest={onAddPageRequest}
         onBack={onClose}

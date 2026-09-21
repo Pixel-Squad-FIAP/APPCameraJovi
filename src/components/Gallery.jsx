@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { saveStoredCapture, updateStoredCapture } from '../services/captureStorage.js';
 import { exportDocumentAsDocx, exportDocumentAsPdf } from '../services/documentExport.js';
 import {
@@ -8,7 +8,7 @@ import {
   getPrimaryDocumentBlob,
   replaceDocumentPage
 } from '../services/documentModel.js';
-import { getInitialDocumentCorners, rectifyDocumentImage } from '../services/documentProcessing.js';
+import { rectifyDocumentImage } from '../services/documentProcessing.js';
 import { createAcademicAnalysis } from '../services/studentSummary.js';
 
 function createCaptureId() {
@@ -264,6 +264,7 @@ export function DocumentWorkspace({
   backLabel = 'Voltar',
   capture,
   documentOcrState,
+  initialPageId = '',
   isCreating,
   modeContext = 'document',
   onAddPageRequest,
@@ -280,22 +281,34 @@ export function DocumentWorkspace({
   const [annotation, setAnnotation] = useState('');
   const [corners, setCorners] = useState([]);
   const [exportSheetOpen, setExportSheetOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [pageText, setPageText] = useState('');
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState('');
   const [dirty, setDirty] = useState(false);
 
   const isStudent = modeContext === 'student' || capture?.source === 'student';
+  const pageIdsKey = pages.map((page) => page.id).join('|');
 
   useEffect(() => {
     setTitle(capture ? getDocumentTitle(capture) : '');
     setAnnotation(capture?.annotation || '');
-    setActivePageId(getDocumentPages(capture)[0]?.id || '');
+    setActivePageId(initialPageId || getDocumentPages(capture)[0]?.id || '');
     setActiveTab(isStudent ? 'notes' : getDocumentPages(capture).length > 0 ? 'image' : 'text');
     setExportSheetOpen(false);
+    setMoreOpen(false);
     setStatus('');
     setDirty(false);
-  }, [capture, isCreating, isStudent]);
+  }, [capture?.id, initialPageId, isCreating, isStudent]);
+
+  useEffect(() => {
+    setActivePageId((currentPageId) => {
+      if (currentPageId && pages.some((page) => page.id === currentPageId)) {
+        return currentPageId;
+      }
+      return pages[0]?.id || '';
+    });
+  }, [pageIdsKey, pages]);
 
   useEffect(() => {
     setPageText(getPageText(activePage));
@@ -344,6 +357,7 @@ export function DocumentWorkspace({
 
     const updatedCapture = await updateStoredCapture(capture.id, patch);
     onCaptureUpdated?.(updatedCapture);
+    setActivePageId(activePage?.id || '');
     setStatus('Alterações salvas');
     setDirty(false);
   };
@@ -370,13 +384,16 @@ export function DocumentWorkspace({
       updatedAt: new Date().toISOString()
     });
     onCaptureUpdated?.(updatedCapture);
+    setActivePageId(activePage?.id || '');
     setStatus('Análise gerada');
     showNotification('Análise acadêmica gerada.');
   };
 
   const handleDeletePage = async () => {
     if (!capture || !activePage || pages.length <= 1) return;
+    const removedIndex = pages.findIndex((page) => page.id === activePage.id);
     const nextPages = pages.filter((page) => page.id !== activePage.id);
+    const nextActivePage = nextPages[Math.min(Math.max(removedIndex, 0), nextPages.length - 1)] || nextPages[0] || null;
     const updatedCapture = await updateStoredCapture(capture.id, {
       blob: nextPages[0]?.blob || null,
       documentText: nextPages.map(getPageText).filter(Boolean).join('\n\n'),
@@ -385,7 +402,8 @@ export function DocumentWorkspace({
       updatedAt: new Date().toISOString()
     });
     onCaptureUpdated?.(updatedCapture);
-    setActivePageId(nextPages[0]?.id || '');
+    setActivePageId(nextActivePage?.id || '');
+    setMoreOpen(false);
     setStatus('Página excluída');
   };
 
@@ -403,6 +421,7 @@ export function DocumentWorkspace({
       updatedAt: new Date().toISOString()
     });
     onCaptureUpdated?.(updatedCapture);
+    setActivePageId(activePage?.id || '');
     return updatedCapture;
   };
 
@@ -433,6 +452,8 @@ export function DocumentWorkspace({
         ocrStatus: 'pending',
         processedBlob: null,
         rectifiedBlob: rectified.blob,
+        sourceHeight: activePage.sourceHeight || activePage.height,
+        sourceWidth: activePage.sourceWidth || activePage.width,
         width: rectified.width
       }),
       summary: '',
@@ -440,15 +461,10 @@ export function DocumentWorkspace({
       updatedAt: new Date().toISOString()
     });
     onCaptureUpdated?.(updatedCapture);
+    setActivePageId(activePage.id);
+    setMoreOpen(false);
     setStatus('Recorte aplicado');
     showNotification('Página retificada.');
-  };
-
-  const handleDetectCorners = async () => {
-    if (!activePage?.blob) return;
-    const detected = await getInitialDocumentCorners(activePage.blob);
-    setCorners(detected);
-    setDirty(true);
   };
 
   const isOcrProcessing = Boolean(
@@ -463,50 +479,44 @@ export function DocumentWorkspace({
     <section className="document-workspace">
       <div className="document-workspace-toolbar">
         <button type="button" onClick={onBack}>{backLabel}</button>
-        <span>{dirty ? 'Alterações não salvas' : status}</span>
-        <button type="button" onClick={handleSave}>Salvar</button>
-      </div>
-
-      <label className="document-workspace-title">
-        <span>Título</span>
-        <input
-          onChange={(event) => {
-            setTitle(event.target.value);
-            setDirty(true);
-          }}
-          placeholder="Título do documento"
-          value={title}
-        />
-      </label>
-
-      <div className="document-workspace-tabs">
-        {isStudent ? (
-          <>
-            <button className={activeTab === 'notes' ? 'active' : ''} type="button" onClick={() => setActiveTab('notes')}>
-              Resumo
-            </button>
-            <button className={activeTab === 'text' ? 'active' : ''} type="button" onClick={() => setActiveTab('text')}>
-              Texto
-            </button>
-            <button className={activeTab === 'annotation' ? 'active' : ''} type="button" onClick={() => setActiveTab('annotation')}>
-              Anotações
-            </button>
-          </>
-        ) : (
-          <>
-            {hasImage && (
-              <button className={activeTab === 'image' ? 'active' : ''} type="button" onClick={() => setActiveTab('image')}>
-                Página
-              </button>
-            )}
-            <button className={activeTab === 'text' ? 'active' : ''} type="button" onClick={() => setActiveTab('text')}>
-              Texto
-            </button>
-          </>
+        <strong>{isStudent ? 'Material de estudo' : 'Documento'}</strong>
+        {!isStudent && !isCreating && (
+          <button aria-label="Mais ações do documento" type="button" onClick={() => setMoreOpen((current) => !current)}>
+            •••
+          </button>
         )}
+        {isStudent && <button type="button" onClick={handleSave}>Salvar</button>}
       </div>
 
-      {hasImage && !isStudent && (
+      {(!hasImage || isStudent || activeTab === 'text') && (
+        <label className="document-workspace-title">
+          <span>Título</span>
+          <input
+            onChange={(event) => {
+              setTitle(event.target.value);
+              setDirty(true);
+            }}
+            placeholder="Título do documento"
+            value={title}
+          />
+        </label>
+      )}
+
+      {isStudent && (
+        <div className="document-workspace-tabs">
+          <button className={activeTab === 'notes' ? 'active' : ''} type="button" onClick={() => setActiveTab('notes')}>
+            Resumo
+          </button>
+          <button className={activeTab === 'text' ? 'active' : ''} type="button" onClick={() => setActiveTab('text')}>
+            Texto
+          </button>
+          <button className={activeTab === 'annotation' ? 'active' : ''} type="button" onClick={() => setActiveTab('annotation')}>
+            Anotações
+          </button>
+        </div>
+      )}
+
+      {hasImage && !isStudent && activeTab !== 'text' && (
         <div className="document-page-strip">
           {pages.map((page, index) => (
             <button
@@ -522,21 +532,23 @@ export function DocumentWorkspace({
         </div>
       )}
 
-      {!isCreating && (
+      {!isCreating && isStudent && (
         <div className="document-workspace-actions">
-          {!isStudent && activePage?.blob && (
-            <button disabled={isOcrProcessing} type="button" onClick={handleRecognize}>Texto</button>
-          )}
-          {!isStudent && hasImage && <button type="button" onClick={handleApplyCrop}>Confirmar recorte</button>}
-          {isStudent && (
-            <>
-              <button disabled={!pageText.trim() && !getDocumentText(capture).trim()} type="button" onClick={handleAnalyze}>
-                Atualizar resumo
-              </button>
-            </>
-          )}
-          {!isStudent && pages.length > 1 && <button type="button" onClick={handleDeletePage}>Excluir página</button>}
+          <button disabled={!pageText.trim() && !getDocumentText(capture).trim()} type="button" onClick={handleAnalyze}>
+            Atualizar resumo
+          </button>
           <button type="button" onClick={() => setExportSheetOpen(true)}>Exportar</button>
+        </div>
+      )}
+
+      {!isCreating && !isStudent && moreOpen && (
+        <div className="document-more-menu">
+          {activePage?.blob && <button disabled={isOcrProcessing} type="button" onClick={handleRecognize}>Refazer OCR</button>}
+          {activePage?.blob && <button type="button" onClick={() => {
+            setActiveTab('image');
+            setMoreOpen(false);
+          }}>Reajustar recorte</button>}
+          {pages.length > 1 && <button type="button" onClick={handleDeletePage}>Excluir página</button>}
         </div>
       )}
 
@@ -549,7 +561,7 @@ export function DocumentWorkspace({
               setCorners(nextCorners);
               setDirty(true);
             }}
-            onDetectCorners={handleDetectCorners}
+            onApplyCrop={handleApplyCrop}
             page={activePage}
           />
         </div>
@@ -580,6 +592,20 @@ export function DocumentWorkspace({
             placeholder="Escreva ou corrija o texto do documento..."
             value={pageText}
           />
+        </div>
+      )}
+
+      {!isCreating && !isStudent && activeTab !== 'text' && (
+        <div className="document-bottom-actions">
+          <button type="button" onClick={() => setActiveTab('text')}>Texto</button>
+          <button type="button" onClick={() => setExportSheetOpen(true)}>Exportar</button>
+        </div>
+      )}
+
+      {!isCreating && !isStudent && activeTab === 'text' && (
+        <div className="document-bottom-actions">
+          <button type="button" onClick={() => setActiveTab('image')}>Página</button>
+          <button type="button" onClick={handleSave}>Salvar texto</button>
         </div>
       )}
 
@@ -622,13 +648,14 @@ export function DocumentWorkspace({
   );
 }
 
-function CornerEditor({ corners, onCornersChange, onDetectCorners, page }) {
+function CornerEditor({ corners, onApplyCrop, onCornersChange, page }) {
   const [imageUrl, setImageUrl] = useState('');
   const [imageRect, setImageRect] = useState({ height: 1, width: 1 });
   const [dragIndex, setDragIndex] = useState(null);
-  const blob = page?.rectifiedBlob || page?.blob;
-  const naturalWidth = page?.width || 1;
-  const naturalHeight = page?.height || 1;
+  const frameRef = useRef(null);
+  const blob = page?.blob;
+  const naturalWidth = page?.sourceWidth || page?.width || 1;
+  const naturalHeight = page?.sourceHeight || page?.height || 1;
   const safeCorners = corners.length === 4 ? corners : [
     { x: naturalWidth * 0.08, y: naturalHeight * 0.08 },
     { x: naturalWidth * 0.92, y: naturalHeight * 0.08 },
@@ -646,10 +673,25 @@ function CornerEditor({ corners, onCornersChange, onDetectCorners, page }) {
     return () => URL.revokeObjectURL(url);
   }, [blob]);
 
-  const updateRect = (event) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    setImageRect({ height: rect.height, width: rect.width });
-  };
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return undefined;
+
+    const updateRect = () => {
+      const rect = frame.getBoundingClientRect();
+      setImageRect({ height: Math.max(1, rect.height), width: Math.max(1, rect.width) });
+    };
+
+    updateRect();
+    if (!window.ResizeObserver) {
+      window.addEventListener('resize', updateRect);
+      return () => window.removeEventListener('resize', updateRect);
+    }
+
+    const observer = new ResizeObserver(updateRect);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [imageUrl]);
 
   const movePoint = (event, index = dragIndex) => {
     if (index === null) return;
@@ -678,20 +720,20 @@ function CornerEditor({ corners, onCornersChange, onDetectCorners, page }) {
 
   return (
     <div className="corner-editor">
-      <div className="corner-editor-actions">
-        <button type="button" onClick={onDetectCorners}>Sugerir recorte</button>
-        <span>Arraste os cantos e aplique o recorte.</span>
+      <div className="corner-editor-header">
+        <span>Ajustar documento</span>
+        <button type="button" onClick={onApplyCrop}>Confirmar</button>
       </div>
       <div className="corner-editor-stage">
         <div
           className="corner-editor-frame"
+          ref={frameRef}
           onPointerMove={(event) => movePoint(event)}
           onPointerUp={() => setDragIndex(null)}
           onPointerCancel={() => setDragIndex(null)}
         >
           <img
             alt="Página capturada para ajuste"
-            onLoad={updateRect}
             src={imageUrl}
           />
           <svg className="corner-editor-polygon" viewBox={`0 0 ${imageRect.width} ${imageRect.height}`} preserveAspectRatio="none">

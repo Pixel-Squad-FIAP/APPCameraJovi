@@ -438,7 +438,6 @@ export default function Viewfinder({
           <span className="focus-corner-br" />
         </div>
 
-        {activeMode === 'Estudante' && <div className="focus-box-student" id="focus-box-student" />}
         {activeMode === 'Panorâmica' && (
           <div className="pano-guide" id="pano-guide">
             <div className="pano-line" />

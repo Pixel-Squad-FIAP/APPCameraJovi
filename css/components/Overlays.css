@@ -317,18 +317,31 @@
   flex: 1;
   min-height: 0;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   overflow: hidden;
-  padding: 0 14px 14px;
+  padding: 0 12px calc(12px + env(safe-area-inset-bottom));
   color: white;
 }
 
 .document-workspace-toolbar {
+  position: relative;
   display: flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  min-height: 42px;
+}
+
+.document-workspace-toolbar strong {
+  flex: 1;
+  overflow: hidden;
+  color: rgba(255,255,255,0.9);
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .document-workspace-toolbar button,
@@ -413,6 +426,55 @@
   scrollbar-width: none;
 }
 
+.document-bottom-actions {
+  display: grid;
+  flex-shrink: 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.document-bottom-actions button {
+  min-width: 0;
+  min-height: 42px;
+  border: 1px solid rgba(158,202,255,0.24);
+  border-radius: 14px;
+  background: rgba(158,202,255,0.12);
+  color: #9ecaff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.document-more-menu {
+  position: absolute;
+  top: 58px;
+  right: 12px;
+  z-index: 5;
+  display: grid;
+  width: min(210px, calc(100% - 24px));
+  gap: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  background: rgba(18,18,24,0.96);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.36);
+  padding: 8px;
+}
+
+.document-more-menu button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.88);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: left;
+  padding: 0 10px;
+}
+
 .document-workspace-actions::-webkit-scrollbar {
   display: none;
 }
@@ -441,6 +503,7 @@
   gap: 8px;
   overflow-x: auto;
   scrollbar-width: none;
+  padding-bottom: 2px;
 }
 
 .document-page-strip::-webkit-scrollbar {
@@ -482,8 +545,9 @@
 .document-image-pane {
   display: grid;
   place-items: center;
-  border-radius: 14px;
+  border-radius: 12px;
   background: rgba(255,255,255,0.04);
+  overflow: hidden;
 }
 
 .document-image-pane img {
@@ -495,36 +559,38 @@
 .corner-editor {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   height: 100%;
   min-height: 0;
   width: 100%;
 }
 
-.corner-editor-actions {
+.corner-editor-header {
   display: flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 8px;
+  padding: 8px 8px 0;
 }
 
-.corner-editor-actions button {
+.corner-editor-header button {
   border: 1px solid rgba(158,202,255,0.22);
-  border-radius: 999px;
+  border-radius: 12px;
   background: rgba(158,202,255,0.12);
   color: #9ecaff;
   cursor: pointer;
   font: inherit;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
-  padding: 7px 10px;
+  min-height: 38px;
+  padding: 0 12px;
 }
 
-.corner-editor-actions span {
-  color: rgba(255,255,255,0.56);
-  font-size: 10px;
+.corner-editor-header span {
+  color: rgba(255,255,255,0.82);
+  font-size: 12px;
+  font-weight: 850;
 }
 
 .corner-editor-stage {
@@ -541,6 +607,7 @@
   display: inline-block;
   max-width: 100%;
   max-height: 100%;
+  overflow: visible;
   touch-action: none;
 }
 
@@ -567,11 +634,11 @@
 
 .corner-handle {
   position: absolute;
-  width: 28px;
-  height: 28px;
+  width: 42px;
+  height: 42px;
   border: 2px solid white;
   border-radius: 50%;
-  background: #5c9df5;
+  background: radial-gradient(circle, #5c9df5 0 34%, rgba(92,157,245,0.28) 36% 100%);
   box-shadow: 0 3px 12px rgba(0,0,0,0.42);
   cursor: grab;
   transform: translate(-50%, -50%);

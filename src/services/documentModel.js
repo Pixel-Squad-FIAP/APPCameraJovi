@@ -24,6 +24,8 @@ export function getDocumentPages(capture) {
       ocrText: capture.ocrText || '',
       processedBlob: capture.processedBlob || null,
       rectifiedBlob: capture.rectifiedBlob || capture.blob,
+      sourceHeight: capture.sourceHeight || capture.height,
+      sourceWidth: capture.sourceWidth || capture.width,
       width: capture.width
     }];
   }

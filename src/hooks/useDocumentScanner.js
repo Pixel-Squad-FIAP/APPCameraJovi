@@ -12,6 +12,8 @@ const IDLE_STATE = {
   status: 'idle'
 };
 
+const LOW_CONFIDENCE_RETRY_THRESHOLD = 58;
+
 function isDocumentCapture(capture) {
   return capture?.kind === 'document' && capture?.blob;
 }
@@ -82,6 +84,8 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
       processedBlob: processed.blob,
       processedHeight: processed.height,
       processedWidth: processed.width,
+      sourceHeight: page.sourceHeight || page.height,
+      sourceWidth: page.sourceWidth || page.width,
       width: processed.width
     }));
   }, [patchCapture]);
@@ -130,7 +134,8 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
       }
 
       const ocrPage = getDocumentPages(workingCapture).find((page) => page.id === workingPage.id) || workingPage;
-      const ocrResult = await recognizeDocumentText(ocrPage.processedBlob || ocrPage.rectifiedBlob || ocrPage.blob, {
+      const primaryOcrBlob = ocrPage.processedBlob || ocrPage.rectifiedBlob || ocrPage.blob;
+      let ocrResult = await recognizeDocumentText(primaryOcrBlob, {
         signal: abortController.signal,
         onProgress: (progress) => {
           if (!mountedRef.current || abortController.signal.aborted) return;
@@ -143,6 +148,43 @@ export function useDocumentScanner({ captureDocument, onCaptureUpdated }) {
           });
         }
       });
+
+      const fallbackBlob = ocrPage.rectifiedBlob || ocrPage.blob;
+      const shouldTryFallback = fallbackBlob
+        && fallbackBlob !== primaryOcrBlob
+        && (!Number.isFinite(ocrResult.confidence) || ocrResult.confidence < LOW_CONFIDENCE_RETRY_THRESHOLD);
+
+      if (shouldTryFallback) {
+        if (mountedRef.current) {
+          setState({
+            captureId: capture.id,
+            error: '',
+            message: 'Tentando leitura alternativa...',
+            progress: null,
+            status: 'processing'
+          });
+        }
+
+        const fallbackResult = await recognizeDocumentText(fallbackBlob, {
+          signal: abortController.signal,
+          onProgress: (progress) => {
+            if (!mountedRef.current || abortController.signal.aborted) return;
+            setState({
+              captureId: capture.id,
+              error: '',
+              message: `Leitura alternativa... ${progress}%`,
+              progress,
+              status: 'processing'
+            });
+          }
+        });
+
+        const primaryConfidence = Number.isFinite(ocrResult.confidence) ? ocrResult.confidence : -1;
+        const fallbackConfidence = Number.isFinite(fallbackResult.confidence) ? fallbackResult.confidence : -1;
+        if (fallbackConfidence > primaryConfidence || (!ocrResult.text && fallbackResult.text)) {
+          ocrResult = fallbackResult;
+        }
+      }
 
       const updatedCapture = await patchCapture(capture.id, replaceDocumentPage(workingCapture, workingPage.id, {
         documentText: ocrPage.documentText ?? ocrResult.text,

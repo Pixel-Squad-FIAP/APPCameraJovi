@@ -54,7 +54,7 @@ export async function recognizeDocumentText(imageBlob, { onProgress, signal } = 
     throwIfAborted();
     if (typeof worker.setParameters === 'function') {
       await worker.setParameters({
-        tessedit_pageseg_mode: '6'
+        tessedit_pageseg_mode: '3'
       });
     }
 

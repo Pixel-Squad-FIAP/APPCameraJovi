@@ -158,20 +158,6 @@
   animation: focusPulse 1.6s ease infinite;
 }
 
-/* ---- Focus Box Estudante ---- */
-.focus-box-student {
-  position: absolute;
-  top: 42%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 250px;
-  height: 350px;
-  border: 1.5px solid rgba(92,157,245,0.7);
-  border-radius: 14px;
-  box-shadow: 0 0 0 1px rgba(92,157,245,0.12), inset 0 0 30px rgba(92,157,245,0.03);
-  z-index: 3;
-}
-
 /* ---- Pano Guide ---- */
 .pano-guide {
   position: absolute;

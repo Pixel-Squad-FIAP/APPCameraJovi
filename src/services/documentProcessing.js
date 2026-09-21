@@ -113,15 +113,20 @@ export async function rectifyDocumentImage(blob, corners) {
 
 export async function processDocumentImage(blob) {
   const image = await loadImageFromBlob(blob);
+  const sourceWidth = image.naturalWidth || image.width;
+  const sourceHeight = image.naturalHeight || image.height;
+  const scale = sourceWidth < 1400 ? Math.min(2, 1400 / Math.max(1, sourceWidth)) : 1;
   const canvas = document.createElement('canvas');
-  canvas.width = image.naturalWidth || image.width;
-  canvas.height = image.naturalHeight || image.height;
+  canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+  canvas.height = Math.max(1, Math.round(sourceHeight * scale));
 
   const context = canvas.getContext('2d', { willReadFrequently: true });
   if (!context) {
     throw new Error('Não foi possível preparar o processamento do documento.');
   }
 
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
   context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
   const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
@@ -142,15 +147,14 @@ export async function processDocumentImage(blob) {
     pixels[index + 2] = luminance;
   }
 
-  const range = Math.max(1, max - min);
   const low = Math.max(0, min - 8);
   const high = Math.min(255, max + 8);
   const adjustedRange = Math.max(1, high - low);
-  const contrastBoost = range < 80 ? 1.12 : 1.04;
+  const contrastBoost = adjustedRange < 80 ? 1.14 : 1.06;
 
   for (let index = 0; index < pixels.length; index += 4) {
     const normalized = ((pixels[index] - low) / adjustedRange) * 255;
-    const contrasted = Math.max(0, Math.min(255, ((normalized - 128) * contrastBoost) + 128));
+    const contrasted = Math.max(0, Math.min(255, ((normalized - 128) * contrastBoost) + 128 + 3));
     pixels[index] = contrasted;
     pixels[index + 1] = contrasted;
     pixels[index + 2] = contrasted;
