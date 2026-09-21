@@ -99,16 +99,16 @@ export default function Viewfinder({
       const appRect = app?.getBoundingClientRect();
       const topBarRect = topBar?.getBoundingClientRect();
       const bottomControlsRect = bottomControls?.getBoundingClientRect();
-      const availableHeight = appRect
+      const deckSeparatedHeight = appRect
         ? Math.max(1, appRect.height - (topBarRect?.height || 0) - (bottomControlsRect?.height || 0))
         : 0;
       const width = appRect?.width || element.getBoundingClientRect().width;
 
-      if (width > 0 && (availableHeight > 0 || element.getBoundingClientRect().height > 0)) {
+      if (width > 0 && (deckSeparatedHeight > 0 || appRect?.height || element.getBoundingClientRect().height > 0)) {
         const fallbackHeight = element.getBoundingClientRect().height;
-        const fixedRatioPreview = ['Foto', 'Vídeo'].includes(activeMode)
-          && Number.isFinite(ratio)
-          && ratioLabel !== 'Full';
+        const mediaMode = ['Foto', 'Vídeo'].includes(activeMode);
+        const fixedRatioPreview = mediaMode && Number.isFinite(ratio) && ratioLabel !== 'Full';
+        const availableHeight = mediaMode ? (appRect?.height || fallbackHeight) : deckSeparatedHeight;
         const idealHeight = fixedRatioPreview ? width / ratio : 0;
         const displayHeight = fixedRatioPreview
           ? Math.min(idealHeight, availableHeight || idealHeight)
@@ -437,10 +437,9 @@ export default function Viewfinder({
   const isSquareRatio = Number.isFinite(ratio)
     ? Math.abs(ratio - 1) < 0.001
     : ratio === '1:1';
-  const ratioControlsPreview = ['Foto', 'Vídeo'].includes(activeMode)
-    && Number.isFinite(ratio)
-    && ratioLabel !== 'Full';
-  const viewfinderClassName = `viewfinder ${ratioControlsPreview ? 'ratio-bound' : 'ratio-fluid'}`;
+  const mediaMode = ['Foto', 'Vídeo'].includes(activeMode);
+  const ratioControlsPreview = mediaMode && Number.isFinite(ratio) && ratioLabel !== 'Full';
+  const viewfinderClassName = `viewfinder ${mediaMode ? 'media-preview' : ''} ${ratioControlsPreview ? 'ratio-bound' : 'ratio-fluid'}`;
   const viewfinderStyle = (() => {
     const width = layoutBounds.width;
     const availableHeight = layoutBounds.availableHeight;
@@ -451,19 +450,18 @@ export default function Viewfinder({
       background: viewfinderBackground
     };
 
-    if (!ratioControlsPreview || width <= 0 || availableHeight <= 0) {
+    if (!mediaMode || width <= 0 || availableHeight <= 0) {
       return baseStyle;
     }
 
-    const idealHeight = width / ratio;
+    const idealHeight = ratioControlsPreview ? width / ratio : availableHeight;
     const constrainedHeight = Math.min(idealHeight, availableHeight);
-    const constrainedWidth = Math.min(width, constrainedHeight * ratio);
 
     return {
       ...baseStyle,
       flex: '0 0 auto',
       height: `${Math.round(constrainedHeight)}px`,
-      width: `${Math.round(constrainedWidth)}px`
+      width: `${Math.round(width)}px`
     };
   })();
 

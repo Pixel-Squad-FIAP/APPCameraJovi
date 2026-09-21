@@ -35,6 +35,11 @@
   overflow: hidden;
 }
 
+.camera-app.media-camera-stage {
+  position: relative;
+  background: #050508;
+}
+
 @media (max-width: 480px), (max-height: 820px) {
   .camera-page {
     align-items: stretch;

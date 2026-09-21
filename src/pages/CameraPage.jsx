@@ -59,6 +59,7 @@ export default function CameraPage() {
   const [viewfinderSize, setViewfinderSize] = useState({ height: 520, width: 390 });
   const ratio = RATIO_STATES[ratioIndex];
   const timerState = TIMER_STATES[timerIndex];
+  const usesMediaStage = ['Foto', 'Vídeo'].includes(activeMode);
   const viewfinderHeight = viewfinderSize.height || viewfinderHeightByRatio[ratio];
   const effectiveRatio = ratio === 'Full'
     ? (viewfinderSize.width || 390) / Math.max(1, viewfinderHeight)
@@ -195,7 +196,7 @@ export default function CameraPage() {
   return (
     <main className="camera-page" aria-label="Aplicação da câmera JOVI">
       <div className="phone">
-        <div id="camera-app" className={`camera-app ${ratioClassByValue[ratio]}`}>
+          <div id="camera-app" className={`camera-app ${usesMediaStage ? 'media-camera-stage' : ''} ${ratioClassByValue[ratio]}`}>
           <TopBar
             activeMode={activeMode}
             flashDisabled={!torchSupported || cameraStatus !== 'ready'}

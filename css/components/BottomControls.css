@@ -22,10 +22,25 @@
   border-top: 1px solid rgba(255,255,255,0.04);
 }
 
+.camera-app.media-camera-stage .bottom-controls {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  background: linear-gradient(to top, rgba(5,5,8,0.94) 0%, rgba(5,5,8,0.72) 58%, rgba(5,5,8,0) 100%);
+  border-top: none;
+  padding-top: 54px;
+}
+
 .camera-app.aspect-1-1 .bottom-controls {
   padding-top: 16px;
   justify-content: space-between;
   padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+}
+
+.camera-app.media-camera-stage.aspect-1-1 .bottom-controls {
+  padding-top: 54px;
 }
 
 
