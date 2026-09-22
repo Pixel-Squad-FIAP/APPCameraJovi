@@ -12,6 +12,8 @@ const MIN_DRAG_PX = 3;
 export default function ModeCarousel({ activeMode, onModeChange }) {
   const containerRef = useRef(null);
   const barRef = useRef(null);
+  const onModeChangeRef = useRef(onModeChange);
+  const snapToModeRef = useRef(null);
   const stateRef = useRef({
     posX: 0,
     velX: 0,
@@ -34,7 +36,12 @@ export default function ModeCarousel({ activeMode, onModeChange }) {
   }, []);
 
   useLayoutEffect(() => {
+    onModeChangeRef.current = onModeChange;
+  }, [onModeChange]);
+
+  useLayoutEffect(() => {
     stateRef.current.activeMode = activeMode;
+    snapToModeRef.current?.(activeMode);
   }, [activeMode]);
 
   useLayoutEffect(() => {
@@ -92,7 +99,7 @@ export default function ModeCarousel({ activeMode, onModeChange }) {
     const updateModeSelection = (mode) => {
       if (state.activeMode === mode) return;
       state.activeMode = mode;
-      onModeChange(mode);
+      onModeChangeRef.current(mode);
     };
     const tick = () => {
       if (state.dragging) {
@@ -132,8 +139,6 @@ export default function ModeCarousel({ activeMode, onModeChange }) {
       }
 
       setX(wrap(state.posX + state.velX));
-      const el = itemAtCenter();
-      if (el) updateModeSelection(el.getAttribute('data-mode'));
       state.rafId = window.requestAnimationFrame(tick);
     };
     const startTick = () => {
@@ -211,10 +216,18 @@ export default function ModeCarousel({ activeMode, onModeChange }) {
     container.addEventListener('click', handleClick);
 
     const init = () => {
-      const defaultIdx = MODES.indexOf(ACTIVE_DEFAULT);
+      const initialMode = state.activeMode || ACTIVE_DEFAULT;
+      const defaultIdx = Math.max(0, MODES.indexOf(initialMode));
       const targetEl = bar.children[2 * MODES.length + defaultIdx];
       if (targetEl) setX(wrap(xForEl(targetEl)));
-      updateModeSelection(ACTIVE_DEFAULT);
+    };
+
+    snapToModeRef.current = (mode) => {
+      const targetEl = closestElForMode(mode);
+      if (!targetEl) return;
+      state.snapping = true;
+      state.snapGoal = xForEl(targetEl);
+      startTick();
     };
 
     const rafA = window.requestAnimationFrame(() => {
@@ -234,8 +247,9 @@ export default function ModeCarousel({ activeMode, onModeChange }) {
       if (state.rafId) window.cancelAnimationFrame(state.rafId);
       if (state.initRafA) window.cancelAnimationFrame(state.initRafA);
       if (state.initRafB) window.cancelAnimationFrame(state.initRafB);
+      if (snapToModeRef.current) snapToModeRef.current = null;
     };
-  }, [onModeChange]);
+  }, []);
 
   return (
     <div className="mode-bar-container" ref={containerRef}>
