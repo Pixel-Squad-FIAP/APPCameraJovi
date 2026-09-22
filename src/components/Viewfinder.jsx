@@ -113,9 +113,7 @@ export default function Viewfinder({
         const displayHeight = fixedRatioPreview
           ? Math.min(idealHeight, availableHeight || idealHeight)
           : availableHeight || fallbackHeight;
-        const displayWidth = fixedRatioPreview
-          ? Math.min(width, displayHeight * ratio)
-          : width;
+        const displayWidth = width;
         const size = {
           height: Math.round(displayHeight),
           width: Math.round(displayWidth)
