@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { heroFacts, prototypeStudentMode } from './landingData.js';
+import { heroFacts, heroImage } from './landingData.js';
 
 export default function LandingHero() {
   return (
@@ -36,8 +36,8 @@ export default function LandingHero() {
       </div>
 
       <figure className="mx-0 justify-self-center rounded-md border border-[#303740] bg-[#0a0b0e] p-2.5 [width:min(300px,76vw)] lg:w-[340px]">
-        <img className="block h-auto w-full rounded-xl border border-[#303740]" src={prototypeStudentMode} alt="Tela real do protótipo JOVI Camera exibindo o Modo Estudante com ações de resumir, anotar e exportar." />
-        <figcaption className="mt-3 text-center text-sm text-[#899198]">Screenshot real do protótipo da Sprint 2.</figcaption>
+        <img className="block h-auto w-full rounded-xl border border-[#303740]" src={heroImage} alt="Tela real da JOVI Camera no modo Documento, com a folha enquadrada pela moldura verde." />
+        <figcaption className="mt-3 text-center text-sm text-[#899198]">Tela real do app — modo Documento.</figcaption>
       </figure>
     </section>
   );

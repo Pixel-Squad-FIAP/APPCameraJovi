@@ -14,7 +14,7 @@ export default function SolutionSection() {
 
           <article className="rounded border border-[#49657f] bg-[rgba(110,163,223,0.06)] p-[18px]">
             <h3 className="mb-2 text-base font-bold leading-tight text-[#f0f0ec]">Solução</h3>
-            <p className="m-0 text-[#bec4c8]">A JOVI Camera propõe uma experiência de câmera que conecta captura a recursos de produtividade acadêmica, com destaque para o Modo Estudante.</p>
+            <p className="m-0 text-[#bec4c8]">A JOVI Camera conecta a captura à produtividade acadêmica: reconhece a cena, digitaliza documentos, extrai o texto, resume e organiza tudo por matéria — com o Modo Estudante como destaque.</p>
           </article>
         </div>
       </div>

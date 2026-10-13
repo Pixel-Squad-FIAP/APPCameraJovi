@@ -1,10 +1,11 @@
-import prototypeCamera from '../../assets/landing/prototype-camera.png';
-import prototypeDocumentExport from '../../assets/landing/prototype-document-export.png';
-import prototypeDocumentMode from '../../assets/landing/prototype-document-mode.png';
-import prototypeExport from '../../assets/landing/prototype-export.png';
-import prototypeNotes from '../../assets/landing/prototype-notes.png';
-import prototypeStudentMode from '../../assets/landing/prototype-student-mode.png';
-import prototypeSummary from '../../assets/landing/prototype-summary.png';
+import appCameraSuggestion from '../../assets/landing/app-camera-suggestion.webp';
+import appDocumentMode from '../../assets/landing/app-document-mode.webp';
+import appExport from '../../assets/landing/app-export.webp';
+import appGallery from '../../assets/landing/app-gallery.webp';
+import appNotes from '../../assets/landing/app-notes.webp';
+import appOcrText from '../../assets/landing/app-ocr-text.webp';
+import appStudentMode from '../../assets/landing/app-student-mode.webp';
+import appSummary from '../../assets/landing/app-summary.webp';
 
 export const navItems = [
   { href: '#solucao', label: 'A Solução' },
@@ -15,9 +16,9 @@ export const navItems = [
 ];
 
 export const heroFacts = [
-  { label: 'Entrega', value: 'Landing Page Sprint 3' },
-  { label: 'Base visual', value: 'Protótipo Sprint 2' },
-  { label: 'Status', value: 'Proposta acadêmica' }
+  { label: 'Entrega', value: 'Sprint 4 · React + Tailwind' },
+  { label: 'Câmera', value: 'Real, no navegador' },
+  { label: 'Status', value: 'Protótipo funcional' }
 ];
 
 export const workflowSteps = [
@@ -29,12 +30,12 @@ export const workflowSteps = [
   {
     number: '2',
     title: 'Transforme',
-    description: 'Acesse recursos propostos para digitalização, extração de conteúdo, resumo e anotação.'
+    description: 'O texto da imagem é extraído (OCR) no próprio aparelho; gere um resumo e faça anotações.'
   },
   {
     number: '3',
     title: 'Organize',
-    description: 'Mantenha o conteúdo mais fácil de utilizar, organizar ou exportar.'
+    description: 'Separe por matéria, busque pelo texto e exporte em PDF, TXT ou para o Google Docs.'
   }
 ];
 
@@ -42,47 +43,47 @@ export const features = [
   {
     category: 'Contexto',
     title: 'Reconhecimento de contexto',
-    description: 'Identificação proposta de cenários como documento, pessoa ou baixa iluminação.'
+    description: 'A câmera analisa a cena e sugere o modo Documento ou Noite — você decide se aceita.'
   },
   {
     category: 'Captura',
     title: 'Assistência de captura',
-    description: 'Sugestões visuais para luz, enquadramento e uso do modo adequado.'
+    description: 'Molduras de enquadramento, grade, foco por toque, exposição, timer e flash.'
   },
   {
     category: 'Captura',
     title: 'Captura simplificada',
-    description: 'Fluxo pensado para registrar imagens com menos ajustes manuais.'
+    description: 'Um toque para capturar; sem análise confiável, a câmera segue no automático.'
   },
   {
     category: 'Documento',
     title: 'Digitalização de documentos',
-    description: 'Modo documento com enquadramento para materiais impressos ou folhas.'
+    description: 'Recorta pela moldura e deixa o papel branco e o texto nítido.'
   },
   {
     category: 'Texto',
     title: 'Extração de texto/OCR',
-    description: 'Proposta de transformar imagens com texto em conteúdo editável.'
+    description: 'Tesseract.js em português, rodando no navegador, com progresso e revisão do texto.'
   },
   {
     category: 'Estudo',
     title: 'Resumo acadêmico',
-    description: 'Interface de resumo apresentada como parte do Modo Estudante.'
+    description: 'Resumo extrativo com as frases mais relevantes do próprio texto, curto ou médio.'
   },
   {
     category: 'Estudo',
     title: 'Anotações',
-    description: 'Área para complementar o texto reconhecido com observações do estudante.'
+    description: 'Notas por captura, salvas automaticamente junto com a imagem.'
   },
   {
     category: 'Arquivo',
     title: 'Organização de conteúdo',
-    description: 'Separação e uso mais prático dos registros acadêmicos capturados.'
+    description: 'Álbuns por matéria, busca no texto extraído e filtros por tipo.'
   },
   {
     category: 'Arquivo',
     title: 'Exportação',
-    description: 'Fluxo visual proposto para formatos como PDF, DOCX e TXT, sem integração real nesta entrega.'
+    description: 'PDF, TXT, imagem original, compartilhamento nativo e envio ao Google Docs.'
   }
 ];
 
@@ -107,39 +108,44 @@ export const audiencePains = [
 
 export const galleryImages = [
   {
-    src: prototypeCamera,
-    alt: 'Tela inicial do protótipo JOVI Camera em modo Foto.',
-    caption: 'Câmera principal'
+    src: appCameraSuggestion,
+    alt: 'Câmera no modo Foto sugerindo o modo Documento ao reconhecer uma folha impressa.',
+    caption: 'Sugestão de modo pela cena'
   },
   {
-    src: prototypeStudentMode,
-    alt: 'Tela do protótipo no Modo Estudante com botões Resumir, Anotar e Exportar.',
-    caption: 'Modo Estudante'
+    src: appDocumentMode,
+    alt: 'Modo Documento com a moldura verde indicando que a folha está enquadrada.',
+    caption: 'Modo Documento enquadrado'
   },
   {
-    src: prototypeSummary,
-    alt: 'Tela do protótipo exibindo resumo gerado dentro do Modo Estudante.',
+    src: appOcrText,
+    alt: 'Texto da folha extraído por OCR e pronto para edição, com contagem de palavras e confiança.',
+    caption: 'Texto extraído (OCR)'
+  },
+  {
+    src: appSummary,
+    alt: 'Resumo gerado com as frases principais do texto e os termos mais frequentes.',
     caption: 'Resumo acadêmico'
   },
   {
-    src: prototypeNotes,
-    alt: 'Tela do protótipo com texto reconhecido e campo de anotação.',
-    caption: 'Anotação'
+    src: appNotes,
+    alt: 'Anotações do estudante vinculadas à captura, salvas automaticamente.',
+    caption: 'Anotações'
   },
   {
-    src: prototypeExport,
-    alt: 'Tela do protótipo com texto extraído e opções de exportação em PDF, DOCX ou TXT.',
-    caption: 'Exportação de texto'
+    src: appStudentMode,
+    alt: 'Modo Estudante com moldura de slide e o álbum de destino das capturas.',
+    caption: 'Modo Estudante'
   },
   {
-    src: prototypeDocumentMode,
-    alt: 'Tela do protótipo em Modo Documento com moldura de digitalização.',
-    caption: 'Modo Documento'
+    src: appExport,
+    alt: 'Opções de exportação: PDF, texto, imagem, copiar, Google Docs e compartilhar.',
+    caption: 'Exportação'
   },
   {
-    src: prototypeDocumentExport,
-    alt: 'Tela do protótipo com opções de exportação de documento.',
-    caption: 'Exportação de documento'
+    src: appGallery,
+    alt: 'Galeria com busca, filtros por tipo e álbuns por matéria.',
+    caption: 'Galeria por matéria'
   }
 ];
 
@@ -151,4 +157,4 @@ export const teamMembers = [
   { name: 'Renan Queiroz', rm: 'RM 569077' }
 ];
 
-export { prototypeStudentMode };
+export { appDocumentMode as heroImage };

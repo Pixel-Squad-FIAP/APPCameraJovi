@@ -4,7 +4,7 @@ import { galleryImages } from './landingData.js';
 function GalleryFigure({ alt, caption, src }) {
   return (
     <figure className="m-0 rounded border border-[#232a32] bg-[#0b0d10] p-2.5 pb-3">
-      <img className="block aspect-[9/16] w-full rounded-sm bg-[#05060a] object-cover" src={src} alt={alt} />
+      <img className="block aspect-[390/844] w-full rounded-sm bg-[#05060a] object-cover object-top" loading="lazy" src={src} alt={alt} />
       <figcaption className="mt-3 text-center text-sm text-[#899198]">{caption}</figcaption>
     </figure>
   );
@@ -17,10 +17,10 @@ export default function LandingGallery() {
         <SectionHeading
           eyebrow="Galeria"
           id="galeria-title"
-          title="Telas reais capturadas do protótipo."
-          intro="A seção abaixo funciona como uma folha de contato: cada tela vem do protótipo HTML/CSS da câmera, capturada no navegador."
+          title="Telas reais da câmera em funcionamento."
+          intro="Capturas do app React rodando no navegador: da sugestão de modo ao texto extraído, resumo, organização e exportação."
         />
-        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
           {galleryImages.map((image) => (
             <GalleryFigure {...image} key={image.caption} />
           ))}

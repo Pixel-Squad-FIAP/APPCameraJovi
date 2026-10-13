@@ -9,6 +9,7 @@ function isValidCapture(item) {
     && typeof item.summary === 'string'
     && typeof item.capturedAt === 'string'
     && Array.isArray(item.tags)
+    && (item.text === undefined || typeof item.text === 'string')
   );
 }
 
