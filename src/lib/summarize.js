@@ -8,6 +8,7 @@ ha isso isto ja la lhe lhes mais mas me mesmo meu minha muito na nas nem no nos 
 o os ou para pela pelas pelo pelos por qual quando que quem se sem ser seu seus sua suas sao so tambem
 te tem tinha tu tua um uma umas uns voce voces vos sobre ser sendo pode podem assim onde ainda apenas
 cada outro outra outros outras todo toda todos todas tal tais the of and to in is
+ocorre ocorrem acontece existe existem deve devem faz fazem possui possuem forma partir ate bem
 `.trim().split(/\s+/));
 
 export const SUMMARY_LENGTHS = {
@@ -89,13 +90,21 @@ export function summarize(text, length = 'curto') {
     .sort((a, b) => a.index - b.index)
     .map((item) => item.sentence);
 
+  // Termos principais: os mais frequentes no texto, mas só os que aparecem nas frases do resumo.
+  const summaryTokens = new Set(selected.flatMap(tokenize));
   const keywords = [...frequencies.entries()]
-    .filter(([, frequency]) => frequency > 1)
+    .filter(([token, frequency]) => frequency > 1 && summaryTokens.has(token))
     .sort((a, b) => b[1] - a[1])
     .slice(0, 6)
     .map(([token]) => display.get(token));
 
   return { sentences: selected, keywords, sourceSentences: sentences.length };
+}
+
+// Garante que só termos presentes nas frases do resumo sejam exibidos (inclusive em resumos antigos).
+export function keywordsInSummary(summary) {
+  const summaryTokens = new Set((summary?.sentences ?? []).flatMap(tokenize));
+  return (summary?.keywords ?? []).filter((keyword) => summaryTokens.has(normalizeWord(keyword)));
 }
 
 // Hash simples para saber se o resumo ainda corresponde ao texto atual.

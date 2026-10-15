@@ -30,7 +30,7 @@ Pixel Squad - 1ESPV
 - **idb / IndexedDB** (armazenamento local de fotos, vídeos e textos)
 - **localStorage** (sessão de demonstração e preferências)
 - **Web APIs**: MediaDevices/getUserMedia (câmera), MediaRecorder (vídeo), Canvas (processamento de imagem), Clipboard, Web Share
-- **Vercel Functions** (API própria em `api/captures.js`)
+- **API pública da Wikipédia** (REST, em português) para explicar os termos do resumo
 - **Vitest** (testes das funções de processamento)
 
 ## Como instalar
@@ -47,7 +47,7 @@ npm install
 npm run dev
 ```
 
-Acesse `http://127.0.0.1:5173`. O mesmo comando também sobe a **API** (`/api/captures`): um plugin no `vite.config.js` executa localmente o handler da Vercel Function, sem precisar da Vercel CLI. Não há outro servidor para iniciar.
+Acesse `http://127.0.0.1:5173`. O projeto não tem back-end próprio: não há outro servidor para iniciar. A única API consumida é a pública da Wikipédia, acessada direto do navegador (precisa de internet).
 
 Outros comandos:
 
@@ -84,7 +84,6 @@ Qualquer e-mail com `@` e senha com 6 ou mais caracteres é aceito. Não há cad
 | `/camera` | privada | Câmera |
 | `/galeria` | privada | Galeria com busca e filtros (`?album=` e `?tipo=`) |
 | `/galeria/:id` | privada | Detalhe da captura: texto, resumo, notas, organização e exportação |
-| `/api/captures` | API | Vercel Function com conteúdos de estudo de exemplo (GET) |
 
 ## Funcionalidades
 
@@ -107,42 +106,42 @@ Qualquer e-mail com `@` e senha com 6 ou mais caracteres é aceito. Não há cad
 
 - Busca no título, no texto extraído e nas anotações; filtros por tipo e por álbum (matéria).
 - **Texto (OCR)**: progresso por etapa, cancelar, tentar de novo, edição com salvamento automático, aviso de baixa confiança, digitação manual.
-- **Resumo** extrativo (curto/médio) com termos principais, que avisa quando o texto mudou depois do resumo.
+- **Resumo** extrativo (curto/médio), que avisa quando o texto mudou depois do resumo. Os **termos principais** que aparecem no resumo podem ser tocados para ver a explicação da Wikipédia.
 - **Notas** por captura e **Organizar** (título, álbum, criação de álbum, metadados).
 - **Exportar**: PDF (imagem + resumo + texto + notas), TXT, arquivo original, copiar, abrir no Google Docs (copia e abre um documento novo) e compartilhamento nativo do aparelho.
 - Excluir com confirmação e opção **Desfazer**.
-- Seção **Exemplos de estudo** consumindo a API própria.
 
 ## API
 
+O app consome a **API pública da Wikipédia em português** (sem chave de acesso):
+
 ```text
-GET /api/captures
+GET https://pt.wikipedia.org/api/rest_v1/page/summary/{termo}
 ```
 
-Retorna conteúdos acadêmicos de exemplo (`id`, `title`, `type`, `summary`, `capturedAt`, `tags`, `text`). Outros métodos retornam `405 Method Not Allowed`. Os dados são fictícios.
+Na aba **Resumo** de uma captura, cada termo principal (sempre uma palavra que aparece nas frases do resumo) abre a explicação do artigo correspondente, com descrição, imagem e link para o artigo completo. O app trata carregamento, termo sem artigo (404 ou página de desambiguação) e falha de conexão com opção de tentar novamente. As respostas ficam em cache durante a sessão. Código: `src/services/wikipediaApi.js` e `src/hooks/useTermDefinition.js`.
 
 ## Persistência
 
 - **IndexedDB** (`jovi-camera`): fotos, vídeos, miniaturas, texto extraído, resumo e anotações.
 - **localStorage**: `jovi.auth.session` (sessão demonstrativa) e `jovi.preferences` (último modo, câmera, proporção, timer, grade, sugestões, álbuns, tutorial visto).
 
-Tudo fica apenas no navegador do usuário. Nenhuma imagem ou texto é enviado para servidores.
+Tudo fica apenas no navegador do usuário. Nenhuma imagem ou texto é enviado para servidores; à Wikipédia só vai o termo consultado.
 
 ## Estrutura
 
 ```text
-api/                 Vercel Function (API própria)
 src/
   pages/             Landing, Login, Câmera, Galeria, Detalhe
   components/
     camera/          TopBar, Viewfinder, ModeSelector, ShutterBar, sheets da câmera
     capture/         Painéis do detalhe (Texto, Resumo, Notas, Organizar, Exportar)
-    library/         Cards, seletor de álbum, exemplos da API
+    library/         Cards e seletor de álbum
     landing/         Seções da Landing Page
     ui/              Botões, Sheet, Toast, Chip, feedback
   hooks/             Hooks customizados (câmera, cena, OCR, gravação, exportação, autosave…)
   lib/               Lógica pura: processamento de imagem, OCR, resumo, análise de cena
-  services/          IndexedDB, preferências (localStorage), cliente da API
+  services/          IndexedDB, preferências (localStorage), cliente da API da Wikipédia
   library/ feedback/ auth/   Contextos (capturas, toasts, sessão)
   data/modes.js      Configuração de cada modo da câmera
 ```

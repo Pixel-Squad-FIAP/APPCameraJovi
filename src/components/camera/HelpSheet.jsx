@@ -35,7 +35,7 @@ export default function HelpSheet({ activeMode, onClose, onShowTutorial, open })
       <h3 className="mt-4 text-sm font-bold">Privacidade</h3>
       <p className="mt-2 text-sm text-white/65">
         Fotos, vídeos, textos e anotações ficam salvos apenas neste navegador (IndexedDB). O OCR e o resumo rodam no próprio
-        aparelho; só o modelo de idioma do OCR é baixado da internet na primeira vez. Nada é enviado para servidores.
+        aparelho; só o modelo de idioma do OCR é baixado da internet na primeira vez. Suas imagens e textos não são enviados para servidores — ao tocar em um termo do resumo, apenas a palavra é consultada na Wikipédia.
       </p>
     </Sheet>
   );

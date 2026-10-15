@@ -1,6 +1,5 @@
 import { useDeferredValue, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import ApiExamples from '../components/library/ApiExamples.jsx';
 import CaptureCard from '../components/library/CaptureCard.jsx';
 import Button, { focusRing } from '../components/ui/Button.jsx';
 import Chip from '../components/ui/Chip.jsx';
@@ -140,7 +139,6 @@ export default function LibraryPage() {
           )}
         </section>
 
-        <ApiExamples />
       </main>
     </div>
   );

@@ -28,6 +28,8 @@ describe('summarize', () => {
     const positions = result.sentences.map((sentence) => STUDY_TEXT.replace(/\s+/g, ' ').indexOf(sentence));
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);
     expect(result.keywords).toContain('termodinâmica');
+    const summaryText = result.sentences.join(' ').toLowerCase();
+    expect(result.keywords.every((keyword) => summaryText.includes(keyword))).toBe(true);
   });
 
   it('resumo médio tem pelo menos o tamanho do curto', () => {
