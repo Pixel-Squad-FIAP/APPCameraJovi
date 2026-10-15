@@ -15,7 +15,6 @@ export function useCameraStream({ facingMode, enabled }) {
   const [status, setStatus] = useState('idle');
   const [attempt, setAttempt] = useState(0);
   const [torchSupported, setTorchSupported] = useState(false);
-  const [videoAspect, setVideoAspect] = useState(null);
   const [pageVisible, setPageVisible] = useState(() => document.visibilityState !== 'hidden');
 
   useEffect(() => {
@@ -74,20 +73,6 @@ export function useCameraStream({ facingMode, enabled }) {
     };
   }, [enabled, facingMode, pageVisible, attempt]);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return undefined;
-    const updateAspect = () => {
-      if (video.videoWidth && video.videoHeight) setVideoAspect(video.videoWidth / video.videoHeight);
-    };
-    video.addEventListener('loadedmetadata', updateAspect);
-    video.addEventListener('resize', updateAspect);
-    return () => {
-      video.removeEventListener('loadedmetadata', updateAspect);
-      video.removeEventListener('resize', updateAspect);
-    };
-  }, []);
-
   const setTorch = useCallback(async (on) => {
     const [track] = streamRef.current?.getVideoTracks() ?? [];
     if (!track || !torchSupported) return false;
@@ -101,5 +86,5 @@ export function useCameraStream({ facingMode, enabled }) {
 
   const retry = useCallback(() => setAttempt((current) => current + 1), []);
 
-  return { videoRef, streamRef, status, retry, setTorch, torchSupported, videoAspect };
+  return { videoRef, streamRef, status, retry, setTorch, torchSupported };
 }

@@ -72,7 +72,7 @@ export async function captureFromFile(file, { modeId }) {
   return finalize(applyModeProcessing(canvas, mode, { useGuide: false }));
 }
 
-export async function thumbnailFromVideo(video) {
-  const canvas = drawSourceFrame(video, {});
+export async function thumbnailFromVideo(video, { aspect, zoom = 1, mirror = false } = {}) {
+  const canvas = drawSourceFrame(video, { aspect, zoom, mirror });
   return createThumbnail(canvas);
 }

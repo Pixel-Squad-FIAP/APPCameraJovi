@@ -96,7 +96,7 @@ Qualquer e-mail com `@` e senha com 6 ou mais caracteres é aceito. Não há cad
   - **Foto**: modo automático.
   - **Retrato**: centro nítido e fundo desfocado (efeito simulado por software).
   - **Noite**: média de 4 quadros para reduzir ruído e clarear a imagem.
-  - **Vídeo**: MediaRecorder, com áudio quando permitido.
+  - **Vídeo**: grava já recortado na proporção escolhida (3:4, 9:16 ou 1:1), com zoom ao vivo e áudio quando o microfone é permitido.
 - **Sugestão contextual**: a análise de luminância e de "papel com texto" sugere Noite ou Documento. O usuário aceita ou ignora, e a câmera nunca troca de modo sozinha.
 - Timer (3 s/10 s, cancelável), flash (lanterna quando o aparelho suporta, senão flash de tela), grade, proporção 3:4/9:16/1:1, zoom digital 1x/2x/3x, foco por toque com ajuste de exposição.
 - Gestos e atalhos: deslizar no visor troca de modo; no computador, `Espaço` captura e `←`/`→` trocam o modo.

@@ -85,7 +85,7 @@ export default function CameraPage() {
   const isFront = facingMode === 'user';
   const camera = useCameraStream({ facingMode, enabled: onboardingDone });
   const ready = camera.status === 'ready';
-  const recorder = useVideoRecorder(camera.streamRef);
+  const recorder = useVideoRecorder();
   const countdown = useCountdown();
   const scene = useSceneAnalysis(camera.videoRef, {
     enabled: ready && !recorder.isRecording && !busy,
@@ -94,7 +94,9 @@ export default function CameraPage() {
   });
 
   const locked = recorder.isRecording || countdown.isRunning;
-  const aspect = mode.isVideo ? camera.videoAspect ?? 9 / 16 : ratioToAspect(ratio);
+  const aspect = ratioToAspect(ratio);
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
   const docAligned = mode.processing === 'document' && (scene.metrics?.paperRatio ?? 0) > DOCUMENT_ALIGNED_RATIO;
   const captureAlbum = mode.afterCapture === 'stay' ? studyAlbum : DEFAULT_ALBUM;
 
@@ -185,18 +187,29 @@ export default function CameraPage() {
     }
 
     if (!recorder.isRecording) {
+      setBusy(true);
+      setProcessingLabel('Preparando gravação…');
       try {
         if (flashOn && !isFront) await camera.setTorch(true);
-        await recorder.start();
+        await recorder.start({
+          video: camera.videoRef.current,
+          aspect,
+          mirror: isFront && mirrorFront,
+          // o zoom pode mudar durante a gravação
+          getZoom: () => zoomRef.current
+        });
       } catch (error) {
         showNotification(error?.message || 'Não foi possível iniciar a gravação.', { tone: 'error' });
+      } finally {
+        setBusy(false);
+        setProcessingLabel('');
       }
       return;
     }
 
     setBusy(true);
     try {
-      const thumbBlob = await thumbnailFromVideo(camera.videoRef.current);
+      const thumbBlob = await thumbnailFromVideo(camera.videoRef.current, { aspect, zoom, mirror: isFront && mirrorFront });
       const result = await recorder.stop();
       if (flashOn) camera.setTorch(false);
       if (!result?.blob?.size) throw new Error('A gravação ficou vazia.');
@@ -207,8 +220,8 @@ export default function CameraPage() {
         result: {
           blob: result.blob,
           thumbBlob,
-          width: camera.videoRef.current?.videoWidth,
-          height: camera.videoRef.current?.videoHeight,
+          width: result.width,
+          height: result.height,
           duration: result.duration
         }
       });
@@ -218,7 +231,7 @@ export default function CameraPage() {
     } finally {
       setBusy(false);
     }
-  }, [camera, flashOn, isFront, mode, navigate, recorder, showNotification, storeCapture]);
+  }, [aspect, camera, flashOn, isFront, mirrorFront, mode, navigate, recorder, showNotification, storeCapture, zoom]);
 
   const handleShutter = useCallback(() => {
     if (countdown.isRunning) {
@@ -301,7 +314,7 @@ export default function CameraPage() {
           onRatioChange={() => setRatio(nextOption(RATIO_OPTIONS, ratio))}
           onTimerChange={() => setTimer(nextOption(TIMER_OPTIONS, timer))}
           ratio={ratio}
-          showRatio={!mode.isVideo}
+          showRatio
           showTimer={!mode.isVideo}
           timer={timer}
         />
