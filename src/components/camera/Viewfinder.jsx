@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { ZOOM_OPTIONS } from '../../data/modes.js';
 import { formatDuration } from '../../lib/format.js';
-import { exposureToBrightness, guideRectPercent } from '../../lib/imageProcessing.js';
+import { useElementSize } from '../../hooks/useElementSize.js';
+import { computeViewfinderLayout, exposureToBrightness, guideRectPercent } from '../../lib/imageProcessing.js';
 import { focusRing } from '../ui/Button.jsx';
 import Icon from '../ui/Icon.jsx';
 
@@ -36,6 +37,8 @@ export default function Viewfinder({
   elapsed,
   exposure,
   grid,
+  insetBottom,
+  insetTop,
   isRecording,
   mirror,
   mode,
@@ -55,6 +58,9 @@ export default function Viewfinder({
   const [hintVisible, setHintVisible] = useState(Boolean(mode.hint));
   const pointerStartRef = useRef(null);
   const hideTimerRef = useRef(null);
+  const containerRef = useRef(null);
+  const container = useElementSize(containerRef);
+  const layout = computeViewfinderLayout({ width: container.width, height: container.height, aspect, insetTop, insetBottom });
 
   useEffect(() => {
     if (!mode.hint) {
@@ -102,12 +108,12 @@ export default function Viewfinder({
   const suggestionContent = suggestion ? SUGGESTION_TEXT[suggestion.type] : null;
 
   return (
-    <div className="relative grid min-h-0 flex-1 place-items-center [container-type:size]">
+    <div className="absolute inset-0 z-0 overflow-hidden" ref={containerRef}>
       <div
-        className="relative touch-pan-y overflow-hidden bg-ink-850 select-none"
+        className={`absolute touch-pan-y overflow-hidden bg-ink-850 select-none ${container.width ? 'transition-[top,left,width,height] duration-300 ease-out' : 'opacity-0'}`}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
-        style={{ aspectRatio: aspect, width: `min(100cqw, calc(100cqh * ${aspect}))` }}
+        style={{ top: layout.top, left: layout.left, width: layout.width, height: layout.height }}
       >
         <video
           aria-label="Visualização da câmera"
@@ -176,66 +182,66 @@ export default function Viewfinder({
         )}
 
         {processingLabel && (
-          <span className="pointer-events-none absolute inset-x-0 bottom-16 mx-auto w-max rounded-full bg-black/70 px-3 py-1.5 text-xs font-semibold">
+          <span className="pointer-events-none absolute inset-x-0 top-14 mx-auto w-max rounded-full bg-black/70 px-3 py-1.5 text-xs font-semibold">
             {processingLabel}
           </span>
         )}
 
         {captureFlashKey > 0 && <span aria-hidden="true" className="pointer-events-none absolute inset-0 animate-flash bg-white opacity-0" key={captureFlashKey} />}
 
-        {ready && (
-          <div className="absolute inset-x-0 bottom-3 flex flex-col items-center gap-2">
-            {hintVisible && !suggestionContent && !isRecording && !controlsVisible && (
-              <span className="animate-fade-in rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white/90">{mode.hint}</span>
-            )}
-            {controlsVisible && !mode.isVideo && (
-              <label
-                className="flex animate-fade-in items-center gap-2 rounded-full bg-black/60 px-3 py-1.5 backdrop-blur"
-                onPointerDown={(event) => event.stopPropagation()}
-                onPointerUp={(event) => event.stopPropagation()}
-              >
-                <Icon className="text-amber-300" name="sparkles" size={14} />
-                <span className="sr-only">Exposição</span>
-                <input
-                  aria-valuetext={`Exposição ${exposure > 0 ? '+' : ''}${exposure.toFixed(1)}`}
-                  className="h-1 w-32 accent-amber-300"
-                  max="1"
-                  min="-1"
-                  onChange={(event) => {
-                    onExposureChange(Number(event.target.value));
-                    keepControlsVisible();
-                  }}
-                  step="0.1"
-                  type="range"
-                  value={exposure}
-                />
-                <span className="w-8 text-right text-xs tabular-nums text-white/80">{exposure > 0 ? '+' : ''}{exposure.toFixed(1)}</span>
-              </label>
-            )}
-            <div
-              className="flex items-center gap-1 rounded-full bg-black/45 p-1 backdrop-blur"
-              onPointerDown={(event) => event.stopPropagation()}
-              onPointerUp={(event) => event.stopPropagation()}
-              role="group"
-              aria-label="Zoom digital"
-            >
-              {ZOOM_OPTIONS.map((level) => (
-                <button
-                  aria-pressed={zoom === level}
-                  className={`grid size-9 place-items-center rounded-full text-xs font-bold transition-colors ${zoom === level ? 'bg-white/20 text-amber-300' : 'text-white/85 hover:bg-white/10'} ${focusRing}`}
-                  key={level}
-                  onClick={() => onZoomChange(level)}
-                  type="button"
-                >
-                  {level}x
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {children}
       </div>
+
+      {ready && (
+        <div className="pointer-events-none absolute inset-x-0 z-10 flex flex-col items-center gap-2 transition-[bottom] duration-300 ease-out" style={{ bottom: layout.controlsBottom }}>
+          {hintVisible && !suggestionContent && !isRecording && !controlsVisible && (
+            <span className="animate-fade-in rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white/90">{mode.hint}</span>
+          )}
+          {controlsVisible && !mode.isVideo && (
+            <label
+              className="pointer-events-auto flex animate-fade-in items-center gap-2 rounded-full bg-black/60 px-3 py-1.5 backdrop-blur"
+              onPointerDown={(event) => event.stopPropagation()}
+              onPointerUp={(event) => event.stopPropagation()}
+            >
+              <Icon className="text-amber-300" name="sparkles" size={14} />
+              <span className="sr-only">Exposição</span>
+              <input
+                aria-valuetext={`Exposição ${exposure > 0 ? '+' : ''}${exposure.toFixed(1)}`}
+                className="h-1 w-32 accent-amber-300"
+                max="1"
+                min="-1"
+                onChange={(event) => {
+                  onExposureChange(Number(event.target.value));
+                  keepControlsVisible();
+                }}
+                step="0.1"
+                type="range"
+                value={exposure}
+              />
+              <span className="w-8 text-right text-xs tabular-nums text-white/80">{exposure > 0 ? '+' : ''}{exposure.toFixed(1)}</span>
+            </label>
+          )}
+          <div
+            className="pointer-events-auto flex items-center gap-1 rounded-full bg-black/45 p-1 backdrop-blur"
+            onPointerDown={(event) => event.stopPropagation()}
+            onPointerUp={(event) => event.stopPropagation()}
+            role="group"
+            aria-label="Zoom digital"
+          >
+            {ZOOM_OPTIONS.map((level) => (
+              <button
+                aria-pressed={zoom === level}
+                className={`grid size-9 place-items-center rounded-full text-xs font-bold transition-colors ${zoom === level ? 'bg-white/20 text-amber-300' : 'text-white/85 hover:bg-white/10'} ${focusRing}`}
+                key={level}
+                onClick={() => onZoomChange(level)}
+                type="button"
+              >
+                {level}x
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

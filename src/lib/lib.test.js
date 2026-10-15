@@ -4,6 +4,7 @@ import {
   averagePixelData,
   computeCropRect,
   computeGuideRect,
+  computeViewfinderLayout,
   ratioToAspect
 } from './imageProcessing.js';
 import { cleanOcrText, countWords, titleFromText } from './ocrText.js';
@@ -74,6 +75,21 @@ describe('imageProcessing', () => {
     expect(rect.height).toBeCloseTo(540);
     expect(rect.width).toBeCloseTo(405);
     expect(rect.x).toBeCloseTo((1920 - 405) / 2);
+  });
+
+  it('visor ocupa a largura toda em qualquer proporção, como no celular', () => {
+    const screen = { width: 390, height: 844, insetTop: 56, insetBottom: 185 };
+    const r34 = computeViewfinderLayout({ ...screen, aspect: 3 / 4 });
+    const r11 = computeViewfinderLayout({ ...screen, aspect: 1 });
+    const r916 = computeViewfinderLayout({ ...screen, aspect: 9 / 16 });
+    [r34, r11, r916].forEach((layout) => {
+      expect(layout.width).toBe(390);
+      expect(layout.left).toBe(0);
+    });
+    expect(r34.height).toBeCloseTo(520);
+    expect(r11.top + r11.height / 2).toBeCloseTo(r34.top + r34.height / 2); // mesmo centro
+    expect(r916.top).toBe(56); // começa logo abaixo da barra superior
+    expect(r916.top + r916.height).toBeLessThanOrEqual(844);
   });
 
   it('moldura cabe dentro do quadro', () => {

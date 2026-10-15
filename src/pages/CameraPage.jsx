@@ -17,6 +17,7 @@ import { DEFAULT_ALBUM, getMode, MODES, RATIO_OPTIONS, TIMER_OPTIONS } from '../
 import { useToast } from '../feedback/ToastContext.jsx';
 import { useCameraStream } from '../hooks/useCameraStream.js';
 import { useCountdown } from '../hooks/useCountdown.js';
+import { useElementSize } from '../hooks/useElementSize.js';
 import { usePreference } from '../hooks/usePreference.js';
 import { useSceneAnalysis } from '../hooks/useSceneAnalysis.js';
 import { useVideoRecorder } from '../hooks/useVideoRecorder.js';
@@ -75,6 +76,10 @@ export default function CameraPage() {
   const [sheet, setSheet] = useState(null);
   const fileInputRef = useRef(null);
   const takePhotoRef = useRef(null);
+  const topBarRef = useRef(null);
+  const bottomBarRef = useRef(null);
+  const topBarSize = useElementSize(topBarRef);
+  const bottomBarSize = useElementSize(bottomBarRef);
 
   const mode = getMode(modeId);
   const isFront = facingMode === 'user';
@@ -283,22 +288,24 @@ export default function CameraPage() {
 
   return (
     <CameraShell aside={<CameraAside mode={mode} />}>
-      <TopBar
-        disabled={locked}
-        flashLabel={!isFront && camera.torchSupported ? 'Flash (lanterna)' : 'Flash de tela'}
-        flashOn={flashOn}
-        grid={grid}
-        onFlashToggle={() => setFlashOn((current) => !current)}
-        onGridToggle={() => setGrid((current) => !current)}
-        onHelp={() => setSheet('help')}
-        onMenu={() => setSheet('settings')}
-        onRatioChange={() => setRatio(nextOption(RATIO_OPTIONS, ratio))}
-        onTimerChange={() => setTimer(nextOption(TIMER_OPTIONS, timer))}
-        ratio={ratio}
-        showRatio={!mode.isVideo}
-        showTimer={!mode.isVideo}
-        timer={timer}
-      />
+      <div className="relative z-20 shrink-0" ref={topBarRef}>
+        <TopBar
+          disabled={locked}
+          flashLabel={!isFront && camera.torchSupported ? 'Flash (lanterna)' : 'Flash de tela'}
+          flashOn={flashOn}
+          grid={grid}
+          onFlashToggle={() => setFlashOn((current) => !current)}
+          onGridToggle={() => setGrid((current) => !current)}
+          onHelp={() => setSheet('help')}
+          onMenu={() => setSheet('settings')}
+          onRatioChange={() => setRatio(nextOption(RATIO_OPTIONS, ratio))}
+          onTimerChange={() => setTimer(nextOption(TIMER_OPTIONS, timer))}
+          ratio={ratio}
+          showRatio={!mode.isVideo}
+          showTimer={!mode.isVideo}
+          timer={timer}
+        />
+      </div>
 
       <Viewfinder
         aspect={aspect}
@@ -308,6 +315,8 @@ export default function CameraPage() {
         elapsed={recorder.elapsed}
         exposure={exposure}
         grid={grid}
+        insetBottom={bottomBarSize.height}
+        insetTop={topBarSize.height}
         isRecording={recorder.isRecording}
         mirror={isFront}
         mode={mode}
@@ -325,7 +334,10 @@ export default function CameraPage() {
         {onboardingDone && <CameraFallback onImport={openImport} onRetry={camera.retry} status={camera.status} />}
       </Viewfinder>
 
-      <div className="shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      {/* espaço do visor: os controles ficam por cima da imagem quando ela é mais alta (9:16) */}
+      <div aria-hidden="true" className="pointer-events-none min-h-0 flex-1" />
+
+      <div className="relative z-20 shrink-0 bg-gradient-to-t from-black/70 to-transparent pb-[max(0.75rem,env(safe-area-inset-bottom))]" ref={bottomBarRef}>
         {mode.afterCapture === 'stay' && (
           <div className="flex justify-center pt-2">
             <button

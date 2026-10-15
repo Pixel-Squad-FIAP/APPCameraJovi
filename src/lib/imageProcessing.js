@@ -43,6 +43,39 @@ export function computeGuideRect(frameWidth, frameHeight, guideAspect, fill = 0.
   };
 }
 
+// Posição do visor como nas câmeras de celular: a imagem ocupa sempre a largura toda e
+// só a altura muda com a proporção. 3:4 e 1:1 ficam centralizados na mesma região
+// (entre as barras); proporções mais altas (9:16) passam por trás dos controles.
+export function computeViewfinderLayout({ width, height, aspect, insetTop = 0, insetBottom = 0 }) {
+  let frameWidth = width;
+  let frameHeight = width / aspect;
+  if (frameHeight > height) {
+    // tela mais larga que a imagem (ex.: celular deitado): encaixa pela altura
+    frameHeight = height;
+    frameWidth = height * aspect;
+  }
+
+  const available = Math.max(0, height - insetTop - insetBottom);
+  const regionHeight = Math.min(width * (4 / 3), available);
+  const regionTop = insetTop + (available - regionHeight) / 2;
+
+  let top;
+  if (frameHeight <= regionHeight) top = regionTop + (regionHeight - frameHeight) / 2;
+  else if (frameHeight <= available) top = insetTop + (available - frameHeight) / 2;
+  else if (insetTop + frameHeight <= height) top = insetTop;
+  else top = (height - frameHeight) / 2;
+
+  const frameBottom = top + frameHeight;
+  return {
+    top,
+    left: (width - frameWidth) / 2,
+    width: frameWidth,
+    height: frameHeight,
+    // distância do rodapé do container até onde os controles do visor (zoom) devem ficar
+    controlsBottom: Math.max(height - frameBottom, insetBottom) + 12
+  };
+}
+
 export function guideRectPercent(frameAspect, guide) {
   const rect = computeGuideRect(frameAspect, 1, guide.aspect, guide.fill);
   return {
