@@ -58,7 +58,6 @@ export const MODES = [
 export const DEFAULT_MODE = 'foto';
 export const TIMER_OPTIONS = [0, 3, 10];
 export const RATIO_OPTIONS = ['3:4', '9:16', '1:1'];
-export const ZOOM_OPTIONS = [1, 2, 3];
 export const DEFAULT_ALBUM = 'Geral';
 export const DEFAULT_ALBUMS = [DEFAULT_ALBUM, 'Aulas', 'Trabalhos', 'Provas'];
 

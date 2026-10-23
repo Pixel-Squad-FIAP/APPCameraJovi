@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { ZOOM_OPTIONS } from '../../data/modes.js';
 import { formatDuration } from '../../lib/format.js';
 import { useElementSize } from '../../hooks/useElementSize.js';
 import { computeViewfinderLayout, exposureToBrightness, guideRectPercent } from '../../lib/imageProcessing.js';
+import { zoomFromDrag, zoomFromPinch } from '../../lib/zoom.js';
+import ZoomControl from './ZoomControl.jsx';
 import { focusRing } from '../ui/Button.jsx';
 import Icon from '../ui/Icon.jsx';
 
 const SWIPE_DISTANCE = 50;
+const AXIS_LOCK_DISTANCE = 10;
 const CONTROLS_TIMEOUT = 3000;
 
 const SUGGESTION_TEXT = {
@@ -36,6 +38,7 @@ export default function Viewfinder({
   docAligned,
   elapsed,
   exposure,
+  frameRef,
   grid,
   insetBottom,
   insetTop,
@@ -46,17 +49,17 @@ export default function Viewfinder({
   onDismissSuggestion,
   onExposureChange,
   onSwipeMode,
-  onZoomChange,
   processingLabel,
   ready,
   suggestion,
   videoRef,
-  zoom
+  zoomControl
 }) {
   const [focusPoint, setFocusPoint] = useState(null);
   const [controlsVisible, setControlsVisible] = useState(false);
   const [hintVisible, setHintVisible] = useState(Boolean(mode.hint));
-  const pointerStartRef = useRef(null);
+  const pointersRef = useRef(new Map());
+  const gestureRef = useRef(null);
   const hideTimerRef = useRef(null);
   const containerRef = useRef(null);
   const container = useElementSize(containerRef);
@@ -83,22 +86,90 @@ export default function Viewfinder({
     }, CONTROLS_TIMEOUT);
   };
 
-  const handlePointerDown = (event) => {
-    pointerStartRef.current = { x: event.clientX, y: event.clientY };
+  // Roda do mouse sobre o visor: zoom (listener não passivo para não rolar a página).
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || !ready) return undefined;
+    const handleWheel = (event) => {
+      event.preventDefault();
+      zoomControl.nudge(event.deltaY);
+    };
+    frame.addEventListener('wheel', handleWheel, { passive: false });
+    return () => frame.removeEventListener('wheel', handleWheel);
+  }, [frameRef, ready, zoomControl.nudge]);
+
+  const pinchDistance = () => {
+    const [a, b] = [...pointersRef.current.values()];
+    return Math.hypot(a.x - b.x, a.y - b.y);
   };
 
-  const handlePointerUp = (event) => {
-    const start = pointerStartRef.current;
-    pointerStartRef.current = null;
-    if (!start || !ready) return;
-    const dx = event.clientX - start.x;
-    const dy = event.clientY - start.y;
+  // Gestos: 1 dedo decide o eixo após alguns pixels (vertical = zoom, horizontal = trocar modo,
+  // parado = foco); 2 dedos = pinça.
+  const handlePointerDown = (event) => {
+    // toques em botões/controles dentro do visor não viram gesto
+    if (!ready || event.target.closest('button, a, input, label')) return;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
-    if (Math.abs(dx) > SWIPE_DISTANCE && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    if (pointersRef.current.size === 1) {
+      gestureRef.current = { type: 'pending', startX: event.clientX, startY: event.clientY };
+    } else if (pointersRef.current.size === 2) {
+      if (gestureRef.current?.type === 'zoom') zoomControl.endGesture();
+      gestureRef.current = { type: 'pinch', startDistance: pinchDistance(), startZoom: zoomControl.beginGesture() };
+    }
+  };
+
+  const handlePointerMove = (event) => {
+    if (!pointersRef.current.has(event.pointerId)) return;
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    const gesture = gestureRef.current;
+    if (!gesture) return;
+
+    if (gesture.type === 'pinch' && pointersRef.current.size >= 2) {
+      zoomControl.setTarget(zoomFromPinch(gesture.startZoom, gesture.startDistance, pinchDistance()));
+      return;
+    }
+
+    const dx = event.clientX - gesture.startX;
+    const dy = event.clientY - gesture.startY;
+    if (gesture.type === 'pending' && Math.max(Math.abs(dx), Math.abs(dy)) > AXIS_LOCK_DISTANCE) {
+      if (Math.abs(dy) > Math.abs(dx)) {
+        gestureRef.current = { ...gesture, type: 'zoom', startY: event.clientY, startZoom: zoomControl.beginGesture() };
+      } else {
+        gestureRef.current = { ...gesture, type: 'swipe' };
+      }
+      return;
+    }
+    if (gesture.type === 'zoom') {
+      zoomControl.setTarget(zoomFromDrag(gesture.startZoom, event.clientY - gesture.startY));
+    }
+  };
+
+  const handlePointerEnd = (event) => {
+    if (!pointersRef.current.has(event.pointerId)) return;
+    pointersRef.current.delete(event.pointerId);
+    const gesture = gestureRef.current;
+    if (!gesture) return;
+
+    if (gesture.type === 'pinch') {
+      // ao soltar um dos dedos, ignora o restante do toque até soltar todos
+      zoomControl.endGesture();
+      gestureRef.current = pointersRef.current.size ? { type: 'done' } : null;
+      return;
+    }
+    if (pointersRef.current.size) return;
+    gestureRef.current = null;
+
+    if (gesture.type === 'zoom') {
+      zoomControl.endGesture();
+      return;
+    }
+    const dx = event.clientX - gesture.startX;
+    if (gesture.type === 'swipe' && Math.abs(dx) > SWIPE_DISTANCE) {
       onSwipeMode(dx < 0 ? 1 : -1);
       return;
     }
-    if (Math.abs(dx) < 10 && Math.abs(dy) < 10 && !mode.isVideo) {
+    if (gesture.type === 'pending' && event.type === 'pointerup' && !mode.isVideo) {
       const rect = event.currentTarget.getBoundingClientRect();
       setFocusPoint({ x: event.clientX - rect.left, y: event.clientY - rect.top, key: Date.now() });
       keepControlsVisible();
@@ -110,9 +181,12 @@ export default function Viewfinder({
   return (
     <div className="absolute inset-0 z-0 overflow-hidden" ref={containerRef}>
       <div
-        className={`absolute touch-pan-y overflow-hidden bg-ink-850 select-none ${container.width ? 'transition-[top,left,width,height] duration-300 ease-out' : 'opacity-0'}`}
+        className={`absolute touch-none overflow-hidden bg-ink-850 select-none ${container.width ? 'transition-[top,left,width,height] duration-300 ease-out' : 'opacity-0'}`}
+        onPointerCancel={handlePointerEnd}
         onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        ref={frameRef}
         style={{ top: layout.top, left: layout.left, width: layout.width, height: layout.height }}
       >
         <video
@@ -123,7 +197,8 @@ export default function Viewfinder({
           playsInline
           ref={videoRef}
           style={{
-            transform: `scale(${zoom})${mirror ? ' scaleX(-1)' : ''}`,
+            // --zoom é atualizado pelo useZoom a cada quadro da animação
+            transform: `scale(var(--zoom, 1))${mirror ? ' scaleX(-1)' : ''}`,
             filter: exposure ? `brightness(${exposureToBrightness(exposure)})` : undefined
           }}
         />
@@ -221,25 +296,7 @@ export default function Viewfinder({
               <span className="w-8 text-right text-xs tabular-nums text-white/80">{exposure > 0 ? '+' : ''}{exposure.toFixed(1)}</span>
             </label>
           )}
-          <div
-            className="pointer-events-auto flex items-center gap-1 rounded-full bg-black/45 p-1 backdrop-blur"
-            onPointerDown={(event) => event.stopPropagation()}
-            onPointerUp={(event) => event.stopPropagation()}
-            role="group"
-            aria-label="Zoom digital"
-          >
-            {ZOOM_OPTIONS.map((level) => (
-              <button
-                aria-pressed={zoom === level}
-                className={`grid size-9 place-items-center rounded-full text-xs font-bold transition-colors ${zoom === level ? 'bg-white/20 text-amber-300' : 'text-white/85 hover:bg-white/10'} ${focusRing}`}
-                key={level}
-                onClick={() => onZoomChange(level)}
-                type="button"
-              >
-                {level}x
-              </button>
-            ))}
-          </div>
+          <ZoomControl adjusting={zoomControl.adjusting} onSelect={zoomControl.selectPreset} zoom={zoomControl.zoom} />
         </div>
       )}
     </div>

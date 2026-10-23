@@ -10,6 +10,17 @@ import {
 import { cleanOcrText, countWords, titleFromText } from './ocrText.js';
 import { analyzeFrame, suggestMode } from './sceneAnalysis.js';
 import { splitSentences, summarize, textFingerprint } from './summarize.js';
+import {
+  activePreset,
+  clampZoom,
+  formatZoom,
+  smoothStep,
+  splitZoom,
+  zoomFromDrag,
+  zoomFromPinch,
+  zoomFromWheel,
+  zoomToRulerPosition
+} from './zoom.js';
 
 const STUDY_TEXT = `A termodinâmica estuda a energia e suas transformações. A primeira lei da termodinâmica afirma que a energia de um sistema isolado se conserva.
 Em máquinas térmicas, parte do calor é convertida em trabalho. O rendimento de uma máquina térmica nunca chega a cem por cento.
@@ -147,5 +158,55 @@ describe('sceneAnalysis', () => {
   it('não sugere nada em cena comum', () => {
     const metrics = analyzeFrame(solidFrame(64, 48, [90, 130, 70]), 64, 48);
     expect(suggestMode(metrics, 'foto')).toBeNull();
+  });
+});
+
+describe('zoom', () => {
+  it('limita entre 1x e 5x', () => {
+    expect(clampZoom(0.5)).toBe(1);
+    expect(clampZoom(9)).toBe(5);
+    expect(clampZoom(Number.NaN)).toBe(1);
+  });
+
+  it('arrastar 180px para cima dobra o zoom e para baixo reduz', () => {
+    expect(zoomFromDrag(1, -180)).toBeCloseTo(2);
+    expect(zoomFromDrag(2, -180)).toBeCloseTo(4);
+    expect(zoomFromDrag(2, 180)).toBeCloseTo(1);
+    expect(zoomFromDrag(1, 500)).toBe(1);
+    expect(zoomFromDrag(4, -1000)).toBe(5);
+  });
+
+  it('pinça e roda do mouse', () => {
+    expect(zoomFromPinch(1, 100, 250)).toBeCloseTo(2.5);
+    expect(zoomFromPinch(2, 0, 100)).toBe(2);
+    expect(zoomFromWheel(2, -600)).toBeCloseTo(4);
+    expect(zoomFromWheel(2, 600)).toBeCloseTo(1);
+  });
+
+  it('suavização converge sem ultrapassar o alvo', () => {
+    let value = 1;
+    const values = [];
+    for (let frame = 0; frame < 60; frame += 1) {
+      value = smoothStep(value, 5, 16);
+      values.push(value);
+    }
+    expect(values[0]).toBeGreaterThan(1);
+    expect(values[0]).toBeLessThan(2);
+    expect(values.every((item, index) => index === 0 || item >= values[index - 1])).toBe(true);
+    expect(Math.max(...values)).toBeLessThanOrEqual(5);
+    expect(values.at(-1)).toBe(5);
+  });
+
+  it('formata, escolhe o preset e divide o zoom do sensor', () => {
+    expect(formatZoom(1)).toBe('1x');
+    expect(formatZoom(1.74)).toBe('1,7x');
+    expect(formatZoom(2.98)).toBe('3x');
+    expect(activePreset(1.6)).toBe(1);
+    expect(activePreset(3)).toBe(2);
+    expect(activePreset(5)).toBe(5);
+    expect(splitZoom(4, 2)).toBe(2);
+    expect(splitZoom(1.5, 3)).toBe(1);
+    expect(zoomToRulerPosition(1)).toBe(0);
+    expect(zoomToRulerPosition(5)).toBeCloseTo(1);
   });
 });

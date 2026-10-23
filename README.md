@@ -98,8 +98,9 @@ Qualquer e-mail com `@` e senha com 6 ou mais caracteres é aceito. Não há cad
   - **Noite**: média de 4 quadros para reduzir ruído e clarear a imagem.
   - **Vídeo**: grava já recortado na proporção escolhida (3:4, 9:16 ou 1:1), com zoom ao vivo e áudio quando o microfone é permitido.
 - **Sugestão contextual**: a análise de luminância e de "papel com texto" sugere Noite ou Documento. O usuário aceita ou ignora, e a câmera nunca troca de modo sozinha.
-- Timer (3 s/10 s, cancelável), flash (lanterna quando o aparelho suporta, senão flash de tela), grade, proporção 3:4/9:16/1:1, zoom digital 1x/2x/3x, foco por toque com ajuste de exposição.
-- Gestos e atalhos: deslizar no visor troca de modo; no computador, `Espaço` captura e `←`/`→` trocam o modo.
+- Timer (3 s/10 s, cancelável), flash (lanterna quando o aparelho suporta, senão flash de tela), grade, proporção 3:4/9:16/1:1, foco por toque com ajuste de exposição.
+- **Zoom contínuo de 1x a 5x**, com animação suave: atalhos 1x/2x/5x, arrastar o visor para cima (aproxima) ou para baixo (afasta), pinça com dois dedos e roda do mouse. Uma régua mostra o valor durante o ajuste. Em celulares Android compatíveis usa o zoom do próprio sensor (mais nítido); nos demais, zoom digital.
+- Gestos e atalhos: deslizar para os lados no visor troca de modo; no computador, `Espaço` captura, `←`/`→` trocam o modo e `+`/`-` ajustam o zoom.
 - Tutorial no primeiro uso, ajuda com a explicação de cada modo e da privacidade, ajustes (sugestões, grade, espelhamento, armazenamento usado).
 
 ### Galeria e detalhe (`/galeria`)

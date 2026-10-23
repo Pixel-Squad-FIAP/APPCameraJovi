@@ -27,9 +27,10 @@ export default function HelpSheet({ activeMode, onClose, onShowTutorial, open })
 
       <h3 className="mt-4 text-sm font-bold">Gestos e atalhos</h3>
       <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-white/65">
-        <li>Deslize no visor para trocar de modo.</li>
+        <li>Deslize para os lados no visor para trocar de modo.</li>
+        <li>Arraste para cima ou para baixo (ou faça pinça com dois dedos) para dar zoom de 1x a 5x.</li>
         <li>Toque no visor para focar e ajustar a exposição.</li>
-        <li>No computador: <kbd className="rounded bg-white/10 px-1">Espaço</kbd> captura, <kbd className="rounded bg-white/10 px-1">←</kbd> <kbd className="rounded bg-white/10 px-1">→</kbd> trocam o modo.</li>
+        <li>No computador: <kbd className="rounded bg-white/10 px-1">Espaço</kbd> captura, <kbd className="rounded bg-white/10 px-1">←</kbd> <kbd className="rounded bg-white/10 px-1">→</kbd> trocam o modo, <kbd className="rounded bg-white/10 px-1">+</kbd> <kbd className="rounded bg-white/10 px-1">−</kbd> ou a roda do mouse ajustam o zoom.</li>
       </ul>
 
       <h3 className="mt-4 text-sm font-bold">Privacidade</h3>

@@ -21,6 +21,7 @@ import { useElementSize } from '../hooks/useElementSize.js';
 import { usePreference } from '../hooks/usePreference.js';
 import { useSceneAnalysis } from '../hooks/useSceneAnalysis.js';
 import { useVideoRecorder } from '../hooks/useVideoRecorder.js';
+import { useZoom } from '../hooks/useZoom.js';
 import { captureFromFile, captureFromVideo, thumbnailFromVideo } from '../lib/capturePipeline.js';
 import { ratioToAspect } from '../lib/imageProcessing.js';
 import { preloadOcr } from '../lib/ocrEngine.js';
@@ -66,7 +67,6 @@ export default function CameraPage() {
   const [onboardingDone, setOnboardingDone] = usePreference('onboardingDone');
   const [studyAlbum, setStudyAlbum] = usePreference('studyAlbum');
 
-  const [zoom, setZoom] = useState(1);
   const [exposure, setExposure] = useState(0);
   const [flashOn, setFlashOn] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -85,6 +85,9 @@ export default function CameraPage() {
   const isFront = facingMode === 'user';
   const camera = useCameraStream({ facingMode, enabled: onboardingDone });
   const ready = camera.status === 'ready';
+  const frameRef = useRef(null);
+  const zoomControl = useZoom({ frameRef, streamRef: camera.streamRef, ready, facingMode });
+  const { getDigitalZoom } = zoomControl;
   const recorder = useVideoRecorder();
   const countdown = useCountdown();
   const scene = useSceneAnalysis(camera.videoRef, {
@@ -95,8 +98,6 @@ export default function CameraPage() {
 
   const locked = recorder.isRecording || countdown.isRunning;
   const aspect = ratioToAspect(ratio);
-  const zoomRef = useRef(zoom);
-  zoomRef.current = zoom;
   const docAligned = mode.processing === 'document' && (scene.metrics?.paperRatio ?? 0) > DOCUMENT_ALIGNED_RATIO;
   const captureAlbum = mode.afterCapture === 'stay' ? studyAlbum : DEFAULT_ALBUM;
 
@@ -157,7 +158,8 @@ export default function CameraPage() {
       const result = await captureFromVideo(camera.videoRef.current, {
         modeId: mode.id,
         ratio,
-        zoom,
+        // só a parte digital: o zoom do sensor (Android) já vem no próprio quadro
+        zoom: getDigitalZoom(),
         mirror: isFront && mirrorFront,
         exposure
       });
@@ -176,7 +178,7 @@ export default function CameraPage() {
       setBusy(false);
       setProcessingLabel('');
     }
-  }, [camera, exposure, flashOn, isFront, mirrorFront, mode, ratio, showNotification, storeCapture, zoom]);
+  }, [camera, exposure, flashOn, getDigitalZoom, isFront, mirrorFront, mode, ratio, showNotification, storeCapture]);
 
   takePhotoRef.current = takePhoto;
 
@@ -196,7 +198,7 @@ export default function CameraPage() {
           aspect,
           mirror: isFront && mirrorFront,
           // o zoom pode mudar durante a gravação
-          getZoom: () => zoomRef.current
+          getZoom: getDigitalZoom
         });
       } catch (error) {
         showNotification(error?.message || 'Não foi possível iniciar a gravação.', { tone: 'error' });
@@ -209,7 +211,7 @@ export default function CameraPage() {
 
     setBusy(true);
     try {
-      const thumbBlob = await thumbnailFromVideo(camera.videoRef.current, { aspect, zoom, mirror: isFront && mirrorFront });
+      const thumbBlob = await thumbnailFromVideo(camera.videoRef.current, { aspect, zoom: getDigitalZoom(), mirror: isFront && mirrorFront });
       const result = await recorder.stop();
       if (flashOn) camera.setTorch(false);
       if (!result?.blob?.size) throw new Error('A gravação ficou vazia.');
@@ -231,7 +233,7 @@ export default function CameraPage() {
     } finally {
       setBusy(false);
     }
-  }, [aspect, camera, flashOn, isFront, mirrorFront, mode, navigate, recorder, showNotification, storeCapture, zoom]);
+  }, [aspect, camera, flashOn, getDigitalZoom, isFront, mirrorFront, mode, navigate, recorder, showNotification, storeCapture]);
 
   const handleShutter = useCallback(() => {
     if (countdown.isRunning) {
@@ -287,11 +289,15 @@ export default function CameraPage() {
         swipeMode(1);
       } else if (event.key === 'ArrowLeft') {
         swipeMode(-1);
+      } else if (event.key === '+' || event.key === '=') {
+        zoomControl.nudge(-150);
+      } else if (event.key === '-') {
+        zoomControl.nudge(150);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleShutter, onboardingDone, sheet, swipeMode]);
+  }, [handleShutter, onboardingDone, sheet, swipeMode, zoomControl.nudge]);
 
   const acceptSuggestion = () => {
     const suggested = getMode(scene.suggestion.mode);
@@ -327,6 +333,7 @@ export default function CameraPage() {
         docAligned={docAligned}
         elapsed={recorder.elapsed}
         exposure={exposure}
+        frameRef={frameRef}
         grid={grid}
         insetBottom={bottomBarSize.height}
         insetTop={topBarSize.height}
@@ -337,12 +344,11 @@ export default function CameraPage() {
         onDismissSuggestion={scene.dismiss}
         onExposureChange={setExposure}
         onSwipeMode={swipeMode}
-        onZoomChange={setZoom}
         processingLabel={processingLabel}
         ready={ready}
         suggestion={scene.suggestion}
         videoRef={camera.videoRef}
-        zoom={zoom}
+        zoomControl={zoomControl}
       >
         {onboardingDone && <CameraFallback onImport={openImport} onRetry={camera.retry} status={camera.status} />}
       </Viewfinder>
