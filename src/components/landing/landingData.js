@@ -150,11 +150,30 @@ export const galleryImages = [
 ];
 
 export const teamMembers = [
-  { name: 'Pedro Henrique Marques', rm: 'RM 569307' },
-  { name: 'Evandro Marcondes', rm: 'RM 572473' },
-  { name: 'Enzo Alves', rm: 'RM 569665' },
-  { name: 'Raphael de Oliveira', rm: 'RM 571065' },
-  { name: 'Renan Queiroz', rm: 'RM 569077' }
+  {
+    name: 'Renan Queiroz',
+    rm: 'RM 569077',
+    role: 'Câmera e Modo Estudante',
+    description: 'Visor em tempo real, modos de captura, zoom por gestos e proporções, além da extração de texto (OCR), resumo e explicação dos termos pela Wikipédia.'
+  },
+  {
+    name: 'Raphael de Oliveira',
+    rm: 'RM 571065',
+    role: 'Gravação de vídeo',
+    description: 'Gravação com áudio na proporção escolhida, zoom durante a gravação e salvamento dos vídeos na galeria.'
+  },
+  {
+    name: 'Evandro Marcondes',
+    rm: 'RM 572473',
+    role: 'Documento e galeria',
+    description: 'Digitalização de documentos, álbuns por matéria, busca e exportação em PDF e TXT.'
+  },
+  {
+    name: 'Pedro Henrique Marques',
+    rm: 'RM 569307',
+    role: 'Landing Page',
+    description: 'Estrutura das seções, responsividade para mobile, tablet e desktop e conteúdo da página.'
+  }
 ];
 
 export { appDocumentMode as heroImage };
