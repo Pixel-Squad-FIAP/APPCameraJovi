@@ -68,6 +68,8 @@ npm test          # testes unitários (resumo, OCR, análise de cena, recortes)
 
 A autenticação é **demonstrativa** (somente front-end), usada para proteger as rotas privadas.
 
+Na tela de login, o botão **Acessar a câmera** entra direto, sem preencher nada. Para usar o formulário:
+
 ```text
 E-mail: demo@jovi.com
 Senha:  jovi123
