@@ -1,0 +1,211 @@
+<svg class="rich-terminal" viewBox="0 0 1458 952.8" xmlns="http://www.w3.org/2000/svg">
+    <!-- Generated with Rich https://www.textualize.io -->
+    <style>
+
+    @font-face {
+        font-family: "Fira Code";
+        src: local("FiraCode-Regular"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff2/FiraCode-Regular.woff2") format("woff2"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff/FiraCode-Regular.woff") format("woff");
+        font-style: normal;
+        font-weight: 400;
+    }
+    @font-face {
+        font-family: "Fira Code";
+        src: local("FiraCode-Bold"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff2/FiraCode-Bold.woff2") format("woff2"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff/FiraCode-Bold.woff") format("woff");
+        font-style: bold;
+        font-weight: 700;
+    }
+
+    .terminal-1423201918-matrix {
+        font-family: Fira Code, monospace;
+        font-size: 20px;
+        line-height: 24.4px;
+        font-variant-east-asian: full-width;
+    }
+
+    .terminal-1423201918-title {
+        font-size: 18px;
+        font-weight: bold;
+        font-family: arial;
+    }
+
+    .terminal-1423201918-r1 { fill: #3f66f6 }
+.terminal-1423201918-r2 { fill: #9db4ff;font-weight: bold }
+.terminal-1423201918-r3 { fill: #c5c8c6 }
+.terminal-1423201918-r4 { fill: #949494 }
+.terminal-1423201918-r5 { fill: #6f8fff;font-weight: bold }
+.terminal-1423201918-r6 { fill: #c5c8c6;font-weight: bold }
+.terminal-1423201918-r7 { fill: #949494;font-weight: bold }
+.terminal-1423201918-r8 { fill: #98a84b }
+.terminal-1423201918-r9 { fill: #4e4e4e }
+.terminal-1423201918-r10 { fill: #9db4ff }
+    </style>
+
+    <defs>
+    <clipPath id="terminal-1423201918-clip-terminal">
+      <rect x="0" y="0" width="1438.6" height="901.8" />
+    </clipPath>
+    <clipPath id="terminal-1423201918-line-0">
+    <rect x="0" y="1.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-1">
+    <rect x="0" y="25.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-2">
+    <rect x="0" y="50.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-3">
+    <rect x="0" y="74.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-4">
+    <rect x="0" y="99.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-5">
+    <rect x="0" y="123.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-6">
+    <rect x="0" y="147.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-7">
+    <rect x="0" y="172.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-8">
+    <rect x="0" y="196.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-9">
+    <rect x="0" y="221.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-10">
+    <rect x="0" y="245.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-11">
+    <rect x="0" y="269.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-12">
+    <rect x="0" y="294.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-13">
+    <rect x="0" y="318.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-14">
+    <rect x="0" y="343.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-15">
+    <rect x="0" y="367.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-16">
+    <rect x="0" y="391.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-17">
+    <rect x="0" y="416.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-18">
+    <rect x="0" y="440.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-19">
+    <rect x="0" y="465.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-20">
+    <rect x="0" y="489.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-21">
+    <rect x="0" y="513.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-22">
+    <rect x="0" y="538.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-23">
+    <rect x="0" y="562.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-24">
+    <rect x="0" y="587.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-25">
+    <rect x="0" y="611.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-26">
+    <rect x="0" y="635.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-27">
+    <rect x="0" y="660.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-28">
+    <rect x="0" y="684.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-29">
+    <rect x="0" y="709.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-30">
+    <rect x="0" y="733.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-31">
+    <rect x="0" y="757.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-32">
+    <rect x="0" y="782.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-33">
+    <rect x="0" y="806.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-34">
+    <rect x="0" y="831.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-1423201918-line-35">
+    <rect x="0" y="855.5" width="1439.6" height="24.65"/>
+            </clipPath>
+    </defs>
+
+    <rect fill="#292929" stroke="rgba(255,255,255,0.35)" stroke-width="1" x="1" y="1" width="1456" height="950.8" rx="8"/><text class="terminal-1423201918-title" fill="#c5c8c6" text-anchor="middle" x="728" y="27">Câmera&#160;contextual&#160;—&#160;recomendação</text>
+            <g transform="translate(26,22)">
+            <circle cx="0" cy="0" r="7" fill="#ff5f57"/>
+            <circle cx="22" cy="0" r="7" fill="#febc2e"/>
+            <circle cx="44" cy="0" r="7" fill="#28c840"/>
+            </g>
+        
+    <g transform="translate(9, 41)" clip-path="url(#terminal-1423201918-clip-terminal)">
+    <rect fill="#1c1c1c" x="12.2" y="172.3" width="12.2" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="24.4" y="172.3" width="12.2" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="36.6" y="172.3" width="12.2" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="48.8" y="172.3" width="12.2" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="61" y="172.3" width="12.2" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="73.2" y="172.3" width="488" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="561.2" y="172.3" width="12.2" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="12.2" y="221.1" width="12.2" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="24.4" y="221.1" width="12.2" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="36.6" y="221.1" width="12.2" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="48.8" y="221.1" width="12.2" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="61" y="221.1" width="12.2" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="73.2" y="221.1" width="488" height="24.65" shape-rendering="crispEdges"/><rect fill="#1c1c1c" x="561.2" y="221.1" width="12.2" height="24.65" shape-rendering="crispEdges"/>
+    <g class="terminal-1423201918-matrix">
+    <text class="terminal-1423201918-r1" x="0" y="20" textLength="597.8" clip-path="url(#terminal-1423201918-line-0)">────────────────────────────────────────────────&#160;</text><text class="terminal-1423201918-r2" x="597.8" y="20" textLength="219.6" clip-path="url(#terminal-1423201918-line-0)">📷&#160;&#160;Recomendar&#160;modo</text><text class="terminal-1423201918-r1" x="829.6" y="20" textLength="610" clip-path="url(#terminal-1423201918-line-0)">&#160;─────────────────────────────────────────────────</text><text class="terminal-1423201918-r3" x="1439.6" y="20" textLength="12.2" clip-path="url(#terminal-1423201918-line-0)">
+</text><text class="terminal-1423201918-r4" x="341.6" y="44.4" textLength="744.2" clip-path="url(#terminal-1423201918-line-1)">Responda&#160;3&#160;perguntas&#160;e&#160;descubra&#160;o&#160;melhor&#160;modo&#160;da&#160;câmera&#160;JOVI.</text><text class="terminal-1423201918-r3" x="1439.6" y="44.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-1)">
+</text><text class="terminal-1423201918-r3" x="1439.6" y="68.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-2)">
+</text><text class="terminal-1423201918-r3" x="1439.6" y="93.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-3)">
+</text><text class="terminal-1423201918-r2" x="24.4" y="117.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-4)">#</text><text class="terminal-1423201918-r2" x="73.2" y="117.6" textLength="488" clip-path="url(#terminal-1423201918-line-4)">O&#160;que&#160;você&#160;vai&#160;capturar?&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-1423201918-r3" x="1439.6" y="117.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-4)">
+</text><text class="terminal-1423201918-r1" x="0" y="142" textLength="585.6" clip-path="url(#terminal-1423201918-line-5)">&#160;──────────────────────────────────────────────&#160;</text><text class="terminal-1423201918-r3" x="1439.6" y="142" textLength="12.2" clip-path="url(#terminal-1423201918-line-5)">
+</text><text class="terminal-1423201918-r5" x="24.4" y="166.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-6)">1</text><text class="terminal-1423201918-r3" x="73.2" y="166.4" textLength="488" clip-path="url(#terminal-1423201918-line-6)">Folha,&#160;apostila&#160;ou&#160;documento&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-1423201918-r3" x="1439.6" y="166.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-6)">
+</text><text class="terminal-1423201918-r5" x="24.4" y="190.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-7)">2</text><text class="terminal-1423201918-r3" x="73.2" y="190.8" textLength="488" clip-path="url(#terminal-1423201918-line-7)">Slide,&#160;lousa&#160;ou&#160;quadro&#160;da&#160;aula&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-1423201918-r3" x="1439.6" y="190.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-7)">
+</text><text class="terminal-1423201918-r5" x="24.4" y="215.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-8)">3</text><text class="terminal-1423201918-r3" x="73.2" y="215.2" textLength="488" clip-path="url(#terminal-1423201918-line-8)">Pessoa&#160;ou&#160;selfie&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-1423201918-r3" x="1439.6" y="215.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-8)">
+</text><text class="terminal-1423201918-r5" x="24.4" y="239.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-9)">4</text><text class="terminal-1423201918-r3" x="73.2" y="239.6" textLength="488" clip-path="url(#terminal-1423201918-line-9)">Paisagem,&#160;lugar&#160;ou&#160;objeto&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-1423201918-r3" x="1439.6" y="239.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-9)">
+</text><text class="terminal-1423201918-r5" x="24.4" y="264" textLength="12.2" clip-path="url(#terminal-1423201918-line-10)">5</text><text class="terminal-1423201918-r3" x="73.2" y="264" textLength="488" clip-path="url(#terminal-1423201918-line-10)">Algo&#160;em&#160;movimento&#160;(experimento,&#160;esporte)</text><text class="terminal-1423201918-r3" x="1439.6" y="264" textLength="12.2" clip-path="url(#terminal-1423201918-line-10)">
+</text><text class="terminal-1423201918-r3" x="1439.6" y="288.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-11)">
+</text><text class="terminal-1423201918-r6" x="0" y="312.8" textLength="207.4" clip-path="url(#terminal-1423201918-line-12)">Número&#160;do&#160;cenário</text><text class="terminal-1423201918-r3" x="1439.6" y="312.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-12)">
+</text><text class="terminal-1423201918-r5" x="0" y="337.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-13)">›</text><text class="terminal-1423201918-r3" x="12.2" y="337.2" textLength="24.4" clip-path="url(#terminal-1423201918-line-13)">&#160;1</text><text class="terminal-1423201918-r3" x="1439.6" y="337.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-13)">
+</text><text class="terminal-1423201918-r6" x="0" y="361.6" textLength="707.6" clip-path="url(#terminal-1423201918-line-14)">Quanta&#160;luz&#160;tem&#160;no&#160;ambiente?&#160;(0&#160;=&#160;escuro,&#160;100&#160;=&#160;sol&#160;forte)&#160;</text><text class="terminal-1423201918-r7" x="707.6" y="361.6" textLength="146.4" clip-path="url(#terminal-1423201918-line-14)">(Enter&#160;=&#160;60)</text><text class="terminal-1423201918-r3" x="1439.6" y="361.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-14)">
+</text><text class="terminal-1423201918-r5" x="0" y="386" textLength="12.2" clip-path="url(#terminal-1423201918-line-15)">›</text><text class="terminal-1423201918-r3" x="12.2" y="386" textLength="36.6" clip-path="url(#terminal-1423201918-line-15)">&#160;12</text><text class="terminal-1423201918-r3" x="1439.6" y="386" textLength="12.2" clip-path="url(#terminal-1423201918-line-15)">
+</text><text class="terminal-1423201918-r6" x="0" y="410.4" textLength="268.4" clip-path="url(#terminal-1423201918-line-16)">Quer&#160;gravar&#160;em&#160;vídeo?&#160;</text><text class="terminal-1423201918-r7" x="268.4" y="410.4" textLength="61" clip-path="url(#terminal-1423201918-line-16)">(s/N)</text><text class="terminal-1423201918-r3" x="1439.6" y="410.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-16)">
+</text><text class="terminal-1423201918-r5" x="0" y="434.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-17)">›</text><text class="terminal-1423201918-r3" x="12.2" y="434.8" textLength="24.4" clip-path="url(#terminal-1423201918-line-17)">&#160;n</text><text class="terminal-1423201918-r3" x="1439.6" y="434.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-17)">
+</text><text class="terminal-1423201918-r1" x="0" y="459.2" textLength="24.4" clip-path="url(#terminal-1423201918-line-18)">┌─</text><text class="terminal-1423201918-r1" x="24.4" y="459.2" textLength="549" clip-path="url(#terminal-1423201918-line-18)">─────────────────────────────────────────────</text><text class="terminal-1423201918-r2" x="585.6" y="459.2" textLength="268.4" clip-path="url(#terminal-1423201918-line-18)">Recomendação&#160;da&#160;câmera</text><text class="terminal-1423201918-r1" x="866.2" y="459.2" textLength="549" clip-path="url(#terminal-1423201918-line-18)">─────────────────────────────────────────────</text><text class="terminal-1423201918-r1" x="1415.2" y="459.2" textLength="24.4" clip-path="url(#terminal-1423201918-line-18)">─┐</text><text class="terminal-1423201918-r3" x="1439.6" y="459.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-18)">
+</text><text class="terminal-1423201918-r1" x="0" y="483.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-19)">│</text><text class="terminal-1423201918-r1" x="1427.4" y="483.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-19)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="483.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-19)">
+</text><text class="terminal-1423201918-r1" x="0" y="508" textLength="12.2" clip-path="url(#terminal-1423201918-line-20)">│</text><text class="terminal-1423201918-r6" x="36.6" y="508" textLength="207.4" clip-path="url(#terminal-1423201918-line-20)">📄&#160;&#160;Modo&#160;Documento</text><text class="terminal-1423201918-r1" x="1427.4" y="508" textLength="12.2" clip-path="url(#terminal-1423201918-line-20)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="508" textLength="12.2" clip-path="url(#terminal-1423201918-line-20)">
+</text><text class="terminal-1423201918-r1" x="0" y="532.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-21)">│</text><text class="terminal-1423201918-r4" x="36.6" y="532.4" textLength="1110.2" clip-path="url(#terminal-1423201918-line-21)">Digitaliza&#160;folhas&#160;e&#160;apostilas:&#160;recorta&#160;pela&#160;moldura,&#160;deixa&#160;o&#160;papel&#160;branco&#160;e&#160;extrai&#160;o&#160;texto.</text><text class="terminal-1423201918-r1" x="1427.4" y="532.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-21)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="532.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-21)">
+</text><text class="terminal-1423201918-r1" x="0" y="556.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-22)">│</text><text class="terminal-1423201918-r1" x="1427.4" y="556.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-22)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="556.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-22)">
+</text><text class="terminal-1423201918-r1" x="0" y="581.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-23)">│</text><text class="terminal-1423201918-r3" x="36.6" y="581.2" textLength="134.2" clip-path="url(#terminal-1423201918-line-23)">Confiança&#160;&#160;</text><text class="terminal-1423201918-r8" x="170.8" y="581.2" textLength="170.8" clip-path="url(#terminal-1423201918-line-23)">━━━━━━━━━━━━━━</text><text class="terminal-1423201918-r9" x="341.6" y="581.2" textLength="73.2" clip-path="url(#terminal-1423201918-line-23)">━━━━━━</text><text class="terminal-1423201918-r3" x="414.8" y="581.2" textLength="61" clip-path="url(#terminal-1423201918-line-23)">&#160;&#160;72%</text><text class="terminal-1423201918-r1" x="1427.4" y="581.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-23)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="581.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-23)">
+</text><text class="terminal-1423201918-r1" x="0" y="605.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-24)">│</text><text class="terminal-1423201918-r1" x="1427.4" y="605.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-24)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="605.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-24)">
+</text><text class="terminal-1423201918-r1" x="0" y="630" textLength="12.2" clip-path="url(#terminal-1423201918-line-25)">│</text><text class="terminal-1423201918-r3" x="36.6" y="630" textLength="780.8" clip-path="url(#terminal-1423201918-line-25)">•&#160;Folhas&#160;são&#160;recortadas&#160;pela&#160;moldura&#160;e&#160;o&#160;texto&#160;é&#160;extraído&#160;(OCR).</text><text class="terminal-1423201918-r1" x="1427.4" y="630" textLength="12.2" clip-path="url(#terminal-1423201918-line-25)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="630" textLength="12.2" clip-path="url(#terminal-1423201918-line-25)">
+</text><text class="terminal-1423201918-r1" x="0" y="654.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-26)">│</text><text class="terminal-1423201918-r3" x="36.6" y="654.4" textLength="963.8" clip-path="url(#terminal-1423201918-line-26)">•&#160;A&#160;luz&#160;está&#160;baixa:&#160;o&#160;OCR&#160;pode&#160;errar&#160;—&#160;aproxime&#160;de&#160;uma&#160;janela&#160;ou&#160;ligue&#160;o&#160;flash.</text><text class="terminal-1423201918-r1" x="1427.4" y="654.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-26)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="654.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-26)">
+</text><text class="terminal-1423201918-r1" x="0" y="678.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-27)">│</text><text class="terminal-1423201918-r1" x="1427.4" y="678.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-27)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="678.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-27)">
+</text><text class="terminal-1423201918-r1" x="0" y="703.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-28)">│</text><text class="terminal-1423201918-r10" x="36.6" y="703.2" textLength="85.4" clip-path="url(#terminal-1423201918-line-28)">💡&#160;Luz:&#160;</text><text class="terminal-1423201918-r3" x="134.2" y="703.2" textLength="866.2" clip-path="url(#terminal-1423201918-line-28)">Luz&#160;uniforme&#160;por&#160;cima;&#160;evite&#160;a&#160;sombra&#160;do&#160;próprio&#160;celular&#160;sobre&#160;a&#160;folha.</text><text class="terminal-1423201918-r1" x="1427.4" y="703.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-28)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="703.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-28)">
+</text><text class="terminal-1423201918-r1" x="0" y="727.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-29)">│</text><text class="terminal-1423201918-r10" x="36.6" y="727.6" textLength="207.4" clip-path="url(#terminal-1423201918-line-29)">🎯&#160;Enquadramento:&#160;</text><text class="terminal-1423201918-r3" x="256.2" y="727.6" textLength="890.6" clip-path="url(#terminal-1423201918-line-29)">Encaixe&#160;a&#160;folha&#160;inteira&#160;na&#160;moldura&#160;A4&#160;—&#160;ela&#160;fica&#160;verde&#160;quando&#160;está&#160;certa.</text><text class="terminal-1423201918-r1" x="1427.4" y="727.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-29)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="727.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-29)">
+</text><text class="terminal-1423201918-r1" x="0" y="752" textLength="12.2" clip-path="url(#terminal-1423201918-line-30)">│</text><text class="terminal-1423201918-r10" x="36.6" y="752" textLength="183" clip-path="url(#terminal-1423201918-line-30)">📐&#160;Alinhamento:&#160;</text><text class="terminal-1423201918-r3" x="231.8" y="752" textLength="817.4" clip-path="url(#terminal-1423201918-line-30)">Segure&#160;o&#160;celular&#160;paralelo&#160;à&#160;mesa&#160;para&#160;as&#160;linhas&#160;não&#160;ficarem&#160;tortas.</text><text class="terminal-1423201918-r1" x="1427.4" y="752" textLength="12.2" clip-path="url(#terminal-1423201918-line-30)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="752" textLength="12.2" clip-path="url(#terminal-1423201918-line-30)">
+</text><text class="terminal-1423201918-r1" x="0" y="776.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-31)">│</text><text class="terminal-1423201918-r1" x="1427.4" y="776.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-31)">│</text><text class="terminal-1423201918-r3" x="1439.6" y="776.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-31)">
+</text><text class="terminal-1423201918-r1" x="0" y="800.8" textLength="1439.6" clip-path="url(#terminal-1423201918-line-32)">└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘</text><text class="terminal-1423201918-r3" x="1439.6" y="800.8" textLength="12.2" clip-path="url(#terminal-1423201918-line-32)">
+</text><text class="terminal-1423201918-r6" x="0" y="825.2" textLength="512.4" clip-path="url(#terminal-1423201918-line-33)">Abrir&#160;a&#160;câmera&#160;do&#160;app&#160;no&#160;navegador&#160;agora?&#160;</text><text class="terminal-1423201918-r7" x="512.4" y="825.2" textLength="61" clip-path="url(#terminal-1423201918-line-33)">(s/N)</text><text class="terminal-1423201918-r3" x="1439.6" y="825.2" textLength="12.2" clip-path="url(#terminal-1423201918-line-33)">
+</text><text class="terminal-1423201918-r5" x="0" y="849.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-34)">›</text><text class="terminal-1423201918-r3" x="12.2" y="849.6" textLength="24.4" clip-path="url(#terminal-1423201918-line-34)">&#160;n</text><text class="terminal-1423201918-r3" x="1439.6" y="849.6" textLength="12.2" clip-path="url(#terminal-1423201918-line-34)">
+</text><text class="terminal-1423201918-r3" x="1439.6" y="874" textLength="12.2" clip-path="url(#terminal-1423201918-line-35)">
+</text><text class="terminal-1423201918-r4" x="0" y="898.4" textLength="341.6" clip-path="url(#terminal-1423201918-line-36)">Pressione&#160;Enter&#160;para&#160;voltar…</text><text class="terminal-1423201918-r3" x="1439.6" y="898.4" textLength="12.2" clip-path="url(#terminal-1423201918-line-36)">
+</text>
+    </g>
+    </g>
+</svg>

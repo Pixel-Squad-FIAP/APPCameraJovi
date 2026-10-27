@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>JOVI Desktop — Documentação Sprint 4 (Python)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #3f66f6; --azul-escuro: #2849d8; --azul-claro: #9db4ff; --azul-fundo: #eef2ff;
+    --tinta: #13161b; --texto: #2b2f36; --suave: #6b7280; --linha: #dfe3ea;
+    --verde: #12a150; --amarelo: #c98a00; --vermelho: #d93a3a;
+  }
+  @page { size: A4; margin: 18mm 17mm 20mm; @bottom-right { content: counter(page); font: 500 9pt "DM Sans", sans-serif; color: #6b7280; } }
+  @page :first { margin: 0; @bottom-right { content: none; } }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font: 10.5pt/1.55 "DM Sans", "Segoe UI", system-ui, sans-serif; color: var(--texto); background: #fff; }
+  h1, h2, h3 { color: var(--tinta); line-height: 1.2; }
+  h2 { font-size: 20pt; font-weight: 800; margin: 0 0 6mm; padding-bottom: 3mm; border-bottom: 2px solid var(--azul); break-after: avoid; }
+  h2 .num { color: var(--azul); margin-right: 3mm; }
+  h3 { font-size: 12.5pt; margin: 6mm 0 2mm; break-after: avoid; }
+  p { margin: 0 0 3mm; }
+  ul { margin: 0 0 3mm; padding-left: 5mm; }
+  li { margin-bottom: 1mm; }
+  code, .mono { font-family: "JetBrains Mono", Consolas, monospace; font-size: 8.8pt; background: var(--azul-fundo); color: var(--azul-escuro); padding: .2mm 1.2mm; border-radius: 1.2mm; }
+  pre { font-family: "JetBrains Mono", Consolas, monospace; font-size: 8.6pt; line-height: 1.45; background: var(--tinta); color: #e6e9ef; padding: 4mm 5mm; border-radius: 3mm; margin: 0 0 4mm; white-space: pre-wrap; break-inside: avoid; }
+  pre .c { color: #8b93a3; }
+  section { margin-bottom: 4mm; }
+  .quebra { break-before: page; }
+  table { width: 100%; border-collapse: collapse; margin: 1mm 0 5mm; font-size: 9pt; break-inside: auto; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  th { text-align: left; background: var(--azul); color: #fff; font-weight: 700; padding: 2mm 2.4mm; }
+  th:first-child { border-top-left-radius: 2mm; } th:last-child { border-top-right-radius: 2mm; }
+  td { padding: 2mm 2.4mm; border-bottom: 1px solid var(--linha); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: #f7f8fb; }
+  td code { white-space: nowrap; }
+  .tela { margin: 2mm 0 5mm; break-inside: avoid; text-align: center; }
+  .tela img { max-width: 100%; max-height: 112mm; border-radius: 2.5mm; box-shadow: 0 1.5mm 5mm rgba(19,22,27,.18); }
+  .tela.alta img { max-height: 118mm; }
+  .tela figcaption { font-size: 8.5pt; color: var(--suave); margin-top: 2mm; }
+  .dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .cartao { border: 1px solid var(--linha); border-radius: 3mm; padding: 4mm 4.5mm; background: #fff; break-inside: avoid; }
+  .cartao h4 { margin: 0 0 1.5mm; font-size: 10.5pt; color: var(--azul-escuro); }
+  .cartao p { margin: 0; font-size: 9.5pt; }
+  .grade3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin-bottom: 5mm; }
+  .destaque { background: var(--azul-fundo); border-left: 1.2mm solid var(--azul); border-radius: 0 2.5mm 2.5mm 0; padding: 3.5mm 5mm; margin: 0 0 5mm; break-inside: avoid; }
+  .destaque p:last-child { margin: 0; }
+  .tag { display: inline-block; font-size: 7.5pt; font-weight: 800; letter-spacing: .4pt; text-transform: uppercase; padding: .6mm 2mm; border-radius: 10mm; color: #fff; }
+  .tag.rem { background: var(--vermelho); } .tag.mod { background: var(--amarelo); } .tag.add { background: var(--verde); }
+  .lista-num { counter-reset: n; list-style: none; padding: 0; }
+  .lista-num li { counter-increment: n; padding-left: 8mm; position: relative; margin-bottom: 2mm; }
+  .lista-num li::before { content: counter(n); position: absolute; left: 0; top: .3mm; width: 5.5mm; height: 5.5mm; border-radius: 50%; background: var(--azul); color: #fff; font-size: 8pt; font-weight: 700; display: grid; place-items: center; }
+
+  /* Capa */
+  .capa { width: 210mm; height: 297mm; position: relative; overflow: hidden; color: #fff; padding: 22mm 20mm;
+          background: radial-gradient(120mm 120mm at 85% 12%, rgba(157,180,255,.35), transparent 60%), linear-gradient(155deg, #3f66f6 0%, #2849d8 40%, #0d0f12 100%); }
+  .capa .topo { display: flex; justify-content: space-between; align-items: center; font-weight: 700; letter-spacing: 1.5pt; font-size: 10pt; opacity: .9; }
+  .capa .marca { font-size: 15pt; font-weight: 800; letter-spacing: 3pt; }
+  .capa .centro { position: absolute; left: 20mm; right: 20mm; top: 64mm; }
+  .capa .sprint { display: inline-block; border: 1px solid rgba(255,255,255,.45); border-radius: 10mm; padding: 1.5mm 4mm; font-size: 9.5pt; font-weight: 600; margin-bottom: 8mm; }
+  .capa h1 { color: #fff; font-size: 44pt; font-weight: 800; letter-spacing: -1pt; margin: 0 0 3mm; }
+  .capa .sub { font-size: 15pt; color: var(--azul-claro); margin: 0 0 10mm; font-weight: 500; }
+  .capa .desc { font-size: 11pt; max-width: 140mm; opacity: .88; }
+  .capa .terminal { position: absolute; right: -14mm; top: 160mm; width: 128mm; transform: rotate(-4deg); opacity: .95; border-radius: 3mm; box-shadow: 0 6mm 18mm rgba(0,0,0,.45); }
+  .capa .rodape { position: absolute; left: 20mm; right: 20mm; bottom: 20mm; display: grid; grid-template-columns: 1.3fr 1fr; gap: 10mm; align-items: end; }
+  .capa .equipe h3 { color: var(--azul-claro); font-size: 9pt; letter-spacing: 1.5pt; text-transform: uppercase; margin: 0 0 3mm; }
+  .capa .equipe ul { list-style: none; padding: 0; margin: 0; font-size: 10.5pt; }
+  .capa .equipe li { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,.18); padding: 1.6mm 0; margin: 0; }
+  .capa .equipe li span:last-child { opacity: .75; font-family: "JetBrains Mono", monospace; font-size: 9pt; }
+  .capa .info { text-align: right; font-size: 9.5pt; opacity: .85; line-height: 1.7; }
+
+  /* Sumário */
+  .sumario ol { list-style: none; padding: 0; margin: 0; }
+  .sumario li { display: flex; align-items: baseline; gap: 3mm; padding: 2.6mm 0; border-bottom: 1px dashed var(--linha); font-size: 11pt; margin: 0; }
+  .sumario .n { color: var(--azul); font-weight: 800; width: 8mm; }
+  .sumario .t { font-weight: 700; color: var(--tinta); }
+  .sumario .d { color: var(--suave); font-size: 9pt; flex: 1; }
+  .sumario .p { font-weight: 700; color: var(--azul-escuro); font-family: "JetBrains Mono", monospace; }
+
+  /* Diagrama */
+  .fluxo { display: grid; grid-template-columns: 1fr 34mm 1fr; align-items: center; gap: 2mm; margin: 2mm 0 6mm; break-inside: avoid; }
+  .no { border-radius: 3mm; padding: 4mm; color: #fff; }
+  .no h4 { margin: 0 0 1.5mm; font-size: 11pt; }
+  .no p, .no li { font-size: 8.6pt; margin: 0; opacity: .92; }
+  .no ul { padding-left: 4mm; margin: 0; }
+  .no.app { background: linear-gradient(150deg, #3f66f6, #2849d8); }
+  .no.py { background: linear-gradient(150deg, #262b34, #13161b); }
+  .setas { text-align: center; font-size: 8pt; color: var(--suave); }
+  .setas b { display: block; color: var(--azul-escuro); font-size: 8.5pt; margin: 1.5mm 0 .5mm; }
+  .setas .s { font-size: 15pt; color: var(--azul); line-height: 1; }
+  .apoio { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 5mm; }
+  .apoio .no { background: var(--azul-fundo); color: var(--tinta); border: 1px solid #d7defb; padding: 3mm 4mm; }
+</style>
+</head>
+<body>
+
+<!-- ============================== CAPA ============================== -->
+<div class="capa">
+  <div class="topo"><span>FIAP · ENGENHARIA DE SOFTWARE · 1ESPV</span><span class="marca">JOVI</span></div>
+  <div class="centro">
+    <span class="sprint">Challenge JOVI 2026 · Sprint 4 · Computational Thinking with Python</span>
+    <h1>JOVI Desktop</h1>
+    <p class="sub">Sistema Inteligente de Câmera JOVI — módulo Python</p>
+    <p class="desc">Programa em Python integrado ao app React da câmera: recebe as capturas do estudante, gera resumos, explica termos pela Wikipédia, organiza matérias, faz quiz de revisão e devolve tudo ao app — por arquivo JSON ou por um servidor local de sincronização.</p>
+  </div>
+  <img class="terminal" src="telas/01-menu.svg" alt="">
+  <div class="rodape">
+    <div class="equipe">
+      <h3>Pixel Squad · Integrantes</h3>
+      <ul>
+        <li><span>Pedro Henrique Marques</span><span>RM 569307</span></li>
+        <li><span>Evandro Marcondes</span><span>RM 572473</span></li>
+        <li><span>Raphael de Oliveira</span><span>RM 571065</span></li>
+        <li><span>Renan Queiroz</span><span>RM 569077</span></li>
+      </ul>
+    </div>
+    <div class="info">Projeto: Sistema Inteligente de Câmera JOVI<br>Repositório: github.com/Pixel-Squad-FIAP/APPCameraJovi<br>App: app-camera-jovi.vercel.app<br>São Paulo · Outubro de 2026</div>
+  </div>
+</div>
+
+<!-- ============================== SUMÁRIO ============================== -->
+<section class="sumario">
+  <h2>Sumário</h2>
+  <p style="color:var(--suave)">O documento descreve o programa entregue na Sprint 4 (seções 1 a 7) e justifica o que mudou em relação à Sprint 3 (seção 8).</p>
+  <ol>
+    <li><span class="n">1</span><span class="t">Objetivos</span><span class="d">o que o programa precisa resolver</span><span class="p">{{pg:objetivos}}</span></li>
+    <li><span class="n">2</span><span class="t">Justificativa</span><span class="d">por que a solução importa para o estudante</span><span class="p">{{pg:justificativa}}</span></li>
+    <li><span class="n">3</span><span class="t">Visão geral da solução</span><span class="d">arquitetura, módulos e fluxo de dados</span><span class="p">{{pg:visao-geral}}</span></li>
+    <li><span class="n">4</span><span class="t">Funcionalidades implementadas</span><span class="d">cada opção do menu, com telas reais</span><span class="p">{{pg:funcionalidades}}</span></li>
+    <li><span class="n">5</span><span class="t">Integração com o app React</span><span class="d">arquivo JSON, servidor local e regras de mesclagem</span><span class="p">{{pg:integracao}}</span></li>
+    <li><span class="n">6</span><span class="t">Conceitos de Python aplicados</span><span class="d">funções, listas, dicionários, try/except, JSON, API, testes</span><span class="p">{{pg:conceitos}}</span></li>
+    <li><span class="n">7</span><span class="t">Como instalar e executar</span><span class="d">passo a passo para testar em outra máquina</span><span class="p">{{pg:execucao}}</span></li>
+    <li><span class="n">8</span><span class="t">Alterações em relação à Sprint 3</span><span class="d">o que foi removido, modificado e adicionado, e por quê</span><span class="p">{{pg:alteracoes}}</span></li>
+    <li><span class="n">9</span><span class="t">Limitações assumidas</span><span class="d">o que a solução não faz</span><span class="p">{{pg:limitacoes}}</span></li>
+  </ol>
+</section>
+
+<!-- ============================== 1. OBJETIVOS ============================== -->
+<section class="quebra">
+  <h2 id="objetivos"><span class="num">1</span>Objetivos</h2>
+  <p>O Challenge JOVI 2026 pede uma câmera de smartphone <b>mais intuitiva, funcional e contextual</b> para estudantes full-time, que conciliam estudos, vida social e trabalho e usam o celular para registrar aulas, slides e apostilas. A equipe construiu o <b>Sistema Inteligente de Câmera JOVI</b>: um app React com câmera real, OCR, resumo e organização por matéria.</p>
+  <p>O objetivo da parte em Python na Sprint 4 é entregar a <b>implementação final</b> dessa solução em Python, <b>integrada ao restante do projeto</b>, com persistência de dados e consumo de API externa:</p>
+  <ul class="lista-num">
+    <li><b>Trabalhar sobre os dados reais do app</b>: as capturas feitas no navegador (com o texto do OCR) chegam ao Python e voltam enriquecidas, sem cópia manual.</li>
+    <li><b>Transformar capturas em estudo</b>: resumo idêntico ao do app, explicação de termos pela Wikipédia, anotações, quiz de revisão e caderno de estudos.</li>
+    <li><b>Organizar e medir</b>: álbuns (matérias), busca, filtros, estatísticas de uso e histórico de ações.</li>
+    <li><b>Ser confiável</b>: menu claro, validação de toda entrada, tratamento de exceções, gravação segura em JSON e testes automatizados.</li>
+  </ul>
+</section>
+
+<!-- ============================== 2. JUSTIFICATIVA ============================== -->
+<section>
+  <h2 id="justificativa"><span class="num">2</span>Justificativa</h2>
+  <p>O estudante fotografa dezenas de slides e páginas por semana, mas essas fotos raramente viram material de estudo: ficam perdidas no rolo da câmera, sem texto pesquisável, sem resumo e sem organização. O app resolve a captura; o JOVI Desktop resolve <b>o que acontece depois da captura</b>, no computador, onde o estudante de fato estuda e faz trabalhos.</p>
+  <div class="grade3">
+    <div class="cartao"><h4>Menos tempo de leitura</h4><p>Resumo extrativo das capturas, em lote, com os termos principais destacados.</p></div>
+    <div class="cartao"><h4>Entender, não só guardar</h4><p>Termos difíceis explicados pela Wikipédia e anexados às anotações da própria captura.</p></div>
+    <div class="cartao"><h4>Revisão ativa</h4><p>Quiz de lacunas montado a partir dos resumos do próprio estudante, com placar salvo.</p></div>
+  </div>
+  <p>Fazer isso em Python, e não só no navegador, também tem razão técnica: o programa guarda a biblioteca em <b>arquivo</b> (backup fora do navegador), gera <b>arquivos Markdown</b> prontos para o VS Code, Notion ou Obsidian e expõe a biblioteca por uma <b>API local</b>, abrindo caminho para outras integrações. Como o resumo foi portado de forma idêntica, o que é feito em um lado vale no outro.</p>
+</section>
+
+<!-- ============================== 3. VISÃO GERAL ============================== -->
+<section class="quebra">
+  <h2 id="visao-geral"><span class="num">3</span>Visão geral da solução</h2>
+  <p>A solução tem dois programas que compartilham <b>uma única biblioteca de capturas</b>, no mesmo formato de dados (<code>jovi-biblioteca</code>, versão 1):</p>
+  <div class="fluxo">
+    <div class="no app"><h4>App React (navegador)</h4><ul><li>Câmera real e modos</li><li>OCR em português (Tesseract.js)</li><li>Galeria, resumo, notas, PDF</li><li>IndexedDB + localStorage</li><li>Botão <b>Sincronizar</b></li></ul></div>
+    <div class="setas"><b>Arquivo JSON</b><span class="s">⇄</span><b>HTTP 127.0.0.1:5050</b><span class="s">⇄</span>mesma regra de mesclagem nos dois lados</div>
+    <div class="no py"><h4>JOVI Desktop (Python)</h4><ul><li>Menu no terminal (Rich)</li><li>Resumo, quiz, glossário</li><li>Álbuns, busca, estatísticas</li><li><code style="background:#2c3240;color:#c9d4ff">dados/biblioteca.json</code></li><li>Servidor de sincronização</li></ul></div>
+  </div>
+  <div class="apoio">
+    <div class="no"><h4>API externa</h4><p>Wikipédia em português — <code>GET pt.wikipedia.org/api/rest_v1/page/summary/{termo}</code>, a mesma usada pelo app.</p></div>
+    <div class="no"><h4>Persistência</h4><p>JSON com gravação atômica: capturas, álbuns, lixeira, histórico, cache de termos e partidas do quiz.</p></div>
+  </div>
+  <h3>Organização do código</h3>
+  <p>Cada arquivo tem uma responsabilidade. Os nomes dos módulos da Sprint 3 foram mantidos para que a evolução fique visível.</p>
+  <table>
+    <thead><tr><th style="width:30%">Arquivo</th><th>Responsabilidade</th></tr></thead>
+    <tbody>
+      <tr><td><code>main.py</code></td><td>Ponto de entrada: carrega a biblioteca, mostra o painel inicial, roda o menu principal e salva depois de cada funcionalidade.</td></tr>
+      <tr><td><code>jovi/interface.py</code></td><td>Visual do terminal com as cores do app: banner, menus, tabelas, painéis, gráficos de barra e medidores.</td></tr>
+      <tr><td><code>jovi/entrada.py</code></td><td>Leitura de dados com validação (inteiros em faixa, textos, confirmações, caminhos de arquivo).</td></tr>
+      <tr><td><code>jovi/persistencia.py</code></td><td>Leitura e gravação de JSON, recuperação de arquivo corrompido e histórico de ações.</td></tr>
+      <tr><td><code>jovi/modelo.py</code></td><td>Modos da câmera, álbuns padrão e formato de captura, iguais aos do app.</td></tr>
+      <tr><td><code>jovi/camera.py</code></td><td>Recomendação de modo pela cena e pela luz, com confiança e dicas.</td></tr>
+      <tr><td><code>jovi/documento.py</code></td><td>Texto → captura, visualização completa e revisão do OCR.</td></tr>
+      <tr><td><code>jovi/resumo.py</code></td><td>Resumo extrativo: porte fiel de <code>src/lib/summarize.js</code>.</td></tr>
+      <tr><td><code>jovi/estudante.py</code></td><td>Resumos, anotações, Wikipédia, quiz, glossário e exportação Markdown.</td></tr>
+      <tr><td><code>jovi/wikipedia.py</code></td><td>Cliente da API da Wikipédia, com cache.</td></tr>
+      <tr><td><code>jovi/organizacao.py</code></td><td>Álbuns, busca, filtros, listagem e seleção de capturas.</td></tr>
+      <tr><td><code>jovi/estatisticas.py</code></td><td>Números, gráficos, termos frequentes e relatório.</td></tr>
+      <tr><td><code>jovi/lixeira.py</code></td><td>Remover, restaurar e esvaziar.</td></tr>
+      <tr><td><code>jovi/integracao.py</code> · <code>jovi/servidor.py</code></td><td>Formato de troca, mesclagem com o app e servidor HTTP de sincronização.</td></tr>
+      <tr><td><code>tests/</code></td><td>45 testes automatizados (<code>unittest</code>).</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================== 4. FUNCIONALIDADES ============================== -->
+<section class="quebra">
+  <h2 id="funcionalidades"><span class="num">4</span>Funcionalidades implementadas</h2>
+  <p>O programa abre num painel com os números da biblioteca e o <b>menu principal</b>. Toda funcionalidade volta ao menu ao terminar, e a opção <b>0 – Sair</b> salva e encerra. Na primeira execução, o programa oferece uma <b>biblioteca de exemplo</b> para testar tudo sem o app.</p>
+  <figure class="tela"><img src="telas/01-menu.svg" alt="Menu principal"><figcaption>Painel inicial e menu principal do JOVI Desktop.</figcaption></figure>
+  <table>
+    <thead><tr><th style="width:17%">Opção</th><th style="width:19%">Entrada</th><th>Processamento</th><th style="width:19%">Saída</th><th style="width:19%">Validações</th></tr></thead>
+    <tbody>
+      <tr><td><b>1 · Câmera contextual</b></td><td>Cenário (1–5), luz (0–100), quer vídeo (s/n)</td><td>Escolhe o modo do app; a confiança do modo Noite usa a mesma fórmula da sugestão do app (0,55 + (0,2 − luz) × 4).</td><td>Modo, confiança, motivos, dicas; abre a câmera no navegador</td><td>Número fora da faixa, letras, s/n inválido</td></tr>
+      <tr><td><b>2 · Documento inteligente</b></td><td>Arquivo .txt/.md ou texto colado; título; álbum</td><td>Lê UTF-8 (ou Latin-1), sugere título, cria a captura; localizar/substituir no texto do OCR.</td><td>Nova captura (vai para o app); texto corrigido</td><td>Arquivo inexistente, extensão, vazio, &gt; 1 MB, texto vazio</td></tr>
+      <tr><td><b>3 · Modo estudante</b></td><td>Captura, tamanho do resumo, termo, respostas do quiz</td><td>Resumo extrativo (individual ou em lote, com barra de progresso); consulta à Wikipédia com cache; quiz com <code>random</code>; Markdown.</td><td>Resumo, explicação, nota anexada, placar, arquivo .md</td><td>Texto &lt; 25 palavras, vídeo, termo inexistente, sem internet</td></tr>
+      <tr><td><b>4 · Organização</b></td><td>Busca, filtros, nomes de álbum</td><td>Busca sem acentos em título/álbum/texto/notas; filtros por álbum, modo e tipo; renomear/excluir álbum move as capturas.</td><td>Tabelas de capturas; álbuns atualizados</td><td>Nome vazio, &gt; 30 caracteres, duplicado, álbum “Geral” protegido</td></tr>
+      <tr><td><b>5 · Estatísticas</b></td><td>—</td><td>Contagens com <code>Counter</code>, agrupamento por mês e dia da semana, termos mais frequentes, média do quiz.</td><td>Cartões, gráficos de barra, histórico, relatório .md</td><td>Biblioteca vazia mostra “sem dados”</td></tr>
+      <tr><td><b>6 · Integração</b></td><td>Arquivo .json do app; porta do servidor</td><td>Valida o formato, mescla por id/data, exporta, sobe o servidor HTTP.</td><td>Relatório da sincronização; arquivo para o app</td><td>Formato/versão, capturas inválidas, porta ocupada</td></tr>
+      <tr><td><b>7 · Lixeira</b></td><td>Item a restaurar</td><td>Move entre as listas <code>capturas</code> e <code>lixeira</code>.</td><td>Captura restaurada ou apagada</td><td>Confirmação antes de apagar</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Câmera contextual</h3>
+  <p>O estudante responde três perguntas e recebe o modo do app, a confiança da recomendação e dicas de luz, enquadramento e alinhamento. No fim, pode abrir a câmera do app direto no navegador.</p>
+  <figure class="tela"><img src="telas/02-camera.svg" alt="Recomendação da câmera"><figcaption>Documento com pouca luz: o modo Documento continua indicado, mas com confiança menor e um alerta sobre o OCR.</figcaption></figure>
+
+  <h3>Documento inteligente</h3>
+  <p>Cada captura pode ser vista por completo: metadados, resumo, termos principais, texto extraído e anotações. O texto do OCR pode ser corrigido com localizar/substituir, e o resumo é marcado como desatualizado quando o texto muda, como no app.</p>
+  <figure class="tela"><img src="telas/03-captura.svg" alt="Captura com resumo"><figcaption>Captura da apostila de Fotossíntese com o resumo gerado em Python.</figcaption></figure>
+
+  <h3>Modo estudante — quiz relâmpago</h3>
+  <p>As perguntas são frases dos resumos do próprio estudante com um termo principal escondido. As alternativas erradas vêm, de preferência, da mesma matéria, o que torna a revisão útil. O placar é salvo e entra nas estatísticas.</p>
+  <figure class="tela alta"><img src="telas/04-quiz.svg" alt="Quiz"><figcaption>Quiz gerado a partir do resumo da apostila de Fotossíntese.</figcaption></figure>
+
+  <h3>Estatísticas</h3>
+  <figure class="tela"><img src="telas/05-estatisticas.svg" alt="Estatísticas"><figcaption>Painel de estatísticas com gráficos de barra no terminal.</figcaption></figure>
+</section>
+
+<!-- ============================== 5. INTEGRAÇÃO ============================== -->
+<section class="quebra">
+  <h2 id="integracao"><span class="num">5</span>Integração com o app React</h2>
+  <p>O PDF da Sprint pede integração “por meio de arquivos ou API”. A solução oferece <b>as duas</b>, sobre o mesmo formato e a mesma regra de mesclagem, implementada em Python (<code>jovi/integracao.py</code>) e em JavaScript (<code>src/services/libraryTransfer.js</code>).</p>
+  <div class="dupla">
+    <div class="cartao"><h4>Por arquivo JSON</h4><p>No app: <b>Galeria › Sincronizar › Exportar biblioteca</b>. No Python: <b>6 › 1 Importar do app</b> (o arquivo é encontrado na pasta Downloads). Depois <b>6 › 2 Exportar para o app</b> e, no app, <b>Importar biblioteca</b>.</p></div>
+    <div class="cartao"><h4>Por API (servidor local)</h4><p>No Python: <b>6 › 3</b> ou <code>python python/main.py --servidor</code>. No app: <b>Sincronizar com o JOVI Desktop</b>. Uma requisição envia as alterações do navegador e devolve as do Python.</p></div>
+  </div>
+  <figure class="tela"><img src="telas/06-servidor.svg" alt="Servidor ao vivo"><figcaption>Servidor de sincronização mostrando as requisições do app em tempo real.</figcaption></figure>
+
+  <h3>Formato de troca</h3>
+<pre>{
+  "formato": "jovi-biblioteca", "versao": 1, "origem": "app",
+  "albuns":   ["Geral", "Aulas", "Biologia"],
+  "capturas": [{ "id": "…", "createdAt": "…", "updatedAt": "…", "kind": "photo", "mode": "documento",
+                 "album": "Biologia", "title": "…", "text": "…", "summary": {…}, "notes": "…",
+                 "thumbDataUrl": "data:image/jpeg;base64,…" }],
+  "excluidas": ["id-de-captura-excluida"]
+}</pre>
+
+  <h3>Regras da mesclagem</h3>
+  <ul>
+    <li>As capturas são casadas pelo <code>id</code>. Vence a versão com <code>updatedAt</code> mais recente, e só os campos editáveis mudam: título, álbum, texto, resumo, anotações e status do OCR.</li>
+    <li>Ids desconhecidos viram capturas novas. No app, documentos criados no Python ganham uma <b>capa gerada</b> a partir do título.</li>
+    <li>Os álbuns dos dois lados são unidos.</li>
+    <li>O que é excluído no app vai para a <b>lixeira do Python</b> (restaurável). Nenhum lado recria o que o outro excluiu.</li>
+  </ul>
+
+  <h3>Endpoints e segurança</h3>
+  <table>
+    <thead><tr><th style="width:30%">Endpoint</th><th>Descrição</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET /api/status</code></td><td>Estado do servidor e totais (o app usa para mostrar “JOVI Desktop conectado”).</td></tr>
+      <tr><td><code>GET /api/biblioteca</code></td><td>Biblioteca completa no formato de troca.</td></tr>
+      <tr><td><code>POST /api/biblioteca</code></td><td>Recebe a biblioteca do app, mescla, salva em JSON e devolve a biblioteca mesclada com um relatório. Respostas 400 (JSON inválido), 413 (corpo grande), 422 (formato) e 500 (falha ao salvar).</td></tr>
+      <tr><td><code>GET /api/estatisticas</code></td><td>Os mesmos números do menu Estatísticas.</td></tr>
+    </tbody>
+  </table>
+  <div class="destaque"><p>O servidor escuta apenas em <code>127.0.0.1</code> e só responde a origens do próprio app (localhost ou <code>app-camera-jovi.vercel.app</code>); outros sites recebem 403. Por isso funciona tanto com <code>npm run dev</code> quanto com o app publicado na Vercel.</p></div>
+  <div class="destaque"><p><b>Resumo idêntico nos dois lados.</b> O <code>resumo.py</code> reproduz o algoritmo do app, inclusive o arredondamento do JavaScript e o hash em unidades UTF-16. Um resumo gerado no Python é aceito pelo app como atual, sem o aviso “o texto mudou”. Um teste compara 24 casos com as saídas do próprio <code>summarize.js</code>.</p></div>
+</section>
+
+<!-- ============================== 6. CONCEITOS ============================== -->
+<section class="quebra">
+  <h2 id="conceitos"><span class="num">6</span>Conceitos de Python aplicados</h2>
+  <h3>Funções com parâmetros e retorno</h3>
+  <p>A lógica fica em funções pequenas e testáveis, que recebem dados por parâmetro e devolvem resultados. As telas (<code>_tela_*</code>) só leem a entrada, chamam essas funções e mostram o retorno.</p>
+  <table>
+    <thead><tr><th style="width:34%">Função</th><th style="width:30%">Parâmetros</th><th style="width:14%">Retorno</th><th>Finalidade</th></tr></thead>
+    <tbody>
+      <tr><td><code>camera.recomendar_modo</code></td><td>cenario, luminosidade, quer_video</td><td>dict</td><td>Modo, confiança e motivos</td></tr>
+      <tr><td><code>resumo.resumir</code></td><td>texto, tamanho</td><td>dict</td><td>Frases e termos do resumo</td></tr>
+      <tr><td><code>resumo.impressao_texto</code></td><td>texto</td><td>str</td><td>Hash compatível com o app</td></tr>
+      <tr><td><code>documento.ler_arquivo_texto</code></td><td>caminho</td><td>str</td><td>Lê .txt/.md com fallback de codificação</td></tr>
+      <tr><td><code>documento.substituir_no_texto</code></td><td>texto, procurar, trocar_por, ignorar_maiusculas</td><td>tuple</td><td>Novo texto e número de trocas</td></tr>
+      <tr><td><code>estudante.aplicar_resumo</code></td><td>biblioteca, captura, tamanho</td><td>dict</td><td>Gera e salva o resumo</td></tr>
+      <tr><td><code>estudante.gerar_perguntas</code></td><td>capturas, quantidade, rng</td><td>list</td><td>Perguntas do quiz</td></tr>
+      <tr><td><code>organizacao.validar_nome_album</code></td><td>biblioteca, nome, ignorar</td><td>tuple</td><td>(válido, nome ou erro)</td></tr>
+      <tr><td><code>organizacao.buscar</code> / <code>filtrar</code></td><td>capturas, consulta / album, modo, tipo</td><td>list</td><td>Capturas encontradas</td></tr>
+      <tr><td><code>estatisticas.calcular_estatisticas</code></td><td>biblioteca</td><td>dict</td><td>Todos os números do painel</td></tr>
+      <tr><td><code>wikipedia.buscar_com_cache</code></td><td>termo, cache</td><td>tuple</td><td>(explicação, veio do cache)</td></tr>
+      <tr><td><code>integracao.mesclar</code></td><td>biblioteca, albuns, recebidas, excluidas</td><td>dict</td><td>Relatório da sincronização</td></tr>
+      <tr><td><code>persistencia.carregar_biblioteca</code></td><td>caminho</td><td>tuple</td><td>(biblioteca, aviso)</td></tr>
+      <tr><td><code>entrada.ler_inteiro</code></td><td>mensagem, minimo, maximo, padrao</td><td>int</td><td>Número validado</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Listas e dicionários</h3>
+  <p>A biblioteca é um <b>dicionário</b> com <b>listas de dicionários</b>: <code>capturas</code>, <code>lixeira</code>, <code>historico</code> e <code>quiz</code> são listas; <code>cacheTermos</code> é um dicionário indexado pelo termo normalizado; <code>MODOS</code>, <code>CENARIOS</code> e <code>DICAS</code> são dicionários de configuração. Há compreensões de lista nos filtros, <code>dict.fromkeys</code> para unir álbuns sem repetir, <code>collections.Counter</code> nas estatísticas e <code>collections.deque</code> no log do servidor.</p>
+
+  <h3>Validação de entrada e try/except</h3>
+  <table>
+    <thead><tr><th style="width:30%">Onde</th><th style="width:34%">Exceções tratadas</th><th>O que o usuário vê</th></tr></thead>
+    <tbody>
+      <tr><td><code>entrada.ler_inteiro</code></td><td><code>ValueError</code> no <code>int()</code></td><td>“‘abc’ não é um número inteiro. Digite um valor de 1 a 5.” e nova pergunta</td></tr>
+      <tr><td><code>persistencia.ler_json</code></td><td><code>FileNotFoundError</code>, <code>JSONDecodeError</code>, <code>UnicodeDecodeError</code>, <code>OSError</code></td><td>Mensagem com linha e coluna do erro; arquivo corrompido vira backup e o programa segue</td></tr>
+      <tr><td><code>persistencia.salvar_json</code></td><td><code>OSError</code> (disco cheio, sem permissão)</td><td>Aviso de que os dados seguem na memória; o temporário é apagado</td></tr>
+      <tr><td><code>wikipedia.buscar_termo</code></td><td><code>Timeout</code>, <code>ConnectionError</code>, <code>RequestException</code>, JSON inválido, 404, desambiguação</td><td>“Sem conexão com a internet.” ou “A Wikipédia não tem um artigo…”; o glossário continua offline</td></tr>
+      <tr><td><code>documento</code></td><td><code>UnicodeDecodeError</code> (tenta Latin-1), <code>OSError</code>, <code>ValueError</code></td><td>“O arquivo está vazio.”, “grande demais”…</td></tr>
+      <tr><td><code>servidor</code></td><td><code>OSError</code> (porta ocupada), <code>JSONDecodeError</code>, <code>ErroFormato</code></td><td>Pede outra porta; responde 400/422 ao app</td></tr>
+      <tr><td><code>main</code></td><td><code>KeyboardInterrupt</code>, <code>EOFError</code>, <code>ModuleNotFoundError</code></td><td>Ctrl+C cancela e volta ao menu; dependência ausente explica o <code>pip install</code></td></tr>
+    </tbody>
+  </table>
+  <p>Também foram criadas exceções próprias (<code>ErroPersistencia</code>, <code>ErroFormato</code>, <code>TermoNaoEncontrado</code>, <code>FalhaDeConexao</code>) para separar o tipo de falha da mensagem mostrada.</p>
+
+  <h3>Boas práticas</h3>
+  <ul>
+    <li>Separação entre lógica (funções puras) e tela (<code>_tela_*</code>), módulos com responsabilidade única, nomes descritivos em português e <i>docstrings</i>.</li>
+    <li>Constantes nomeadas (<code>LIMIAR_POUCA_LUZ</code>, <code>MAX_NOME_ALBUM</code>, <code>TEMPO_LIMITE</code>) em vez de números soltos.</li>
+    <li>Gravação atômica, <i>timeout</i> nas requisições, <i>User-Agent</i> identificado para a Wikimedia e servidor restrito ao localhost.</li>
+    <li><b>45 testes automatizados</b> (<code>python -m unittest discover -s python/tests</code>): paridade do resumo com o JavaScript, mesclagem, servidor HTTP, persistência, câmera, álbuns, quiz e a API simulada com <code>unittest.mock</code>.</li>
+  </ul>
+</section>
+
+<!-- ============================== 7. EXECUÇÃO ============================== -->
+<section>
+  <h2 id="execucao"><span class="num">7</span>Como instalar e executar</h2>
+  <p>Requisitos: Python 3.10 ou superior (testado no 3.12). Na raiz do projeto:</p>
+<pre><span class="c"># 1. ambiente virtual e dependências (rich e requests)</span>
+python -m venv python/.venv
+python\.venv\Scripts\activate          <span class="c"># Windows</span>
+source python/.venv/bin/activate       <span class="c"># macOS / Linux</span>
+pip install -r python/requirements.txt
+
+<span class="c"># 2. executar</span>
+python python/main.py                  <span class="c"># menu interativo</span>
+python python/main.py --servidor       <span class="c"># direto no servidor de sincronização</span>
+
+<span class="c"># 3. testes</span>
+python -m unittest discover -s python/tests</pre>
+  <p>Para testar a integração: com o servidor ligado, abra o app (<code>npm run dev</code> ou <code>app-camera-jovi.vercel.app</code>), entre com <b>Acessar a câmera</b> e vá em <b>Galeria › Sincronizar › Sincronizar com o JOVI Desktop</b>. Com a biblioteca de exemplo, seis capturas aparecem na Galeria com resumo, notas e capa. Se o navegador pedir acesso à rede local, permita. Use um terminal com cores e emojis (Windows Terminal, VS Code, PowerShell 7).</p>
+</section>
+
+<!-- ============================== 8. ALTERAÇÕES ============================== -->
+<section class="quebra">
+  <h2 id="alteracoes"><span class="num">8</span>Alterações em relação à Sprint 3</h2>
+  <p>Na Sprint 3, o Python era um app <b>Streamlit</b> separado do projeto (<code>app.py</code>, <code>camera.py</code>, <code>documento.py</code>, <code>estudante.py</code>, <code>organizacao.py</code>), com captura, OCR e resumo <b>simulados</b> e dados apenas em <code>st.session_state</code>. A Sprint 4 pede a implementação final <b>integrada à solução</b>, com persistência e API externa. Por isso o código foi reconstruído dentro do repositório do app, mantendo os quatro módulos como base.</p>
+
+  <h3><span class="tag rem">Removido</span></h3>
+  <table>
+    <thead><tr><th style="width:30%">O que saiu</th><th>Por quê</th></tr></thead>
+    <tbody>
+      <tr><td>Interface Streamlit (<code>app.py</code>, <code>streamlit</code> no requirements)</td><td>A Sprint 4 avalia um menu de opções que volta ao menu principal e tem opção de finalizar. No Streamlit, o “Encerrar” só parava a tela e o servidor continuava rodando. O programa de terminal cumpre o fluxo pedido e encerra de fato.</td></tr>
+      <tr><td><code>st.session_state</code> como armazenamento</td><td>Os dados sumiam ao fechar a aba. Agora tudo fica em <code>dados/biblioteca.json</code>.</td></tr>
+      <tr><td><code>capturar_imagem</code>, <code>digitalizar_documento</code>, <code>realizar_ocr</code> (simulações)</td><td>A captura e o OCR reais já existem no app (câmera do navegador + Tesseract.js). O Python passou a trabalhar sobre esses dados reais em vez de inventar um texto fixo.</td></tr>
+      <tr><td>Resumo “20 primeiras palavras + …”</td><td>Não era um resumo. Foi substituído pelo resumo extrativo do app.</td></tr>
+      <tr><td>Matérias iniciais fixas e categorias “Anotação/Documento/Resumo”</td><td>Passaram a ser os álbuns do app e o modo/tipo real de cada captura, para os dois lados falarem a mesma língua.</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="tag mod">Modificado</span></h3>
+  <table>
+    <thead><tr><th style="width:18%">Módulo</th><th style="width:38%">Sprint 3 → Sprint 4</th><th>Por quê</th></tr></thead>
+    <tbody>
+      <tr><td><code>camera.py</code></td><td><code>analisar_contexto(contexto)</code> → <code>recomendar_modo(cenario, luminosidade, quer_video)</code>, que devolve um dicionário com modo, confiança e motivos. Novos cenários (slide → Estudante, movimento/vídeo). <code>gerar_assistencia</code> agora é por modo.</td><td>Recomendar os modos que existem de verdade no app, com a mesma regra de pouca luz da sugestão automática dele, e abrir a câmera no navegador.</td></tr>
+      <tr><td><code>documento.py</code></td><td><code>revisar_texto</code> agora edita uma captura real, atualiza o status do OCR e o título automático. Novos: importação de .txt/.md, localizar/substituir e visualização completa.</td><td>Corrigir erros reais do OCR sem redigitar e trazer anotações de outros lugares para o app.</td></tr>
+      <tr><td><code>estudante.py</code></td><td><code>gerar_resumo</code> → <code>aplicar_resumo</code> (algoritmo real em <code>resumo.py</code>). <code>criar_anotacao</code>/<code>editar_anotacao</code> → anotações com data na própria captura. <code>exportar_conteudo</code> (TXT) → Markdown por captura ou por álbum, com glossário.</td><td>O resumo e as notas precisam valer no app, e o material exportado precisa ser útil de verdade.</td></tr>
+      <tr><td><code>organizacao.py</code></td><td><code>adicionar_materia</code> → <code>criar_album</code>, com as regras do app (até 30 caracteres, sem duplicar ignorando maiúsculas). <code>organizar_material</code>/<code>corrigir_organizacao</code> → <code>mover_captura</code>/<code>renomear_captura</code>. Novos: renomear/excluir álbum, busca e filtros.</td><td>A organização feita aqui aparece na Galeria do app depois da sincronização.</td></tr>
+      <tr><td>Interface</td><td>Widgets do Streamlit → painéis, tabelas, barras de progresso e gráficos com Rich. Validação centralizada em <code>entrada.py</code>.</td><td>Mensagens claras, navegação por números e a identidade visual do app.</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="tag add">Adicionado</span></h3>
+  <table>
+    <thead><tr><th style="width:30%">Novidade</th><th>Para que serve</th></tr></thead>
+    <tbody>
+      <tr><td><code>persistencia.py</code></td><td>Persistência em JSON com gravação atômica e recuperação de arquivo corrompido (requisito da Sprint 4).</td></tr>
+      <tr><td><code>wikipedia.py</code></td><td>Consumo de API externa (requisito da Sprint 4), com cache offline e tratamento de erros.</td></tr>
+      <tr><td><code>integracao.py</code> + <code>servidor.py</code></td><td>Integração com o restante da solução, por arquivo e por API (requisito da Sprint 4).</td></tr>
+      <tr><td>Botão <b>Sincronizar</b> no app React</td><td>Lado do app da integração: <code>libraryTransfer.js</code>, <code>syncApi.js</code>, o hook <code>useLibrarySync</code> e a <code>SyncSheet</code>, com testes no Vitest.</td></tr>
+      <tr><td><code>resumo.py</code></td><td>Porte fiel do resumo do app, validado por teste de paridade.</td></tr>
+      <tr><td>Quiz, glossário, estatísticas, histórico e lixeira</td><td>Revisão ativa, acompanhamento do estudo e segurança contra exclusão acidental.</td></tr>
+      <tr><td>Biblioteca de exemplo e <code>--servidor</code></td><td>Testar tudo sem o app e subir a sincronização com um comando.</td></tr>
+      <tr><td>45 testes automatizados</td><td>Garantir as regras de negócio e a compatibilidade com o app.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================== 9. LIMITAÇÕES ============================== -->
+<section style="break-inside: avoid">
+  <h2 id="limitacoes"><span class="num">9</span>Limitações assumidas</h2>
+  <ul>
+    <li>O Python não acessa a câmera nem roda OCR: a captura e a extração de texto acontecem no app (navegador). O Python trabalha sobre o texto já extraído.</li>
+    <li>Vídeos não são recriados no app a partir do Python, porque o arquivo original só existe no navegador. Documentos criados no Python chegam ao app com uma capa gerada, não com foto.</li>
+    <li>Excluir no Python não apaga a captura do app. Excluir no app manda a captura para a lixeira do Python.</li>
+    <li>A sincronização por servidor exige o programa aberto no mesmo computador do navegador. A consulta à Wikipédia precisa de internet, exceto para termos já em cache.</li>
+    <li>O resumo é extrativo: seleciona frases do próprio texto, sem gerar texto novo.</li>
+  </ul>
+</section>
+
+</body>
+</html>

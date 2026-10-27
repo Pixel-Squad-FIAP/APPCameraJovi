@@ -1,0 +1,183 @@
+<svg class="rich-terminal" viewBox="0 0 1458 806.4" xmlns="http://www.w3.org/2000/svg">
+    <!-- Generated with Rich https://www.textualize.io -->
+    <style>
+
+    @font-face {
+        font-family: "Fira Code";
+        src: local("FiraCode-Regular"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff2/FiraCode-Regular.woff2") format("woff2"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff/FiraCode-Regular.woff") format("woff");
+        font-style: normal;
+        font-weight: 400;
+    }
+    @font-face {
+        font-family: "Fira Code";
+        src: local("FiraCode-Bold"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff2/FiraCode-Bold.woff2") format("woff2"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff/FiraCode-Bold.woff") format("woff");
+        font-style: bold;
+        font-weight: 700;
+    }
+
+    .terminal-2620878247-matrix {
+        font-family: Fira Code, monospace;
+        font-size: 20px;
+        line-height: 24.4px;
+        font-variant-east-asian: full-width;
+    }
+
+    .terminal-2620878247-title {
+        font-size: 18px;
+        font-weight: bold;
+        font-family: arial;
+    }
+
+    .terminal-2620878247-r1 { fill: #3f66f6 }
+.terminal-2620878247-r2 { fill: #9db4ff;font-weight: bold }
+.terminal-2620878247-r3 { fill: #c5c8c6 }
+.terminal-2620878247-r4 { fill: #c5c8c6;font-weight: bold }
+.terminal-2620878247-r5 { fill: #949494 }
+.terminal-2620878247-r6 { fill: #9db4ff }
+    </style>
+
+    <defs>
+    <clipPath id="terminal-2620878247-clip-terminal">
+      <rect x="0" y="0" width="1438.6" height="755.4" />
+    </clipPath>
+    <clipPath id="terminal-2620878247-line-0">
+    <rect x="0" y="1.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-1">
+    <rect x="0" y="25.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-2">
+    <rect x="0" y="50.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-3">
+    <rect x="0" y="74.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-4">
+    <rect x="0" y="99.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-5">
+    <rect x="0" y="123.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-6">
+    <rect x="0" y="147.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-7">
+    <rect x="0" y="172.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-8">
+    <rect x="0" y="196.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-9">
+    <rect x="0" y="221.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-10">
+    <rect x="0" y="245.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-11">
+    <rect x="0" y="269.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-12">
+    <rect x="0" y="294.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-13">
+    <rect x="0" y="318.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-14">
+    <rect x="0" y="343.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-15">
+    <rect x="0" y="367.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-16">
+    <rect x="0" y="391.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-17">
+    <rect x="0" y="416.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-18">
+    <rect x="0" y="440.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-19">
+    <rect x="0" y="465.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-20">
+    <rect x="0" y="489.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-21">
+    <rect x="0" y="513.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-22">
+    <rect x="0" y="538.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-23">
+    <rect x="0" y="562.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-24">
+    <rect x="0" y="587.1" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-25">
+    <rect x="0" y="611.5" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-26">
+    <rect x="0" y="635.9" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-27">
+    <rect x="0" y="660.3" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-28">
+    <rect x="0" y="684.7" width="1439.6" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2620878247-line-29">
+    <rect x="0" y="709.1" width="1439.6" height="24.65"/>
+            </clipPath>
+    </defs>
+
+    <rect fill="#292929" stroke="rgba(255,255,255,0.35)" stroke-width="1" x="1" y="1" width="1456" height="804.4" rx="8"/><text class="terminal-2620878247-title" fill="#c5c8c6" text-anchor="middle" x="728" y="27">Documento&#160;inteligente&#160;—&#160;captura&#160;com&#160;resumo</text>
+            <g transform="translate(26,22)">
+            <circle cx="0" cy="0" r="7" fill="#ff5f57"/>
+            <circle cx="22" cy="0" r="7" fill="#febc2e"/>
+            <circle cx="44" cy="0" r="7" fill="#28c840"/>
+            </g>
+        
+    <g transform="translate(9, 41)" clip-path="url(#terminal-2620878247-clip-terminal)">
+    
+    <g class="terminal-2620878247-matrix">
+    <text class="terminal-2620878247-r1" x="0" y="20" textLength="24.4" clip-path="url(#terminal-2620878247-line-0)">┌─</text><text class="terminal-2620878247-r1" x="24.4" y="20" textLength="634.4" clip-path="url(#terminal-2620878247-line-0)">────────────────────────────────────────────────────</text><text class="terminal-2620878247-r2" x="671" y="20" textLength="85.4" clip-path="url(#terminal-2620878247-line-0)">Captura</text><text class="terminal-2620878247-r1" x="768.6" y="20" textLength="646.6" clip-path="url(#terminal-2620878247-line-0)">─────────────────────────────────────────────────────</text><text class="terminal-2620878247-r1" x="1415.2" y="20" textLength="24.4" clip-path="url(#terminal-2620878247-line-0)">─┐</text><text class="terminal-2620878247-r3" x="1439.6" y="20" textLength="12.2" clip-path="url(#terminal-2620878247-line-0)">
+</text><text class="terminal-2620878247-r1" x="0" y="44.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-1)">│</text><text class="terminal-2620878247-r1" x="1427.4" y="44.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-1)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="44.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-1)">
+</text><text class="terminal-2620878247-r1" x="0" y="68.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-2)">│</text><text class="terminal-2620878247-r4" x="36.6" y="68.8" textLength="366" clip-path="url(#terminal-2620878247-line-2)">Fotossíntese&#160;—&#160;apostila&#160;cap.&#160;4</text><text class="terminal-2620878247-r1" x="1427.4" y="68.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-2)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="68.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-2)">
+</text><text class="terminal-2620878247-r1" x="0" y="93.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-3)">│</text><text class="terminal-2620878247-r5" x="36.6" y="93.2" textLength="549" clip-path="url(#terminal-2620878247-line-3)">Documento&#160;·&#160;Álbum&#160;Biologia&#160;·&#160;18/08/2026&#160;10:20</text><text class="terminal-2620878247-r5" x="585.6" y="93.2" textLength="183" clip-path="url(#terminal-2620878247-line-3)">&#160;·&#160;147&#160;palavras</text><text class="terminal-2620878247-r1" x="1427.4" y="93.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-3)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="93.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-3)">
+</text><text class="terminal-2620878247-r1" x="0" y="117.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-4)">│</text><text class="terminal-2620878247-r1" x="1427.4" y="117.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-4)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="117.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-4)">
+</text><text class="terminal-2620878247-r1" x="0" y="142" textLength="12.2" clip-path="url(#terminal-2620878247-line-5)">│</text><text class="terminal-2620878247-r2" x="36.6" y="142" textLength="73.2" clip-path="url(#terminal-2620878247-line-5)">Resumo</text><text class="terminal-2620878247-r1" x="1427.4" y="142" textLength="12.2" clip-path="url(#terminal-2620878247-line-5)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="142" textLength="12.2" clip-path="url(#terminal-2620878247-line-5)">
+</text><text class="terminal-2620878247-r1" x="0" y="166.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-6)">│</text><text class="terminal-2620878247-r1" x="1427.4" y="166.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-6)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="166.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-6)">
+</text><text class="terminal-2620878247-r1" x="0" y="190.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-7)">│</text><text class="terminal-2620878247-r4" x="36.6" y="190.8" textLength="36.6" clip-path="url(#terminal-2620878247-line-7)">&#160;•&#160;</text><text class="terminal-2620878247-r3" x="73.2" y="190.8" textLength="1329.8" clip-path="url(#terminal-2620878247-line-7)">A&#160;fotossíntese&#160;é&#160;o&#160;processo&#160;pelo&#160;qual&#160;plantas,&#160;algas&#160;e&#160;algumas&#160;bactérias&#160;transformam&#160;energia&#160;luminosa&#160;em&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2620878247-r1" x="1427.4" y="190.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-7)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="190.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-7)">
+</text><text class="terminal-2620878247-r1" x="0" y="215.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-8)">│</text><text class="terminal-2620878247-r3" x="73.2" y="215.2" textLength="1329.8" clip-path="url(#terminal-2620878247-line-8)">energia&#160;química.&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2620878247-r1" x="1427.4" y="215.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-8)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="215.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-8)">
+</text><text class="terminal-2620878247-r1" x="0" y="239.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-9)">│</text><text class="terminal-2620878247-r4" x="36.6" y="239.6" textLength="36.6" clip-path="url(#terminal-2620878247-line-9)">&#160;•&#160;</text><text class="terminal-2620878247-r3" x="73.2" y="239.6" textLength="1329.8" clip-path="url(#terminal-2620878247-line-9)">Na&#160;fase&#160;escura,&#160;também&#160;chamada&#160;de&#160;ciclo&#160;de&#160;Calvin,&#160;o&#160;gás&#160;carbônico&#160;do&#160;ar&#160;é&#160;fixado&#160;e&#160;transformado&#160;em&#160;glicose&#160;&#160;</text><text class="terminal-2620878247-r1" x="1427.4" y="239.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-9)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="239.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-9)">
+</text><text class="terminal-2620878247-r1" x="0" y="264" textLength="12.2" clip-path="url(#terminal-2620878247-line-10)">│</text><text class="terminal-2620878247-r3" x="73.2" y="264" textLength="1329.8" clip-path="url(#terminal-2620878247-line-10)">usando&#160;o&#160;ATP&#160;e&#160;o&#160;NADPH&#160;produzidos&#160;na&#160;fase&#160;clara.&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2620878247-r1" x="1427.4" y="264" textLength="12.2" clip-path="url(#terminal-2620878247-line-10)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="264" textLength="12.2" clip-path="url(#terminal-2620878247-line-10)">
+</text><text class="terminal-2620878247-r1" x="0" y="288.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-11)">│</text><text class="terminal-2620878247-r6" x="36.6" y="288.4" textLength="890.6" clip-path="url(#terminal-2620878247-line-11)">Termos&#160;principais:&#160;fotossíntese,&#160;energia,&#160;fase,&#160;processo,&#160;luminosa,&#160;clara</text><text class="terminal-2620878247-r1" x="1427.4" y="288.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-11)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="288.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-11)">
+</text><text class="terminal-2620878247-r1" x="0" y="312.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-12)">│</text><text class="terminal-2620878247-r1" x="1427.4" y="312.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-12)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="312.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-12)">
+</text><text class="terminal-2620878247-r1" x="0" y="337.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-13)">│</text><text class="terminal-2620878247-r2" x="36.6" y="337.2" textLength="170.8" clip-path="url(#terminal-2620878247-line-13)">Texto&#160;extraído</text><text class="terminal-2620878247-r1" x="1427.4" y="337.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-13)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="337.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-13)">
+</text><text class="terminal-2620878247-r1" x="0" y="361.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-14)">│</text><text class="terminal-2620878247-r3" x="36.6" y="361.6" textLength="146.4" clip-path="url(#terminal-2620878247-line-14)">FOTOSSÍNTESE</text><text class="terminal-2620878247-r1" x="1427.4" y="361.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-14)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="361.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-14)">
+</text><text class="terminal-2620878247-r1" x="0" y="386" textLength="12.2" clip-path="url(#terminal-2620878247-line-15)">│</text><text class="terminal-2620878247-r3" x="36.6" y="386" textLength="1366.4" clip-path="url(#terminal-2620878247-line-15)">A&#160;fotossíntese&#160;é&#160;o&#160;processo&#160;pelo&#160;qual&#160;plantas,&#160;algas&#160;e&#160;algumas&#160;bactérias&#160;transformam&#160;energia&#160;luminosa&#160;em&#160;energia</text><text class="terminal-2620878247-r1" x="1427.4" y="386" textLength="12.2" clip-path="url(#terminal-2620878247-line-15)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="386" textLength="12.2" clip-path="url(#terminal-2620878247-line-15)">
+</text><text class="terminal-2620878247-r1" x="0" y="410.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-16)">│</text><text class="terminal-2620878247-r3" x="36.6" y="410.4" textLength="1293.2" clip-path="url(#terminal-2620878247-line-16)">química.&#160;O&#160;processo&#160;acontece&#160;principalmente&#160;nos&#160;cloroplastos,&#160;organelas&#160;que&#160;possuem&#160;clorofila,&#160;o&#160;pigmento&#160;</text><text class="terminal-2620878247-r1" x="1427.4" y="410.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-16)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="410.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-16)">
+</text><text class="terminal-2620878247-r1" x="0" y="434.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-17)">│</text><text class="terminal-2620878247-r3" x="36.6" y="434.8" textLength="378.2" clip-path="url(#terminal-2620878247-line-17)">responsável&#160;por&#160;absorver&#160;a&#160;luz.</text><text class="terminal-2620878247-r1" x="1427.4" y="434.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-17)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="434.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-17)">
+</text><text class="terminal-2620878247-r1" x="0" y="459.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-18)">│</text><text class="terminal-2620878247-r3" x="36.6" y="459.2" textLength="1354.2" clip-path="url(#terminal-2620878247-line-18)">Na&#160;fase&#160;clara,&#160;que&#160;depende&#160;diretamente&#160;da&#160;luz,&#160;a&#160;água&#160;é&#160;quebrada&#160;e&#160;libera&#160;oxigênio&#160;para&#160;a&#160;atmosfera.&#160;A&#160;energia&#160;</text><text class="terminal-2620878247-r1" x="1427.4" y="459.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-18)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="459.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-18)">
+</text><text class="terminal-2620878247-r1" x="0" y="483.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-19)">│</text><text class="terminal-2620878247-r3" x="36.6" y="483.6" textLength="780.8" clip-path="url(#terminal-2620878247-line-19)">captada&#160;pela&#160;clorofila&#160;é&#160;armazenada&#160;em&#160;moléculas&#160;de&#160;ATP&#160;e&#160;NADPH.</text><text class="terminal-2620878247-r1" x="1427.4" y="483.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-19)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="483.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-19)">
+</text><text class="terminal-2620878247-r1" x="0" y="508" textLength="12.2" clip-path="url(#terminal-2620878247-line-20)">│</text><text class="terminal-2620878247-r3" x="36.6" y="508" textLength="1317.6" clip-path="url(#terminal-2620878247-line-20)">Na&#160;fase&#160;escura,&#160;também&#160;chamada&#160;de&#160;ciclo&#160;de&#160;Calvin,&#160;o&#160;gás&#160;carbônico&#160;do&#160;ar&#160;é&#160;fixado&#160;e&#160;transformado&#160;em&#160;glicose&#160;</text><text class="terminal-2620878247-r1" x="1427.4" y="508" textLength="12.2" clip-path="url(#terminal-2620878247-line-20)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="508" textLength="12.2" clip-path="url(#terminal-2620878247-line-20)">
+</text><text class="terminal-2620878247-r1" x="0" y="532.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-21)">│</text><text class="terminal-2620878247-r3" x="36.6" y="532.4" textLength="585.6" clip-path="url(#terminal-2620878247-line-21)">usando&#160;o&#160;ATP&#160;e&#160;o&#160;NADPH&#160;produzidos&#160;na&#160;fase&#160;clara.</text><text class="terminal-2620878247-r1" x="1427.4" y="532.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-21)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="532.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-21)">
+</text><text class="terminal-2620878247-r1" x="0" y="556.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-22)">│</text><text class="terminal-2620878247-r3" x="36.6" y="556.8" textLength="1366.4" clip-path="url(#terminal-2620878247-line-22)">A&#160;glicose&#160;produzida&#160;serve&#160;como&#160;fonte&#160;de&#160;energia&#160;para&#160;a&#160;planta&#160;e&#160;como&#160;matéria-prima&#160;para&#160;formar&#160;amido&#160;e&#160;celulose.</text><text class="terminal-2620878247-r1" x="1427.4" y="556.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-22)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="556.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-22)">
+</text><text class="terminal-2620878247-r1" x="0" y="581.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-23)">│</text><text class="terminal-2620878247-r3" x="36.6" y="581.2" textLength="1000.4" clip-path="url(#terminal-2620878247-line-23)">Por&#160;isso&#160;a&#160;fotossíntese&#160;é&#160;a&#160;base&#160;de&#160;quase&#160;todas&#160;as&#160;cadeias&#160;alimentares&#160;do&#160;planeta.</text><text class="terminal-2620878247-r1" x="1427.4" y="581.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-23)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="581.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-23)">
+</text><text class="terminal-2620878247-r1" x="0" y="605.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-24)">│</text><text class="terminal-2620878247-r3" x="36.6" y="605.6" textLength="1305.4" clip-path="url(#terminal-2620878247-line-24)">Fatores&#160;como&#160;intensidade&#160;luminosa,&#160;concentração&#160;de&#160;gás&#160;carbônico&#160;e&#160;temperatura&#160;influenciam&#160;a&#160;velocidade&#160;da&#160;</text><text class="terminal-2620878247-r1" x="1427.4" y="605.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-24)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="605.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-24)">
+</text><text class="terminal-2620878247-r1" x="0" y="630" textLength="12.2" clip-path="url(#terminal-2620878247-line-25)">│</text><text class="terminal-2620878247-r3" x="36.6" y="630" textLength="158.6" clip-path="url(#terminal-2620878247-line-25)">fotossíntese.</text><text class="terminal-2620878247-r1" x="1427.4" y="630" textLength="12.2" clip-path="url(#terminal-2620878247-line-25)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="630" textLength="12.2" clip-path="url(#terminal-2620878247-line-25)">
+</text><text class="terminal-2620878247-r1" x="0" y="654.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-26)">│</text><text class="terminal-2620878247-r1" x="1427.4" y="654.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-26)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="654.4" textLength="12.2" clip-path="url(#terminal-2620878247-line-26)">
+</text><text class="terminal-2620878247-r1" x="0" y="678.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-27)">│</text><text class="terminal-2620878247-r2" x="36.6" y="678.8" textLength="109.8" clip-path="url(#terminal-2620878247-line-27)">Anotações</text><text class="terminal-2620878247-r1" x="1427.4" y="678.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-27)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="678.8" textLength="12.2" clip-path="url(#terminal-2620878247-line-27)">
+</text><text class="terminal-2620878247-r1" x="0" y="703.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-28)">│</text><text class="terminal-2620878247-r3" x="36.6" y="703.2" textLength="610" clip-path="url(#terminal-2620878247-line-28)">Cai&#160;na&#160;prova&#160;bimestral!&#160;Revisar&#160;o&#160;ciclo&#160;de&#160;Calvin.</text><text class="terminal-2620878247-r1" x="1427.4" y="703.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-28)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="703.2" textLength="12.2" clip-path="url(#terminal-2620878247-line-28)">
+</text><text class="terminal-2620878247-r1" x="0" y="727.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-29)">│</text><text class="terminal-2620878247-r1" x="1427.4" y="727.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-29)">│</text><text class="terminal-2620878247-r3" x="1439.6" y="727.6" textLength="12.2" clip-path="url(#terminal-2620878247-line-29)">
+</text><text class="terminal-2620878247-r1" x="0" y="752" textLength="1439.6" clip-path="url(#terminal-2620878247-line-30)">└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘</text><text class="terminal-2620878247-r3" x="1439.6" y="752" textLength="12.2" clip-path="url(#terminal-2620878247-line-30)">
+</text>
+    </g>
+    </g>
+</svg>

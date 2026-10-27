@@ -1,8 +1,10 @@
 # Sistema Inteligente de Câmera JOVI
 
-Projeto acadêmico do Challenge JOVI 2026 (FIAP) — entrega conjunta da Sprint 4 de **Front-End Design** e **Web Development**.
+Projeto acadêmico do Challenge JOVI 2026 (FIAP) — entrega da Sprint 4 de **Front-End Design**, **Web Development** e **Computational Thinking with Python**, todas no mesmo projeto.
 
 A aplicação React reúne a Landing Page institucional e uma **câmera real no navegador** pensada para estudantes full-time: ela reconhece a cena e sugere o modo adequado, digitaliza documentos, **extrai o texto da imagem (OCR)**, gera **resumos**, guarda **anotações** e organiza as capturas por **matéria**, com exportação em PDF/TXT.
+
+O **JOVI Desktop** (pasta [`python/`](python/README.md)) é o programa Python da solução. Ele usa a mesma biblioteca de capturas: recebe as fotos do app com o texto do OCR, gera resumos, explica termos pela Wikipédia, organiza álbuns, faz quiz de revisão e devolve tudo ao app, por arquivo JSON ou por um servidor local de sincronização.
 
 ## Integrantes
 
@@ -30,14 +32,21 @@ Pixel Squad - 1ESPV
 - **localStorage** (sessão de demonstração e preferências)
 - **Web APIs**: MediaDevices/getUserMedia (câmera), MediaRecorder (vídeo), Canvas (processamento de imagem), Clipboard, Web Share
 - **API pública da Wikipédia** (REST, em português) para explicar os termos do resumo
-- **Vitest** (testes das funções de processamento)
+- **Vitest** (testes das funções de processamento e da sincronização)
+- **Python 3.10+** no JOVI Desktop: **Rich** (interface do terminal), **Requests** (API da Wikipédia), `http.server` (servidor de sincronização), `json` (persistência) e `unittest` (testes)
 
 ## Como instalar
 
-Pré-requisito: Node.js 20 ou superior.
+Pré-requisitos: Node.js 20 ou superior e, para o JOVI Desktop, Python 3.10 ou superior.
 
 ```bash
 npm install
+
+# JOVI Desktop (Python)
+python -m venv python/.venv
+python\.venv\Scripts\activate          # Windows
+# source python/.venv/bin/activate     # macOS / Linux
+pip install -r python/requirements.txt
 ```
 
 ## Como executar
@@ -46,14 +55,24 @@ npm install
 npm run dev
 ```
 
-Acesse `http://127.0.0.1:5173`. O projeto não tem back-end próprio: não há outro servidor para iniciar. A única API consumida é a pública da Wikipédia, acessada direto do navegador (precisa de internet).
+Acesse `http://127.0.0.1:5173`. O app funciona sozinho: a única API externa é a pública da Wikipédia, acessada direto do navegador (precisa de internet).
+
+Para usar o **JOVI Desktop** (Python), abra outro terminal na raiz do projeto, com o ambiente virtual ativado:
+
+```bash
+python python/main.py              # menu interativo
+python python/main.py --servidor   # servidor de sincronização em http://127.0.0.1:5050
+```
+
+Com o servidor ligado, no app abra **Galeria › Sincronizar › Sincronizar com o JOVI Desktop**. Funciona com o app local e com o publicado na Vercel. Se o navegador pedir acesso à rede local, permita. Detalhes em [`python/README.md`](python/README.md).
 
 Outros comandos:
 
 ```bash
 npm run build     # build de produção em dist/
 npm run preview   # serve o build localmente
-npm test          # testes unitários (resumo, OCR, análise de cena, recortes)
+npm test          # testes unitários (resumo, OCR, análise de cena, recortes, sincronização)
+python -m unittest discover -s python/tests   # testes do JOVI Desktop
 ```
 
 ### Câmera e permissões
@@ -112,6 +131,20 @@ Qualquer e-mail com `@` e senha com 6 ou mais caracteres é aceito. Não há cad
 - **Notas** por captura e **Organizar** (título, álbum, criação de álbum, metadados).
 - **Exportar**: PDF (imagem + resumo + texto + notas), TXT, arquivo original, copiar, abrir no Google Docs (copia e abre um documento novo) e compartilhamento nativo do aparelho.
 - Excluir com confirmação e opção **Desfazer**.
+- **Sincronizar** (botão no topo da Galeria): sincroniza com o JOVI Desktop pelo servidor local, ou exporta e importa a biblioteca em JSON. Vence sempre a edição mais recente. Documentos criados no Python chegam com uma capa gerada a partir do título.
+
+### JOVI Desktop (Python)
+
+Programa de terminal com menu, em `python/`:
+
+- **Câmera contextual**: recomenda o modo pela cena e pela luz, com dicas de captura.
+- **Documento inteligente**: transforma `.txt`/`.md` em captura e revisa o texto do OCR.
+- **Modo estudante**: o mesmo resumo do app, resumos em lote, termos explicados pela Wikipédia (com cache offline), anotações, quiz de revisão e caderno de estudos em Markdown.
+- **Organização**: álbuns, busca e filtros.
+- **Estatísticas**: gráficos e histórico de ações.
+- **Integração com o app** e **Lixeira**.
+
+Os dados ficam em `python/dados/biblioteca.json`. Instruções completas, endpoints e regras de sincronização estão em [`python/README.md`](python/README.md).
 
 ## API
 
@@ -121,14 +154,17 @@ O app consome a **API pública da Wikipédia em português** (sem chave de acess
 GET https://pt.wikipedia.org/api/rest_v1/page/summary/{termo}
 ```
 
+O JOVI Desktop (Python) consome a mesma API para explicar termos no Modo estudante (`python/jovi/wikipedia.py`).
+
 Na aba **Resumo** de uma captura, cada termo principal (sempre uma palavra que aparece nas frases do resumo) abre a explicação do artigo correspondente, com descrição, imagem e link para o artigo completo. O app trata carregamento, termo sem artigo (404 ou página de desambiguação) e falha de conexão com opção de tentar novamente. As respostas ficam em cache durante a sessão. Código: `src/services/wikipediaApi.js` e `src/hooks/useTermDefinition.js`.
 
 ## Persistência
 
 - **IndexedDB** (`jovi-camera`): fotos, vídeos, miniaturas, texto extraído, resumo e anotações.
-- **localStorage**: `jovi.auth.session` (sessão demonstrativa) e `jovi.preferences` (último modo, câmera, proporção, timer, grade, sugestões, álbuns, tutorial visto).
+- **localStorage**: `jovi.auth.session` (sessão demonstrativa), `jovi.preferences` (último modo, câmera, proporção, timer, grade, sugestões, álbuns, tutorial visto) e `jovi.sync.deleted` (ids excluídos, enviados na sincronização para não voltarem).
+- **JOVI Desktop**: `python/dados/biblioteca.json` (capturas, álbuns, lixeira, histórico, cache de termos e quiz).
 
-Tudo fica apenas no navegador do usuário. Nenhuma imagem ou texto é enviado para servidores; à Wikipédia só vai o termo consultado.
+Tudo fica no aparelho do usuário. As capturas só saem do navegador quando o próprio usuário exporta o arquivo ou sincroniza com o JOVI Desktop, que roda no computador dele (`127.0.0.1`). À Wikipédia só vai o termo consultado.
 
 ## Estrutura
 
@@ -143,9 +179,15 @@ src/
     ui/              Botões, Sheet, Toast, Chip, feedback
   hooks/             Hooks customizados (câmera, cena, OCR, gravação, exportação, autosave…)
   lib/               Lógica pura: processamento de imagem, OCR, resumo, análise de cena
-  services/          IndexedDB, preferências (localStorage), cliente da API da Wikipédia
+  services/          IndexedDB, preferências (localStorage), Wikipédia, sincronização com o JOVI Desktop
   library/ feedback/ auth/   Contextos (capturas, toasts, sessão)
   data/modes.js      Configuração de cada modo da câmera
+python/
+  main.py            JOVI Desktop: menu principal
+  jovi/              Módulos (câmera, documento, estudante, organização, estatísticas, integração, servidor…)
+  dados/             Biblioteca local e biblioteca de exemplo
+  tests/             Testes (unittest)
+  docs/              Documentação da Sprint 4 de Python (PDF)
 ```
 
 ## Limitações conhecidas
@@ -158,4 +200,4 @@ src/
 
 ## Uso de IA
 
-Usamos ferramentas de Inteligência Artificial (assistente de código) como apoio durante o desenvolvimento: na análise do código existente e dos requisitos das Sprints 3 e 4, no planejamento da reestruturação da câmera, na escrita e revisão de componentes, hooks e funções de processamento (OCR, resumo, análise de cena), em testes automatizados e de navegador e na redação desta documentação. A equipe revisou, testou e validou todas as alterações antes de integrá-las à entrega.
+Usamos ferramentas de Inteligência Artificial (assistente de código) como apoio durante o desenvolvimento: na análise do código existente e dos requisitos das Sprints 3 e 4, no planejamento da reestruturação da câmera, na escrita e revisão de componentes, hooks e funções de processamento (OCR, resumo, análise de cena), no programa Python JOVI Desktop (estrutura dos módulos, porte do resumo para Python, sincronização com o app e testes), em testes automatizados e de navegador e na redação desta documentação. A equipe revisou, testou e validou todas as alterações antes de integrá-las à entrega.
