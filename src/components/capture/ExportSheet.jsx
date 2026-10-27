@@ -6,7 +6,7 @@ import { Spinner } from '../ui/Feedback.jsx';
 import Icon from '../ui/Icon.jsx';
 import Sheet from '../ui/Sheet.jsx';
 
-function ExportOption({ busy, description, disabled, icon, label, onClick }) {
+export function ExportOption({ busy, description, disabled, icon, label, onClick }) {
   return (
     <li>
       <button

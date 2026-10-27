@@ -5,6 +5,7 @@ import {
   autoLevelsGrayscale,
   averageCanvases,
   canvasToBlob,
+  createTextCover,
   createThumbnail,
   cropToGuide,
   drawSourceFrame,
@@ -70,6 +71,17 @@ export async function captureFromFile(file, { modeId }) {
   const mode = getMode(modeId);
   const canvas = await loadImageCanvas(file);
   return finalize(applyModeProcessing(canvas, mode, { useGuide: false }));
+}
+
+// Captura recebida do JOVI Desktop: usa a miniatura que veio no arquivo ou, para
+// documentos criados no Python (sem foto), gera uma capa com o título.
+export async function captureFromTransfer(capture, thumbDataUrl) {
+  if (thumbDataUrl) {
+    const imageBlob = await (await fetch(thumbDataUrl)).blob();
+    const canvas = await loadImageCanvas(imageBlob);
+    return { imageBlob, thumbBlob: await createThumbnail(canvas), width: canvas.width, height: canvas.height };
+  }
+  return finalize(createTextCover({ title: capture.title, label: getMode(capture.mode).label }));
 }
 
 export async function thumbnailFromVideo(video, { aspect, zoom = 1, mirror = false } = {}) {

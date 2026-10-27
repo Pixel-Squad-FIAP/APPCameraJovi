@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { formatLongDate, slugify } from '../lib/format.js';
 
-function downloadBlob(blob, filename) {
+export function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -46,7 +46,7 @@ async function copyToClipboard(text) {
   if (!ok) throw new Error('Não foi possível copiar.');
 }
 
-function blobToDataUrl(blob) {
+export function blobToDataUrl(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);

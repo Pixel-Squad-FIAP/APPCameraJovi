@@ -263,6 +263,66 @@ export async function createThumbnail(source, maxSide = 360) {
   return canvasToBlob(canvas, 'image/jpeg', 0.8);
 }
 
+function wrapText(ctx, text, maxWidth, maxLines) {
+  const lines = [];
+  let line = '';
+  text.split(/\s+/).filter(Boolean).forEach((word) => {
+    const candidate = line ? `${line} ${word}` : word;
+    if (ctx.measureText(candidate).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = candidate;
+    }
+  });
+  if (line) lines.push(line);
+  if (lines.length > maxLines) {
+    lines.length = maxLines;
+    lines[maxLines - 1] = `${lines[maxLines - 1].replace(/\s+\S*$/, '')}…`;
+  }
+  return lines;
+}
+
+// Capa para capturas criadas no JOVI Desktop (Python), que chegam sem foto.
+// O título fica no centro porque a Galeria mostra só a parte central da miniatura.
+export function createTextCover({ title, label = 'Documento', width = 720, height = 960 }) {
+  const canvas = createCanvas(width, height);
+  const ctx = context2d(canvas);
+  const gradient = ctx.createLinearGradient(0, 0, width, height);
+  gradient.addColorStop(0, '#3f66f6');
+  gradient.addColorStop(1, '#13161b');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+
+  // Linhas de "folha" ao fundo, bem discretas.
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.07)';
+  for (let y = height * 0.08; y < height * 0.95; y += height * 0.045) {
+    ctx.fillRect(width * 0.08, y, width * (0.55 + ((y * 7) % 30) / 100), height * 0.012);
+  }
+
+  const margin = width * 0.1;
+  const fontSize = Math.round(width * 0.078);
+  ctx.font = `700 ${fontSize}px "DM Sans", system-ui, sans-serif`;
+  const lines = wrapText(ctx, title, width - margin * 2, 4);
+  const lineHeight = fontSize * 1.22;
+  const blockTop = height / 2 - (lines.length * lineHeight) / 2;
+
+  ctx.fillStyle = '#9db4ff';
+  ctx.fillRect(margin, blockTop - fontSize * 1.15, width * 0.09, height * 0.008);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+  ctx.font = `600 ${Math.round(width * 0.036)}px "DM Sans", system-ui, sans-serif`;
+  ctx.fillText(label.toUpperCase(), margin, blockTop - fontSize * 0.4);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `700 ${fontSize}px "DM Sans", system-ui, sans-serif`;
+  lines.forEach((line, index) => ctx.fillText(line, margin, blockTop + lineHeight * (index + 0.8)));
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.font = `500 ${Math.round(width * 0.03)}px "DM Sans", system-ui, sans-serif`;
+  ctx.fillText('Criado no JOVI Desktop', margin, height * 0.93);
+  return canvas;
+}
+
 export async function loadImageCanvas(blob) {
   const bitmap = await createImageBitmap(blob, { imageOrientation: 'from-image' });
   const size = outputSize(bitmap.width, bitmap.height);

@@ -8,8 +8,11 @@ import {
   saveCapture,
   updateCaptureRecord
 } from '../services/captureStore.js';
+import { forgetDeleted, rememberDeleted } from '../services/libraryTransfer.js';
 
 const LibraryContext = createContext(null);
+
+const byNewest = (a, b) => b.createdAt.localeCompare(a.createdAt);
 
 export function LibraryProvider({ children }) {
   const [captures, setCapturesState] = useState([]);
@@ -82,13 +85,27 @@ export function LibraryProvider({ children }) {
     const capture = capturesRef.current.find((item) => item.id === id);
     if (!capture) return null;
     const media = await deleteCaptureRecord(id);
+    rememberDeleted(id);
     setCaptures((items) => items.filter((item) => item.id !== id));
     return { capture, media };
   }, [setCaptures]);
 
   const restoreCapture = useCallback(async ({ capture, media }) => {
     await saveCapture(capture, media);
-    setCaptures((items) => [...items, capture].sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+    forgetDeleted(capture.id);
+    setCaptures((items) => [...items, capture].sort(byNewest));
+  }, [setCaptures]);
+
+  // Aplica uma sincronização com o JOVI Desktop. As alterações mantêm o updatedAt de origem
+  // para que a próxima sincronização não as trate como novas edições.
+  const importCaptures = useCallback(async ({ created = [], updated = [] }) => {
+    const changesById = new Map(updated.map(({ id, changes }) => [id, changes]));
+    const next = capturesRef.current.map((capture) => (changesById.has(capture.id) ? { ...capture, ...changesById.get(capture.id) } : capture));
+    await Promise.all([
+      ...created.map(({ capture, media }) => saveCapture(capture, media)),
+      ...next.filter((capture) => changesById.has(capture.id)).map(updateCaptureRecord)
+    ]);
+    setCaptures([...next, ...created.map(({ capture }) => capture)].sort(byNewest));
   }, [setCaptures]);
 
   const { ocrJobs, startOcr, cancelOcr } = useOcrQueue(updateCapture);
@@ -100,10 +117,11 @@ export function LibraryProvider({ children }) {
     updateCapture,
     removeCapture,
     restoreCapture,
+    importCaptures,
     ocrJobs,
     startOcr,
     cancelOcr
-  }), [captures, status, addCapture, updateCapture, removeCapture, restoreCapture, ocrJobs, startOcr, cancelOcr]);
+  }), [captures, status, addCapture, updateCapture, removeCapture, restoreCapture, importCaptures, ocrJobs, startOcr, cancelOcr]);
 
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>;
 }

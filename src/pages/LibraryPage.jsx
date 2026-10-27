@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import CaptureCard from '../components/library/CaptureCard.jsx';
+import SyncSheet from '../components/library/SyncSheet.jsx';
 import Button, { focusRing } from '../components/ui/Button.jsx';
 import Chip from '../components/ui/Chip.jsx';
 import { EmptyState, Notice, Spinner } from '../components/ui/Feedback.jsx';
@@ -8,6 +9,7 @@ import Icon from '../components/ui/Icon.jsx';
 import { useAlbums } from '../hooks/usePreference.js';
 import { normalizeSearch } from '../lib/format.js';
 import { useCaptureLibrary } from '../library/LibraryContext.jsx';
+import { DEFAULT_DESKTOP_PORT } from '../services/syncApi.js';
 
 const ALL = 'Todos';
 const TYPE_FILTERS = [
@@ -32,6 +34,9 @@ export default function LibraryPage() {
 
   const album = searchParams.get('album') ?? ALL;
   const type = searchParams.get('tipo') ?? 'all';
+  // ?sincronizar=1 abre a sincronização direto (link aberto pelo JOVI Desktop); ?porta= troca a porta do servidor.
+  const syncOpen = searchParams.get('sincronizar') === '1';
+  const desktopPort = Number.parseInt(searchParams.get('porta'), 10) || DEFAULT_DESKTOP_PORT;
 
   const updateParam = (key, value, fallback) => {
     setSearchParams((params) => {
@@ -73,6 +78,13 @@ export default function LibraryPage() {
             <h1 className="text-xl font-bold leading-tight">Galeria</h1>
             <p className="text-xs text-white/50">{captures.length} {captures.length === 1 ? 'captura' : 'capturas'} salvas neste aparelho</p>
           </div>
+          <button
+            className={`inline-flex min-h-11 items-center gap-2 rounded-full bg-white/8 px-3 text-sm font-semibold text-white/85 hover:bg-white/15 hover:text-white ${focusRing}`}
+            onClick={() => updateParam('sincronizar', '1', null)}
+            type="button"
+          >
+            <Icon name="refresh" size={18} /> <span className="hidden sm:inline">Sincronizar</span><span className="sr-only sm:hidden">Sincronizar com o JOVI Desktop</span>
+          </button>
           <Link className={`hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white/70 hover:bg-white/8 hover:text-white sm:inline-flex ${focusRing}`} to="/">
             <Icon name="home" size={18} /> Projeto
           </Link>
@@ -140,6 +152,8 @@ export default function LibraryPage() {
         </section>
 
       </main>
+
+      <SyncSheet onClose={() => updateParam('sincronizar', null, null)} open={syncOpen} port={desktopPort} />
     </div>
   );
 }
