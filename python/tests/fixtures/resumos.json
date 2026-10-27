@@ -1,0 +1,693 @@
+[
+  {
+    "texto": "FOTOSSÍNTESE\nA fotossíntese é o processo pelo qual plantas, algas e algumas bactérias transformam energia luminosa em energia química. O processo acontece principalmente nos cloroplastos, organelas que possuem clorofila, o pigmento responsável por absorver a luz.\nNa fase clara, que depende diretamente da luz, a água é quebrada e libera oxigênio para a atmosfera. A energia captada pela clorofila é armazenada em moléculas de ATP e NADPH.\nNa fase escura, também chamada de ciclo de Calvin, o gás carbônico do ar é fixado e transformado em glicose usando o ATP e o NADPH produzidos na fase clara.\nA glicose produzida serve como fonte de energia para a planta e como matéria-prima para formar amido e celulose. Por isso a fotossíntese é a base de quase todas as cadeias alimentares do planeta.\nFatores como intensidade luminosa, concentração de gás carbônico e temperatura influenciam a velocidade da fotossíntese.",
+    "tamanho": "curto",
+    "frases": [
+      "FOTOSSÍNTESE",
+      "A fotossíntese é o processo pelo qual plantas, algas e algumas bactérias transformam energia luminosa em energia química.",
+      "O processo acontece principalmente nos cloroplastos, organelas que possuem clorofila, o pigmento responsável por absorver a luz.",
+      "Na fase clara, que depende diretamente da luz, a água é quebrada e libera oxigênio para a atmosfera.",
+      "A energia captada pela clorofila é armazenada em moléculas de ATP e NADPH.",
+      "Na fase escura, também chamada de ciclo de Calvin, o gás carbônico do ar é fixado e transformado em glicose usando o ATP e o NADPH produzidos na fase clara.",
+      "A glicose produzida serve como fonte de energia para a planta e como matéria-prima para formar amido e celulose.",
+      "Por isso a fotossíntese é a base de quase todas as cadeias alimentares do planeta.",
+      "Fatores como intensidade luminosa, concentração de gás carbônico e temperatura influenciam a velocidade da fotossíntese."
+    ],
+    "resumo": {
+      "sentences": [
+        "A fotossíntese é o processo pelo qual plantas, algas e algumas bactérias transformam energia luminosa em energia química.",
+        "Na fase escura, também chamada de ciclo de Calvin, o gás carbônico do ar é fixado e transformado em glicose usando o ATP e o NADPH produzidos na fase clara."
+      ],
+      "keywords": [
+        "fotossíntese",
+        "energia",
+        "fase",
+        "processo",
+        "luminosa",
+        "clara"
+      ],
+      "sourceSentences": 8
+    },
+    "palavrasNoResumo": [
+      "fotossíntese",
+      "energia",
+      "fase",
+      "processo",
+      "luminosa",
+      "clara"
+    ],
+    "impressao": "913:-1355814791"
+  },
+  {
+    "texto": "FOTOSSÍNTESE\nA fotossíntese é o processo pelo qual plantas, algas e algumas bactérias transformam energia luminosa em energia química. O processo acontece principalmente nos cloroplastos, organelas que possuem clorofila, o pigmento responsável por absorver a luz.\nNa fase clara, que depende diretamente da luz, a água é quebrada e libera oxigênio para a atmosfera. A energia captada pela clorofila é armazenada em moléculas de ATP e NADPH.\nNa fase escura, também chamada de ciclo de Calvin, o gás carbônico do ar é fixado e transformado em glicose usando o ATP e o NADPH produzidos na fase clara.\nA glicose produzida serve como fonte de energia para a planta e como matéria-prima para formar amido e celulose. Por isso a fotossíntese é a base de quase todas as cadeias alimentares do planeta.\nFatores como intensidade luminosa, concentração de gás carbônico e temperatura influenciam a velocidade da fotossíntese.",
+    "tamanho": "medio",
+    "frases": [
+      "FOTOSSÍNTESE",
+      "A fotossíntese é o processo pelo qual plantas, algas e algumas bactérias transformam energia luminosa em energia química.",
+      "O processo acontece principalmente nos cloroplastos, organelas que possuem clorofila, o pigmento responsável por absorver a luz.",
+      "Na fase clara, que depende diretamente da luz, a água é quebrada e libera oxigênio para a atmosfera.",
+      "A energia captada pela clorofila é armazenada em moléculas de ATP e NADPH.",
+      "Na fase escura, também chamada de ciclo de Calvin, o gás carbônico do ar é fixado e transformado em glicose usando o ATP e o NADPH produzidos na fase clara.",
+      "A glicose produzida serve como fonte de energia para a planta e como matéria-prima para formar amido e celulose.",
+      "Por isso a fotossíntese é a base de quase todas as cadeias alimentares do planeta.",
+      "Fatores como intensidade luminosa, concentração de gás carbônico e temperatura influenciam a velocidade da fotossíntese."
+    ],
+    "resumo": {
+      "sentences": [
+        "A fotossíntese é o processo pelo qual plantas, algas e algumas bactérias transformam energia luminosa em energia química.",
+        "Na fase escura, também chamada de ciclo de Calvin, o gás carbônico do ar é fixado e transformado em glicose usando o ATP e o NADPH produzidos na fase clara.",
+        "Fatores como intensidade luminosa, concentração de gás carbônico e temperatura influenciam a velocidade da fotossíntese."
+      ],
+      "keywords": [
+        "fotossíntese",
+        "energia",
+        "fase",
+        "processo",
+        "luminosa",
+        "clara"
+      ],
+      "sourceSentences": 8
+    },
+    "palavrasNoResumo": [
+      "fotossíntese",
+      "energia",
+      "fase",
+      "processo",
+      "luminosa",
+      "clara"
+    ],
+    "impressao": "913:-1355814791"
+  },
+  {
+    "texto": "Funções em Python\nUma função é um bloco de código nomeado que executa uma tarefa específica e pode ser reutilizado em vários pontos do programa. Em Python, uma função é criada com a palavra-chave def, seguida do nome e dos parâmetros entre parênteses.\nOs parâmetros são variáveis que recebem os valores enviados na chamada da função. Uma função pode ter parâmetros obrigatórios, parâmetros com valor padrão e até receber uma quantidade variável de argumentos.\nO comando return devolve um valor para quem chamou a função e encerra a sua execução. Funções sem return devolvem None automaticamente.\nDividir o programa em funções pequenas facilita os testes, evita repetição de código e deixa o sistema mais organizado. Cada função deve ter uma única responsabilidade bem definida.\nBoas práticas incluem nomes descritivos, documentação com docstrings e validação dos dados recebidos nos parâmetros.",
+    "tamanho": "curto",
+    "frases": [
+      "Funções em Python",
+      "Uma função é um bloco de código nomeado que executa uma tarefa específica e pode ser reutilizado em vários pontos do programa.",
+      "Em Python, uma função é criada com a palavra-chave def, seguida do nome e dos parâmetros entre parênteses.",
+      "Os parâmetros são variáveis que recebem os valores enviados na chamada da função.",
+      "Uma função pode ter parâmetros obrigatórios, parâmetros com valor padrão e até receber uma quantidade variável de argumentos.",
+      "O comando return devolve um valor para quem chamou a função e encerra a sua execução.",
+      "Funções sem return devolvem None automaticamente.",
+      "Dividir o programa em funções pequenas facilita os testes, evita repetição de código e deixa o sistema mais organizado.",
+      "Cada função deve ter uma única responsabilidade bem definida.",
+      "Boas práticas incluem nomes descritivos, documentação com docstrings e validação dos dados recebidos nos parâmetros."
+    ],
+    "resumo": {
+      "sentences": [
+        "Uma função é um bloco de código nomeado que executa uma tarefa específica e pode ser reutilizado em vários pontos do programa.",
+        "Uma função pode ter parâmetros obrigatórios, parâmetros com valor padrão e até receber uma quantidade variável de argumentos."
+      ],
+      "keywords": [
+        "função",
+        "parâmetros",
+        "código",
+        "programa",
+        "ter",
+        "valor"
+      ],
+      "sourceSentences": 9
+    },
+    "palavrasNoResumo": [
+      "função",
+      "parâmetros",
+      "código",
+      "programa",
+      "ter",
+      "valor"
+    ],
+    "impressao": "894:-542068969"
+  },
+  {
+    "texto": "Funções em Python\nUma função é um bloco de código nomeado que executa uma tarefa específica e pode ser reutilizado em vários pontos do programa. Em Python, uma função é criada com a palavra-chave def, seguida do nome e dos parâmetros entre parênteses.\nOs parâmetros são variáveis que recebem os valores enviados na chamada da função. Uma função pode ter parâmetros obrigatórios, parâmetros com valor padrão e até receber uma quantidade variável de argumentos.\nO comando return devolve um valor para quem chamou a função e encerra a sua execução. Funções sem return devolvem None automaticamente.\nDividir o programa em funções pequenas facilita os testes, evita repetição de código e deixa o sistema mais organizado. Cada função deve ter uma única responsabilidade bem definida.\nBoas práticas incluem nomes descritivos, documentação com docstrings e validação dos dados recebidos nos parâmetros.",
+    "tamanho": "medio",
+    "frases": [
+      "Funções em Python",
+      "Uma função é um bloco de código nomeado que executa uma tarefa específica e pode ser reutilizado em vários pontos do programa.",
+      "Em Python, uma função é criada com a palavra-chave def, seguida do nome e dos parâmetros entre parênteses.",
+      "Os parâmetros são variáveis que recebem os valores enviados na chamada da função.",
+      "Uma função pode ter parâmetros obrigatórios, parâmetros com valor padrão e até receber uma quantidade variável de argumentos.",
+      "O comando return devolve um valor para quem chamou a função e encerra a sua execução.",
+      "Funções sem return devolvem None automaticamente.",
+      "Dividir o programa em funções pequenas facilita os testes, evita repetição de código e deixa o sistema mais organizado.",
+      "Cada função deve ter uma única responsabilidade bem definida.",
+      "Boas práticas incluem nomes descritivos, documentação com docstrings e validação dos dados recebidos nos parâmetros."
+    ],
+    "resumo": {
+      "sentences": [
+        "Uma função é um bloco de código nomeado que executa uma tarefa específica e pode ser reutilizado em vários pontos do programa.",
+        "Em Python, uma função é criada com a palavra-chave def, seguida do nome e dos parâmetros entre parênteses.",
+        "Os parâmetros são variáveis que recebem os valores enviados na chamada da função.",
+        "Uma função pode ter parâmetros obrigatórios, parâmetros com valor padrão e até receber uma quantidade variável de argumentos."
+      ],
+      "keywords": [
+        "função",
+        "parâmetros",
+        "python",
+        "código",
+        "programa",
+        "ter"
+      ],
+      "sourceSentences": 9
+    },
+    "palavrasNoResumo": [
+      "função",
+      "parâmetros",
+      "python",
+      "código",
+      "programa",
+      "ter"
+    ],
+    "impressao": "894:-542068969"
+  },
+  {
+    "texto": "Revolução Francesa (1789-1799)\nA Revolução Francesa foi um período de intensa transformação política e social na França, que encerrou o absolutismo monárquico e influenciou o mundo ocidental.\nA sociedade francesa era dividida em três estados: o clero, a nobreza e o terceiro estado, formado pela burguesia, pelos camponeses e pelos trabalhadores urbanos. O terceiro estado pagava quase todos os impostos e não tinha privilégios.\nA crise financeira do Estado, a fome e as ideias iluministas levaram à convocação dos Estados Gerais em 1789. No mesmo ano, a população tomou a Bastilha, símbolo do poder do rei.\nA Assembleia Nacional aprovou a Declaração dos Direitos do Homem e do Cidadão, que defendia liberdade, igualdade e propriedade.\nO período terminou com o golpe do 18 Brumário, quando Napoleão Bonaparte assumiu o poder em 1799.",
+    "tamanho": "curto",
+    "frases": [
+      "Revolução Francesa (1789-1799)",
+      "A Revolução Francesa foi um período de intensa transformação política e social na França, que encerrou o absolutismo monárquico e influenciou o mundo ocidental.",
+      "A sociedade francesa era dividida em três estados: o clero, a nobreza e o terceiro estado, formado pela burguesia, pelos camponeses e pelos trabalhadores urbanos.",
+      "O terceiro estado pagava quase todos os impostos e não tinha privilégios.",
+      "A crise financeira do Estado, a fome e as ideias iluministas levaram à convocação dos Estados Gerais em 1789.",
+      "No mesmo ano, a população tomou a Bastilha, símbolo do poder do rei.",
+      "A Assembleia Nacional aprovou a Declaração dos Direitos do Homem e do Cidadão, que defendia liberdade, igualdade e propriedade.",
+      "O período terminou com o golpe do 18 Brumário, quando Napoleão Bonaparte assumiu o poder em 1799."
+    ],
+    "resumo": {
+      "sentences": [
+        "Revolução Francesa (1789-1799)",
+        "A sociedade francesa era dividida em três estados: o clero, a nobreza e o terceiro estado, formado pela burguesia, pelos camponeses e pelos trabalhadores urbanos."
+      ],
+      "keywords": [
+        "francesa",
+        "estado",
+        "revolução",
+        "1789",
+        "1799",
+        "estados"
+      ],
+      "sourceSentences": 8
+    },
+    "palavrasNoResumo": [
+      "francesa",
+      "estado",
+      "revolução",
+      "1789",
+      "1799",
+      "estados"
+    ],
+    "impressao": "833:-1954331077"
+  },
+  {
+    "texto": "Revolução Francesa (1789-1799)\nA Revolução Francesa foi um período de intensa transformação política e social na França, que encerrou o absolutismo monárquico e influenciou o mundo ocidental.\nA sociedade francesa era dividida em três estados: o clero, a nobreza e o terceiro estado, formado pela burguesia, pelos camponeses e pelos trabalhadores urbanos. O terceiro estado pagava quase todos os impostos e não tinha privilégios.\nA crise financeira do Estado, a fome e as ideias iluministas levaram à convocação dos Estados Gerais em 1789. No mesmo ano, a população tomou a Bastilha, símbolo do poder do rei.\nA Assembleia Nacional aprovou a Declaração dos Direitos do Homem e do Cidadão, que defendia liberdade, igualdade e propriedade.\nO período terminou com o golpe do 18 Brumário, quando Napoleão Bonaparte assumiu o poder em 1799.",
+    "tamanho": "medio",
+    "frases": [
+      "Revolução Francesa (1789-1799)",
+      "A Revolução Francesa foi um período de intensa transformação política e social na França, que encerrou o absolutismo monárquico e influenciou o mundo ocidental.",
+      "A sociedade francesa era dividida em três estados: o clero, a nobreza e o terceiro estado, formado pela burguesia, pelos camponeses e pelos trabalhadores urbanos.",
+      "O terceiro estado pagava quase todos os impostos e não tinha privilégios.",
+      "A crise financeira do Estado, a fome e as ideias iluministas levaram à convocação dos Estados Gerais em 1789.",
+      "No mesmo ano, a população tomou a Bastilha, símbolo do poder do rei.",
+      "A Assembleia Nacional aprovou a Declaração dos Direitos do Homem e do Cidadão, que defendia liberdade, igualdade e propriedade.",
+      "O período terminou com o golpe do 18 Brumário, quando Napoleão Bonaparte assumiu o poder em 1799."
+    ],
+    "resumo": {
+      "sentences": [
+        "Revolução Francesa (1789-1799)",
+        "A Revolução Francesa foi um período de intensa transformação política e social na França, que encerrou o absolutismo monárquico e influenciou o mundo ocidental.",
+        "A sociedade francesa era dividida em três estados: o clero, a nobreza e o terceiro estado, formado pela burguesia, pelos camponeses e pelos trabalhadores urbanos."
+      ],
+      "keywords": [
+        "francesa",
+        "estado",
+        "revolução",
+        "1789",
+        "1799",
+        "período"
+      ],
+      "sourceSentences": 8
+    },
+    "palavrasNoResumo": [
+      "francesa",
+      "estado",
+      "revolução",
+      "1789",
+      "1799",
+      "período"
+    ],
+    "impressao": "833:-1954331077"
+  },
+  {
+    "texto": "Leis de Newton — conteúdo da prova\nA primeira lei de Newton, ou princípio da inércia, afirma que um corpo permanece em repouso ou em movimento retilíneo uniforme quando a força resultante sobre ele é nula.\nA segunda lei, o princípio fundamental da dinâmica, diz que a força resultante é igual ao produto da massa pela aceleração do corpo. Quanto maior a massa, maior a força necessária para produzir a mesma aceleração.\nA terceira lei, o princípio da ação e reação, estabelece que toda ação gera uma reação de mesma intensidade, mesma direção e sentido oposto, aplicada em corpos diferentes.\nNa prova serão cobrados exercícios de plano inclinado, força de atrito e diagramas de forças. Revise as unidades do Sistema Internacional: força em newtons, massa em quilogramas e aceleração em metros por segundo ao quadrado.",
+    "tamanho": "curto",
+    "frases": [
+      "Leis de Newton — conteúdo da prova",
+      "A primeira lei de Newton, ou princípio da inércia, afirma que um corpo permanece em repouso ou em movimento retilíneo uniforme quando a força resultante sobre ele é nula.",
+      "A segunda lei, o princípio fundamental da dinâmica, diz que a força resultante é igual ao produto da massa pela aceleração do corpo.",
+      "Quanto maior a massa, maior a força necessária para produzir a mesma aceleração.",
+      "A terceira lei, o princípio da ação e reação, estabelece que toda ação gera uma reação de mesma intensidade, mesma direção e sentido oposto, aplicada em corpos diferentes.",
+      "Na prova serão cobrados exercícios de plano inclinado, força de atrito e diagramas de forças.",
+      "Revise as unidades do Sistema Internacional: força em newtons, massa em quilogramas e aceleração em metros por segundo ao quadrado."
+    ],
+    "resumo": {
+      "sentences": [
+        "A segunda lei, o princípio fundamental da dinâmica, diz que a força resultante é igual ao produto da massa pela aceleração do corpo."
+      ],
+      "keywords": [
+        "força",
+        "lei",
+        "princípio",
+        "massa",
+        "aceleração",
+        "corpo"
+      ],
+      "sourceSentences": 7
+    },
+    "palavrasNoResumo": [
+      "força",
+      "lei",
+      "princípio",
+      "massa",
+      "aceleração",
+      "corpo"
+    ],
+    "impressao": "817:-1985554507"
+  },
+  {
+    "texto": "Leis de Newton — conteúdo da prova\nA primeira lei de Newton, ou princípio da inércia, afirma que um corpo permanece em repouso ou em movimento retilíneo uniforme quando a força resultante sobre ele é nula.\nA segunda lei, o princípio fundamental da dinâmica, diz que a força resultante é igual ao produto da massa pela aceleração do corpo. Quanto maior a massa, maior a força necessária para produzir a mesma aceleração.\nA terceira lei, o princípio da ação e reação, estabelece que toda ação gera uma reação de mesma intensidade, mesma direção e sentido oposto, aplicada em corpos diferentes.\nNa prova serão cobrados exercícios de plano inclinado, força de atrito e diagramas de forças. Revise as unidades do Sistema Internacional: força em newtons, massa em quilogramas e aceleração em metros por segundo ao quadrado.",
+    "tamanho": "medio",
+    "frases": [
+      "Leis de Newton — conteúdo da prova",
+      "A primeira lei de Newton, ou princípio da inércia, afirma que um corpo permanece em repouso ou em movimento retilíneo uniforme quando a força resultante sobre ele é nula.",
+      "A segunda lei, o princípio fundamental da dinâmica, diz que a força resultante é igual ao produto da massa pela aceleração do corpo.",
+      "Quanto maior a massa, maior a força necessária para produzir a mesma aceleração.",
+      "A terceira lei, o princípio da ação e reação, estabelece que toda ação gera uma reação de mesma intensidade, mesma direção e sentido oposto, aplicada em corpos diferentes.",
+      "Na prova serão cobrados exercícios de plano inclinado, força de atrito e diagramas de forças.",
+      "Revise as unidades do Sistema Internacional: força em newtons, massa em quilogramas e aceleração em metros por segundo ao quadrado."
+    ],
+    "resumo": {
+      "sentences": [
+        "A segunda lei, o princípio fundamental da dinâmica, diz que a força resultante é igual ao produto da massa pela aceleração do corpo.",
+        "Quanto maior a massa, maior a força necessária para produzir a mesma aceleração.",
+        "A terceira lei, o princípio da ação e reação, estabelece que toda ação gera uma reação de mesma intensidade, mesma direção e sentido oposto, aplicada em corpos diferentes."
+      ],
+      "keywords": [
+        "força",
+        "lei",
+        "princípio",
+        "massa",
+        "aceleração",
+        "mesma"
+      ],
+      "sourceSentences": 7
+    },
+    "palavrasNoResumo": [
+      "força",
+      "lei",
+      "princípio",
+      "massa",
+      "aceleração",
+      "mesma"
+    ],
+    "impressao": "817:-1985554507"
+  },
+  {
+    "texto": "Requisitos do projeto — Engenharia de Software\nRequisitos funcionais descrevem o que o sistema deve fazer, como permitir que o estudante fotografe um documento, extraia o texto e organize a captura em um álbum.\nRequisitos não funcionais descrevem como o sistema deve se comportar, como desempenho, usabilidade, segurança e disponibilidade. A câmera deve abrir em menos de dois segundos e funcionar sem internet.\nO backlog do produto reúne os requisitos em forma de histórias de usuário, priorizadas pelo valor para o usuário e para o negócio.\nCada história de usuário deve ter critérios de aceitação claros, que permitem saber quando a funcionalidade está pronta.\nO diagrama de caso de uso representa os atores e as interações principais com o sistema, como capturar, resumir, anotar e exportar.",
+    "tamanho": "curto",
+    "frases": [
+      "Requisitos do projeto — Engenharia de Software",
+      "Requisitos funcionais descrevem o que o sistema deve fazer, como permitir que o estudante fotografe um documento, extraia o texto e organize a captura em um álbum.",
+      "Requisitos não funcionais descrevem como o sistema deve se comportar, como desempenho, usabilidade, segurança e disponibilidade.",
+      "A câmera deve abrir em menos de dois segundos e funcionar sem internet.",
+      "O backlog do produto reúne os requisitos em forma de histórias de usuário, priorizadas pelo valor para o usuário e para o negócio.",
+      "Cada história de usuário deve ter critérios de aceitação claros, que permitem saber quando a funcionalidade está pronta.",
+      "O diagrama de caso de uso representa os atores e as interações principais com o sistema, como capturar, resumir, anotar e exportar."
+    ],
+    "resumo": {
+      "sentences": [
+        "Requisitos funcionais descrevem o que o sistema deve fazer, como permitir que o estudante fotografe um documento, extraia o texto e organize a captura em um álbum."
+      ],
+      "keywords": [
+        "requisitos",
+        "sistema",
+        "funcionais",
+        "descrevem"
+      ],
+      "sourceSentences": 7
+    },
+    "palavrasNoResumo": [
+      "requisitos",
+      "sistema",
+      "funcionais",
+      "descrevem"
+    ],
+    "impressao": "795:-2010391087"
+  },
+  {
+    "texto": "Requisitos do projeto — Engenharia de Software\nRequisitos funcionais descrevem o que o sistema deve fazer, como permitir que o estudante fotografe um documento, extraia o texto e organize a captura em um álbum.\nRequisitos não funcionais descrevem como o sistema deve se comportar, como desempenho, usabilidade, segurança e disponibilidade. A câmera deve abrir em menos de dois segundos e funcionar sem internet.\nO backlog do produto reúne os requisitos em forma de histórias de usuário, priorizadas pelo valor para o usuário e para o negócio.\nCada história de usuário deve ter critérios de aceitação claros, que permitem saber quando a funcionalidade está pronta.\nO diagrama de caso de uso representa os atores e as interações principais com o sistema, como capturar, resumir, anotar e exportar.",
+    "tamanho": "medio",
+    "frases": [
+      "Requisitos do projeto — Engenharia de Software",
+      "Requisitos funcionais descrevem o que o sistema deve fazer, como permitir que o estudante fotografe um documento, extraia o texto e organize a captura em um álbum.",
+      "Requisitos não funcionais descrevem como o sistema deve se comportar, como desempenho, usabilidade, segurança e disponibilidade.",
+      "A câmera deve abrir em menos de dois segundos e funcionar sem internet.",
+      "O backlog do produto reúne os requisitos em forma de histórias de usuário, priorizadas pelo valor para o usuário e para o negócio.",
+      "Cada história de usuário deve ter critérios de aceitação claros, que permitem saber quando a funcionalidade está pronta.",
+      "O diagrama de caso de uso representa os atores e as interações principais com o sistema, como capturar, resumir, anotar e exportar."
+    ],
+    "resumo": {
+      "sentences": [
+        "Requisitos funcionais descrevem o que o sistema deve fazer, como permitir que o estudante fotografe um documento, extraia o texto e organize a captura em um álbum.",
+        "Requisitos não funcionais descrevem como o sistema deve se comportar, como desempenho, usabilidade, segurança e disponibilidade.",
+        "O backlog do produto reúne os requisitos em forma de histórias de usuário, priorizadas pelo valor para o usuário e para o negócio."
+      ],
+      "keywords": [
+        "requisitos",
+        "sistema",
+        "usuário",
+        "funcionais",
+        "descrevem"
+      ],
+      "sourceSentences": 7
+    },
+    "palavrasNoResumo": [
+      "requisitos",
+      "sistema",
+      "usuário",
+      "funcionais",
+      "descrevem"
+    ],
+    "impressao": "795:-2010391087"
+  },
+  {
+    "texto": "",
+    "tamanho": "curto",
+    "frases": [],
+    "resumo": {
+      "sentences": [],
+      "keywords": [],
+      "sourceSentences": 0
+    },
+    "palavrasNoResumo": [],
+    "impressao": "0:0"
+  },
+  {
+    "texto": "",
+    "tamanho": "medio",
+    "frases": [],
+    "resumo": {
+      "sentences": [],
+      "keywords": [],
+      "sourceSentences": 0
+    },
+    "palavrasNoResumo": [],
+    "impressao": "0:0"
+  },
+  {
+    "texto": "Curto demais.",
+    "tamanho": "curto",
+    "frases": [
+      "Curto demais."
+    ],
+    "resumo": {
+      "sentences": [
+        "Curto demais."
+      ],
+      "keywords": [],
+      "sourceSentences": 1
+    },
+    "palavrasNoResumo": [],
+    "impressao": "13:-1847447606"
+  },
+  {
+    "texto": "Curto demais.",
+    "tamanho": "medio",
+    "frases": [
+      "Curto demais."
+    ],
+    "resumo": {
+      "sentences": [
+        "Curto demais."
+      ],
+      "keywords": [],
+      "sourceSentences": 1
+    },
+    "palavrasNoResumo": [],
+    "impressao": "13:-1847447606"
+  },
+  {
+    "texto": "TÍTULO EM CAIXA ALTA\nPrimeira frase do conteúdo com várias palavras. Segunda frase continua o tema principal do conteúdo; Terceira frase encerra.",
+    "tamanho": "curto",
+    "frases": [
+      "TÍTULO EM CAIXA ALTA",
+      "Primeira frase do conteúdo com várias palavras.",
+      "Segunda frase continua o tema principal do conteúdo;",
+      "Terceira frase encerra."
+    ],
+    "resumo": {
+      "sentences": [
+        "Segunda frase continua o tema principal do conteúdo;"
+      ],
+      "keywords": [
+        "frase",
+        "conteúdo"
+      ],
+      "sourceSentences": 3
+    },
+    "palavrasNoResumo": [
+      "frase",
+      "conteúdo"
+    ],
+    "impressao": "145:578754632"
+  },
+  {
+    "texto": "TÍTULO EM CAIXA ALTA\nPrimeira frase do conteúdo com várias palavras. Segunda frase continua o tema principal do conteúdo; Terceira frase encerra.",
+    "tamanho": "medio",
+    "frases": [
+      "TÍTULO EM CAIXA ALTA",
+      "Primeira frase do conteúdo com várias palavras.",
+      "Segunda frase continua o tema principal do conteúdo;",
+      "Terceira frase encerra."
+    ],
+    "resumo": {
+      "sentences": [
+        "Primeira frase do conteúdo com várias palavras.",
+        "Segunda frase continua o tema principal do conteúdo;"
+      ],
+      "keywords": [
+        "frase",
+        "conteúdo"
+      ],
+      "sourceSentences": 3
+    },
+    "palavrasNoResumo": [
+      "frase",
+      "conteúdo"
+    ],
+    "impressao": "145:578754632"
+  },
+  {
+    "texto": "• Item de lista com marcador e palavras suficientes\n- Outro item com hífen e palavras suficientes\n– Travessão também conta como marcador aqui",
+    "tamanho": "curto",
+    "frases": [
+      "Item de lista com marcador e palavras suficientes",
+      "Outro item com hífen e palavras suficientes",
+      "Travessão também conta como marcador aqui"
+    ],
+    "resumo": {
+      "sentences": [
+        "Item de lista com marcador e palavras suficientes"
+      ],
+      "keywords": [
+        "item",
+        "marcador",
+        "palavras",
+        "suficientes"
+      ],
+      "sourceSentences": 3
+    },
+    "palavrasNoResumo": [
+      "item",
+      "marcador",
+      "palavras",
+      "suficientes"
+    ],
+    "impressao": "141:1796646604"
+  },
+  {
+    "texto": "• Item de lista com marcador e palavras suficientes\n- Outro item com hífen e palavras suficientes\n– Travessão também conta como marcador aqui",
+    "tamanho": "medio",
+    "frases": [
+      "Item de lista com marcador e palavras suficientes",
+      "Outro item com hífen e palavras suficientes",
+      "Travessão também conta como marcador aqui"
+    ],
+    "resumo": {
+      "sentences": [
+        "Item de lista com marcador e palavras suficientes",
+        "Outro item com hífen e palavras suficientes"
+      ],
+      "keywords": [
+        "item",
+        "marcador",
+        "palavras",
+        "suficientes"
+      ],
+      "sourceSentences": 3
+    },
+    "palavrasNoResumo": [
+      "item",
+      "marcador",
+      "palavras",
+      "suficientes"
+    ],
+    "impressao": "141:1796646604"
+  },
+  {
+    "texto": "Emoji 📷 fora do BMP muda o comprimento em UTF-16. Câmera câmera CÂMERA acentuação é normalizada! \"Aspas abrem frase\". (Parênteses também) 123 números contam.",
+    "tamanho": "curto",
+    "frases": [
+      "Emoji 📷 fora do BMP muda o comprimento em UTF-16.",
+      "Câmera câmera CÂMERA acentuação é normalizada!",
+      "\"Aspas abrem frase\".",
+      "(Parênteses também) 123 números contam."
+    ],
+    "resumo": {
+      "sentences": [
+        "Câmera câmera CÂMERA acentuação é normalizada!"
+      ],
+      "keywords": [
+        "câmera"
+      ],
+      "sourceSentences": 3
+    },
+    "palavrasNoResumo": [
+      "câmera"
+    ],
+    "impressao": "158:2142164322"
+  },
+  {
+    "texto": "Emoji 📷 fora do BMP muda o comprimento em UTF-16. Câmera câmera CÂMERA acentuação é normalizada! \"Aspas abrem frase\". (Parênteses também) 123 números contam.",
+    "tamanho": "medio",
+    "frases": [
+      "Emoji 📷 fora do BMP muda o comprimento em UTF-16.",
+      "Câmera câmera CÂMERA acentuação é normalizada!",
+      "\"Aspas abrem frase\".",
+      "(Parênteses também) 123 números contam."
+    ],
+    "resumo": {
+      "sentences": [
+        "Emoji 📷 fora do BMP muda o comprimento em UTF-16.",
+        "Câmera câmera CÂMERA acentuação é normalizada!"
+      ],
+      "keywords": [
+        "câmera"
+      ],
+      "sourceSentences": 3
+    },
+    "palavrasNoResumo": [
+      "câmera"
+    ],
+    "impressao": "158:2142164322"
+  },
+  {
+    "texto": "Linha um sem ponto\n\n\nLinha dois depois de várias quebras\tcom\ttabs e   espaços   múltiplos. Espaço duro no fim. ",
+    "tamanho": "curto",
+    "frases": [
+      "Linha um sem ponto",
+      "Linha dois depois de várias quebras com tabs e espaços múltiplos.",
+      "Espaço duro no fim."
+    ],
+    "resumo": {
+      "sentences": [
+        "Linha dois depois de várias quebras com tabs e espaços múltiplos."
+      ],
+      "keywords": [
+        "linha"
+      ],
+      "sourceSentences": 3
+    },
+    "palavrasNoResumo": [
+      "linha"
+    ],
+    "impressao": "111:-617788322"
+  },
+  {
+    "texto": "Linha um sem ponto\n\n\nLinha dois depois de várias quebras\tcom\ttabs e   espaços   múltiplos. Espaço duro no fim. ",
+    "tamanho": "medio",
+    "frases": [
+      "Linha um sem ponto",
+      "Linha dois depois de várias quebras com tabs e espaços múltiplos.",
+      "Espaço duro no fim."
+    ],
+    "resumo": {
+      "sentences": [
+        "Linha um sem ponto",
+        "Linha dois depois de várias quebras com tabs e espaços múltiplos."
+      ],
+      "keywords": [
+        "linha"
+      ],
+      "sourceSentences": 3
+    },
+    "palavrasNoResumo": [
+      "linha"
+    ],
+    "impressao": "111:-617788322"
+  },
+  {
+    "texto": "Repetição repetição repetição. Palavra palavra palavra repetição. Termo termo repetição palavra. Outro outro termo. Fim fim fim palavra termo.",
+    "tamanho": "curto",
+    "frases": [
+      "Repetição repetição repetição.",
+      "Palavra palavra palavra repetição.",
+      "Termo termo repetição palavra.",
+      "Outro outro termo.",
+      "Fim fim fim palavra termo."
+    ],
+    "resumo": {
+      "sentences": [
+        "Palavra palavra palavra repetição."
+      ],
+      "keywords": [
+        "repetição",
+        "palavra"
+      ],
+      "sourceSentences": 3
+    },
+    "palavrasNoResumo": [
+      "repetição",
+      "palavra"
+    ],
+    "impressao": "142:-734431139"
+  },
+  {
+    "texto": "Repetição repetição repetição. Palavra palavra palavra repetição. Termo termo repetição palavra. Outro outro termo. Fim fim fim palavra termo.",
+    "tamanho": "medio",
+    "frases": [
+      "Repetição repetição repetição.",
+      "Palavra palavra palavra repetição.",
+      "Termo termo repetição palavra.",
+      "Outro outro termo.",
+      "Fim fim fim palavra termo."
+    ],
+    "resumo": {
+      "sentences": [
+        "Palavra palavra palavra repetição.",
+        "Termo termo repetição palavra."
+      ],
+      "keywords": [
+        "repetição",
+        "palavra",
+        "termo"
+      ],
+      "sourceSentences": 3
+    },
+    "palavrasNoResumo": [
+      "repetição",
+      "palavra",
+      "termo"
+    ],
+    "impressao": "142:-734431139"
+  }
+]

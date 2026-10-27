@@ -5,3 +5,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Python (JOVI Desktop)
+__pycache__/
+*.pyc
+.venv/
+python/dados/biblioteca.json
+python/dados/*.corrompido.json
+python/dados/*.tmp
+python/exportacoes/
+
+# Pacotes de entrega
+JOVI_Python_Sprint*.zip
