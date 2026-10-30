@@ -37,7 +37,7 @@ Na primeira execução, o programa oferece carregar uma **biblioteca de exemplo*
 
 | Opção | O que faz |
 | --- | --- |
-| 1. Câmera contextual | Recomenda o modo da câmera (Documento, Estudante, Retrato, Noite, Vídeo, Foto) a partir da cena e da luz. Mostra a confiança e dicas de luz, enquadramento e alinhamento, e abre a câmera do app no navegador. |
+| 1. Câmera contextual | Recomenda o modo da câmera (Documento, Estudante, Retrato, Noite, Vídeo, Foto) a partir da cena e da luz. Mostra a confiança e dicas de luz, enquadramento e alinhamento, e abre a câmera do app no navegador já no modo recomendado. |
 | 2. Documento inteligente | Importa um `.txt`/`.md` (ou texto colado) como captura, mostra uma captura completa e revisa o texto do OCR com localizar/substituir. |
 | 3. Modo estudante | Gera resumo curto ou médio (o mesmo algoritmo do app) e resume em lote as capturas pendentes. Explica termos com a **API da Wikipédia**, com cache offline. Também tem anotações, **quiz relâmpago**, glossário e exportação de material de estudo em Markdown. |
 | 4. Organização acadêmica | Lista, busca sem acentos e filtra por álbum, modo ou tipo. Cria, renomeia e exclui álbuns, além de mover, renomear e remover capturas. |
@@ -46,7 +46,7 @@ Na primeira execução, o programa oferece carregar uma **biblioteca de exemplo*
 | 7. Lixeira | Restaura ou apaga de vez as capturas removidas. |
 | 0. Sair | Salva e encerra o programa. |
 
-Depois de cada funcionalidade, o programa salva e volta ao menu principal. Entradas inválidas (letras no lugar de números, valores fora do intervalo, campos vazios, arquivos inexistentes) são explicadas e perguntadas de novo. `Ctrl+C` cancela a operação atual e volta ao menu.
+Depois de cada funcionalidade, o programa salva e volta ao menu principal. Em qualquer submenu, `0`, `Enter` ou `voltar` volta ao menu anterior. Entradas inválidas (letras no lugar de números, valores fora do intervalo, campos vazios, arquivos inexistentes) são explicadas e perguntadas de novo. `Ctrl+C` cancela a operação atual e volta ao menu.
 
 ## Integração com o app React
 

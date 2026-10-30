@@ -90,7 +90,7 @@ def executar(biblioteca: dict) -> None:
     while True:
         painel_inicial(biblioteca)
         try:
-            opcao = entrada.ler_opcao(["0", *acoes])
+            opcao = entrada.ler_opcao(["0", *acoes], vazio_volta=False)
         except KeyboardInterrupt:
             opcao = "0"
         if opcao == "0":

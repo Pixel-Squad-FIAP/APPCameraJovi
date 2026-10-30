@@ -10,7 +10,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const redirectTo = location.state?.from?.pathname || '/camera';
+  // Mantém a query string da página pedida (ex.: /camera?modo=estudante, /galeria?sincronizar=1).
+  const from = location.state?.from;
+  const redirectTo = from ? `${from.pathname}${from.search ?? ''}` : '/camera';
 
   if (isAuthenticated) {
     return <Navigate to={redirectTo} replace />;

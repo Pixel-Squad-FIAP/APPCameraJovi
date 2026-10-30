@@ -110,9 +110,14 @@ def gerar_assistencia(modo: str) -> dict:
     return DICAS.get(modo, DICAS["foto"])
 
 
-def abrir_camera_no_app() -> bool:
+def url_camera(modo: str | None = None) -> str:
+    """Endereço da câmera do app; com ?modo= ela já abre no modo indicado."""
+    return f"{URL_APP}/camera" + (f"?modo={modo}" if modo in MODOS else "")
+
+
+def abrir_camera_no_app(modo: str | None = None) -> bool:
     try:
-        return webbrowser.open(f"{URL_APP}/camera")
+        return webbrowser.open(url_camera(modo))
     except webbrowser.Error:
         return False
 
@@ -150,10 +155,10 @@ def _tela_recomendar(biblioteca: dict) -> None:
     registrar_historico(biblioteca, "Modo recomendado", f"{CENARIOS[cenario]} · luz {luminosidade}% → {modo['rotulo']}")
 
     if entrada.confirmar("Abrir a câmera do app no navegador agora?"):
-        if abrir_camera_no_app():
-            interface.sucesso(f"Abrindo {URL_APP}/camera — escolha o modo {modo['rotulo']} na barra de modos.")
+        if abrir_camera_no_app(resultado["modo"]):
+            interface.sucesso(f"Abrindo a câmera do app já no modo {modo['rotulo']}.")
         else:
-            interface.aviso(f"Não consegui abrir o navegador. Acesse {URL_APP}/camera.")
+            interface.aviso(f"Não consegui abrir o navegador. Acesse {url_camera(resultado['modo'])}")
     interface.pausar()
 
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import CameraFallback from '../components/camera/CameraFallback.jsx';
 import CameraShell from '../components/camera/CameraShell.jsx';
 import HelpSheet from '../components/camera/HelpSheet.jsx';
@@ -100,6 +100,19 @@ export default function CameraPage() {
   const aspect = ratioToAspect(ratio);
   const docAligned = mode.processing === 'document' && (scene.metrics?.paperRatio ?? 0) > DOCUMENT_ALIGNED_RATIO;
   const captureAlbum = mode.afterCapture === 'stay' ? studyAlbum : DEFAULT_ALBUM;
+
+  // ?modo=estudante abre a câmera direto num modo (link aberto pelo JOVI Desktop).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedMode = searchParams.get('modo');
+  useEffect(() => {
+    if (!requestedMode) return;
+    if (MODES.some((item) => item.id === requestedMode)) setModeId(requestedMode);
+    setSearchParams((params) => {
+      const next = new URLSearchParams(params);
+      next.delete('modo');
+      return next;
+    }, { replace: true });
+  }, [requestedMode, setModeId, setSearchParams]);
 
   useEffect(() => {
     if (mode.extractsText) preloadOcr();

@@ -76,15 +76,25 @@ def cabecalho(titulo: str, icone: str = "", descricao: str = "") -> None:
 
 
 def menu(titulo: str, opcoes: list[tuple[str, str, str]], rodape: str = "0  Voltar") -> None:
-    """Desenha um menu. opcoes = [(tecla, rótulo, descrição)]."""
+    """Desenha um menu. opcoes = [(tecla, rótulo, descrição)].
+
+    rodape = "0  Voltar · informação extra": vira a última linha do menu, separada das demais,
+    para que a saída fique sempre à vista.
+    """
     tabela = Table(box=None, show_header=False, padding=(0, 2), expand=False)
     tabela.add_column(justify="right", style="opcao", no_wrap=True)
     tabela.add_column(style="destaque", no_wrap=True)
     tabela.add_column(style="suave")
     for tecla, rotulo, descricao in opcoes:
         tabela.add_row(tecla, rotulo, descricao)
+    tecla, _, resto = rodape.strip().partition(" ")
+    rotulo, _, descricao = resto.strip().partition(" · ")
+    tabela.add_row("", "", "")
+    if not descricao and rotulo != "Sair":
+        descricao = "ou Enter"  # nos submenus, Enter vazio também volta (entrada.ler_opcao)
+    tabela.add_row(tecla, Text(f"↩  {rotulo}", style="jovi.claro"), descricao)
     console.print(Panel(tabela, title=f"[titulo]{titulo}[/]", border_style=AZUL, box=box.ROUNDED, padding=(1, 2),
-                        subtitle=f"[suave]{rodape}[/]", expand=False))
+                        expand=False))
 
 
 def sucesso(mensagem: str) -> None:

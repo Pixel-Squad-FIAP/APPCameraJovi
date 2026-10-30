@@ -202,12 +202,12 @@
 <!-- ============================== 4. FUNCIONALIDADES ============================== -->
 <section class="quebra">
   <h2 id="funcionalidades"><span class="num">4</span>Funcionalidades implementadas</h2>
-  <p>O programa abre num painel com os números da biblioteca e o <b>menu principal</b>. Toda funcionalidade volta ao menu ao terminar, e a opção <b>0 – Sair</b> salva e encerra. Na primeira execução, o programa oferece uma <b>biblioteca de exemplo</b> para testar tudo sem o app.</p>
+  <p>O programa abre num painel com os números da biblioteca e o <b>menu principal</b>. Toda funcionalidade volta ao menu ao terminar. Nos submenus, <b>0</b> (ou Enter) volta; no menu principal, <b>0 – Sair</b> salva e encerra. Na primeira execução, o programa oferece uma <b>biblioteca de exemplo</b> para testar tudo sem o app.</p>
   <figure class="tela"><img src="telas/01-menu.svg" alt="Menu principal"><figcaption>Painel inicial e menu principal do JOVI Desktop.</figcaption></figure>
   <table>
     <thead><tr><th style="width:17%">Opção</th><th style="width:19%">Entrada</th><th>Processamento</th><th style="width:19%">Saída</th><th style="width:19%">Validações</th></tr></thead>
     <tbody>
-      <tr><td><b>1 · Câmera contextual</b></td><td>Cenário (1–5), luz (0–100), quer vídeo (s/n)</td><td>Escolhe o modo do app; a confiança do modo Noite usa a mesma fórmula da sugestão do app (0,55 + (0,2 − luz) × 4).</td><td>Modo, confiança, motivos, dicas; abre a câmera no navegador</td><td>Número fora da faixa, letras, s/n inválido</td></tr>
+      <tr><td><b>1 · Câmera contextual</b></td><td>Cenário (1–5), luz (0–100), quer vídeo (s/n)</td><td>Escolhe o modo do app; a confiança do modo Noite usa a mesma fórmula da sugestão do app (0,55 + (0,2 − luz) × 4).</td><td>Modo, confiança, motivos, dicas; abre a câmera no navegador já no modo</td><td>Número fora da faixa, letras, s/n inválido</td></tr>
       <tr><td><b>2 · Documento inteligente</b></td><td>Arquivo .txt/.md ou texto colado; título; álbum</td><td>Lê UTF-8 (ou Latin-1), sugere título, cria a captura; localizar/substituir no texto do OCR.</td><td>Nova captura (vai para o app); texto corrigido</td><td>Arquivo inexistente, extensão, vazio, &gt; 1 MB, texto vazio</td></tr>
       <tr><td><b>3 · Modo estudante</b></td><td>Captura, tamanho do resumo, termo, respostas do quiz</td><td>Resumo extrativo (individual ou em lote, com barra de progresso); consulta à Wikipédia com cache; quiz com <code>random</code>; Markdown.</td><td>Resumo, explicação, nota anexada, placar, arquivo .md</td><td>Texto &lt; 25 palavras, vídeo, termo inexistente, sem internet</td></tr>
       <tr><td><b>4 · Organização</b></td><td>Busca, filtros, nomes de álbum</td><td>Busca sem acentos em título/álbum/texto/notas; filtros por álbum, modo e tipo; renomear/excluir álbum move as capturas.</td><td>Tabelas de capturas; álbuns atualizados</td><td>Nome vazio, &gt; 30 caracteres, duplicado, álbum “Geral” protegido</td></tr>
@@ -218,7 +218,7 @@
   </table>
 
   <h3>Câmera contextual</h3>
-  <p>O estudante responde três perguntas e recebe o modo do app, a confiança da recomendação e dicas de luz, enquadramento e alinhamento. No fim, pode abrir a câmera do app direto no navegador.</p>
+  <p>O estudante responde três perguntas e recebe o modo do app, a confiança da recomendação e dicas de luz, enquadramento e alinhamento. No fim, pode abrir a câmera do app no navegador já no modo recomendado (<code>/camera?modo=estudante</code>).</p>
   <figure class="tela"><img src="telas/02-camera.svg" alt="Recomendação da câmera"><figcaption>Documento com pouca luz: o modo Documento continua indicado, mas com confiança menor e um alerta sobre o OCR.</figcaption></figure>
 
   <h3>Documento inteligente</h3>

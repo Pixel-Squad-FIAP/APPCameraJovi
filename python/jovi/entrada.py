@@ -53,12 +53,23 @@ def ler_inteiro(mensagem: str, minimo: int, maximo: int, padrao: int | None = No
         return numero
 
 
-def ler_opcao(validas: list[str], mensagem: str = "Escolha uma opção") -> str:
-    """Lê a opção de um menu; aceita só as teclas listadas."""
+PALAVRAS_DE_SAIDA = ("v", "voltar", "sair", "cancelar", "menu")
+
+
+def ler_opcao(validas: list[str], mensagem: str = "Escolha uma opção", vazio_volta: bool = True) -> str:
+    """Lê a opção de um menu; aceita só as teclas listadas.
+
+    Nos submenus, Enter vazio ou "voltar" equivalem ao 0, para nunca deixar o usuário preso.
+    No menu principal (vazio_volta=False) o Enter vazio só repete a pergunta, para não sair sem querer.
+    """
     while True:
         valor = _perguntar(mensagem).lower()
         if valor in validas:
             return valor
+        if "0" in validas and (not valor or valor in PALAVRAS_DE_SAIDA):
+            # No menu principal o 0 encerra o programa: só "sair" vale como atalho.
+            if vazio_volta or valor == "sair":
+                return "0"
         erro(f"Opção inválida. Digite uma destas: {', '.join(validas)}.")
 
 
